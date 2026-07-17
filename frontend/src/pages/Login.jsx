@@ -30,7 +30,7 @@ export default function Login({ mode = 'login' }) {
   return <div className="auth-card">
     <a className="auth-card-back" href="#home">&larr; Back to home</a>
     <div className="auth-card__top">
-      <h1>{isSignup ? 'Create your Homi account' : 'Welcome back'}</h1>
+      <h1>{isSignup ? 'Create your Smart Hostel account' : 'Welcome back'}</h1>
       <p>{isSignup ? 'Set up a calmer way to manage hostel life.' : 'Sign in to continue to your hostel workspace.'}</p>
     </div>
 
@@ -40,9 +40,9 @@ export default function Login({ mode = 'login' }) {
       
       <label>PASSWORD<input type="password" placeholder="Enter your password" autoComplete={isSignup ? 'new-password' : 'current-password'} required /></label>
       {!isSignup && <a className="auth-forgot" href="#forgot-password">Forgot password?</a>}
-      <button className="auth-submit" type="submit">{isSignup ? `Create ${roleName} account` : `Sign in as ${roleName}`} <b>&rarr;</b></button>
+      <button className="auth-submit" type="submit">{isSignup ? 'Sign up' : 'Sign in'} <b>&rarr;</b></button>
     </form>
 
-    <p className="auth-switch">{isSignup ? 'Already have an account?' : 'New to Homi?'} <a href={isSignup ? '#login' : '#signup'}>{isSignup ? 'Sign in' : 'Create an account'}</a></p>
+    <p className="auth-switch">{isSignup ? 'Already have an account?' : 'New to Smart Hostel?'} <a href={isSignup ? '#login' : '#signup'}>{isSignup ? 'Sign in' : 'Create an account'}</a></p>
   </div>
 }
