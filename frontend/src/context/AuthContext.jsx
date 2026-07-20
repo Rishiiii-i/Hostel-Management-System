@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
-  const syncUserWithBackend = async (fbUser, customName = null) => {
+  const syncUserWithBackend = async (fbUser, customName = null, rollNo = null) => {
     try {
       const response = await fetch('http://localhost:5000/api/auth/sync', {
         method: 'POST',
@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
           name: customName || fbUser.displayName || fbUser.email.split('@')[0],
           email: fbUser.email,
           photoURL: fbUser.photoURL || '',
+          rollNo: rollNo || '',
         }),
       });
 
@@ -71,6 +72,7 @@ export const AuthProvider = ({ children }) => {
         email: fbUser.email,
         role: fbUser.email.toLowerCase().includes('admin') ? 'administrator' : fbUser.email.toLowerCase().includes('warden') ? 'warden' : 'student',
         photoURL: fbUser.photoURL || '',
+        rollNo: rollNo || '',
         isFallback: true
       };
       
@@ -101,14 +103,14 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  const signUpWithEmail = async (name, email, password) => {
+  const signUpWithEmail = async (name, email, password, rollNo) => {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       // Update profile display name immediately
       await updateProfile(userCredential.user, { displayName: name });
       // Sync user profile to backend MongoDB
-      const syncedUser = await syncUserWithBackend(userCredential.user, name);
+      const syncedUser = await syncUserWithBackend(userCredential.user, name, rollNo);
       setFirebaseUser(userCredential.user);
       setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };

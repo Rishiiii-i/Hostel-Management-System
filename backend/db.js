@@ -43,6 +43,9 @@ const userSchema = new mongoose.Schema({
   photoURL: {
     type: String
   },
+  rollNo: {
+    type: String
+  },
   name: {
     type: String,
     required: true
