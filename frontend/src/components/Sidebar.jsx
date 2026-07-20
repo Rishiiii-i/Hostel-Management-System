@@ -1,3 +1,4 @@
+import './Sidebar.css'
 import Icon from './Icon'
 import homeIcon from '../assets/icons/home.png'
 import roomIcon from '../assets/icons/room.png'

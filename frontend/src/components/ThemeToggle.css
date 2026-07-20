@@ -1,0 +1,62 @@
+/* theme toggle button */
+.theme-toggle-btn {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #d8e5da;
+  background: #f2f7f3;
+  color: #1e6b51;
+  font: 700 12px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: #e4f0e7;
+}
+
+html.dark .theme-toggle-btn {
+  background: #182c23;
+  border-color: #244437;
+  color: #5ccfa0;
+}
+
+html.dark .theme-toggle-btn:hover {
+  background: #203c30;
+}
+
+/* stylish pill theme toggle switch (icon only) */
+.theme-toggle-switch {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 3px !important;
+  height: 34px !important;
+  border-radius: 999px !important;
+  border: 1px solid #dce6db !important;
+  background: #f0f6f1 !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  outline: none !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+}
+
+.theme-toggle-switch:hover {
+  border-color: #1e6b51 !important;
+  box-shadow: 0 4px 12px rgba(30, 107, 81, 0.12) !important;
+}
+
+.theme-toggle-switch.dark .toggle-track {
+  background: #182842 !important;
+}
+
+.theme-toggle-switch.dark .toggle-thumb {
+  transform: translateX(18px) !important;
+  background: #1e6b51 !important;
+}
+
+.theme-toggle-switch.dark {
+  background: #111d31 !important;
+  border-color: #243859 !important;
+}

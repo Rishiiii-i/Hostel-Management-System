@@ -1,3 +1,4 @@
+import './GoogleSignInButton.css'
 import googleIcon from '../assets/icons/google.png'
 
 export default function GoogleSignInButton({ text = 'Sign in with Google', onClick, type = 'button' }) {

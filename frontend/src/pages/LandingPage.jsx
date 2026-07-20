@@ -1,3 +1,4 @@
+import './LandingPage.css'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Icon from '../components/Icon'

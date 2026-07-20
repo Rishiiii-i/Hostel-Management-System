@@ -1,3 +1,4 @@
+import './MainLayout.css'
 import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Icon from '../components/Icon'

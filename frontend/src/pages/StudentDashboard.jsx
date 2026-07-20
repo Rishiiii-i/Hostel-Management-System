@@ -1,3 +1,4 @@
+import './StudentDashboard.css'
 import { useState } from 'react'
 import roomIcon from '../assets/icons/room.png'
 import feeIcon from '../assets/icons/fee.png'
