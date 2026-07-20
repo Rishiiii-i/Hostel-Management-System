@@ -4,25 +4,37 @@ import complaintIcon from '../assets/icons/complaint.png'
 import attendanceIcon from '../assets/icons/attendance.png'
 import bellIcon from '../assets/icons/bell.png'
 import searchIcon from '../assets/icons/search.png'
+import logoIcon from '../assets/icons/logo.png'
+import homeIcon from '../assets/icons/home.png'
+import settingsIcon from '../assets/icons/settings.png'
+import logoutIcon from '../assets/icons/logout.png'
+import userIcon from '../assets/icons/user.png'
+import eyeIcon from '../assets/icons/eye.png'
+import eyeOffIcon from '../assets/icons/eye-off.png'
+import checkmarkIcon from '../assets/icons/checkmark.png'
 
 export default function Icon({ name, width = 20, height = 20, className = "" }) {
-  if (name === 'building') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={width} height={height} className={className}>
-        <path d="M6 22V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M2 22h20M10 8h.01M14 8h.01M10 12h.01M14 12h.01M10 16h.01M14 16h.01" />
-      </svg>
-    )
-  }
-
   const iconMap = {
     room: roomIcon,
     fee: feeIcon,
     note: complaintIcon,
+    complaint: complaintIcon,
     check: attendanceIcon,
+    attendance: attendanceIcon,
     users: attendanceIcon,
     chart: attendanceIcon,
     bell: bellIcon,
-    search: searchIcon
+    notice: bellIcon,
+    search: searchIcon,
+    building: logoIcon,
+    logo: logoIcon,
+    home: homeIcon,
+    settings: settingsIcon,
+    logout: logoutIcon,
+    user: userIcon,
+    eye: eyeIcon,
+    'eye-off': eyeOffIcon,
+    checkmark: checkmarkIcon
   }
 
   const src = iconMap[name] || roomIcon
