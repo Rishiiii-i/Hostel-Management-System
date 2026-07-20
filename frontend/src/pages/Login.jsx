@@ -42,7 +42,6 @@ export default function Login({ mode = 'login' }) {
       } else {
         await logInWithEmail(email, password)
       }
-      window.location.hash = '#dashboard'
     } catch (err) {
       setError(err.message || 'Authentication failed')
     } finally {
@@ -55,7 +54,6 @@ export default function Login({ mode = 'login' }) {
     setLoading(true)
     try {
       await logInWithGoogle()
-      window.location.hash = '#dashboard'
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Google sign-in popup was closed before completion.')
