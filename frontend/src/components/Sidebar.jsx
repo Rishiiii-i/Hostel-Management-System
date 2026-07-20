@@ -67,10 +67,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
         </a>
       </div>
 
-      <div className="portal-badge" style={{ textTransform: 'capitalize' }}>
-        <span className="portal-dot"></span>
-        {user?.role || 'Student'} Portal
-      </div>
+
 
       <nav className="sidebar-nav">
         {navItems.map((item) => (
