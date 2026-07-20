@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import GoogleSignInButton from '../components/GoogleSignInButton'
 import { useAuth } from '../context/AuthContext'
 import Icon from '../components/Icon'
@@ -13,53 +13,10 @@ export default function Login({ mode = 'login' }) {
   const [showPassword, setShowPassword] = useState(false)
   const [rollNo, setRollNo] = useState('')
 
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [resetEmail, setResetEmail] = useState('')
-  const [oobCode, setOobCode] = useState('')
-
-  const { logInWithEmail, signUpWithEmail, logInWithGoogle, sendPasswordReset, verifyResetCode, confirmResetPassword } = useAuth()
+  const { logInWithEmail, signUpWithEmail, logInWithGoogle, sendPasswordReset } = useAuth()
 
   const isSignup = mode === 'signup'
   const isForgot = mode === 'forgot'
-  const isReset = mode === 'reset' || Boolean(oobCode)
-
-  useEffect(() => {
-    const url = window.location.href
-    let code = ''
-    if (url.includes('oobCode=')) {
-      const match = url.match(/oobCode=([^&#]+)/)
-      if (match) code = decodeURIComponent(match[1])
-    }
-    if (code && verifyResetCode) {
-      setOobCode(code)
-      verifyResetCode(code)
-        .then((emailAddress) => setResetEmail(emailAddress))
-        .catch(() => setError('Invalid or expired password reset link.'))
-    }
-  }, [verifyResetCode])
-
-  const handleResetPasswordSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setSuccessMessage('')
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match!')
-      return
-    }
-    setLoading(true)
-    try {
-      await confirmResetPassword(oobCode, newPassword, resetEmail)
-      setSuccessMessage('Password has been updated successfully! Redirecting to sign in...')
-      setTimeout(() => {
-        window.location.href = '#login'
-      }, 2000)
-    } catch (err) {
-      setError(err.message || 'Failed to reset password.')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleForgotSubmit = async (e) => {
     e.preventDefault()
@@ -122,58 +79,7 @@ export default function Login({ mode = 'login' }) {
     }
   }
 
-  if (isReset) {
-    return <div className="auth-card auth-card--forgot">
-      <a className="auth-card-back" href="#login">&larr; Back to sign in</a>
-      <div className="auth-card__top">
-        <h1>Reset your password</h1>
-        <p>{resetEmail ? `for ${resetEmail}` : 'Enter your new password below.'}</p>
-      </div>
 
-      {error && <div className="auth-error-message" style={{ color: '#ef4444', marginBottom: '1rem', fontSize: '0.875rem', textAlign: 'center' }}>{error}</div>}
-      {successMessage && <div className="auth-success-message" style={{ color: '#10b981', marginBottom: '1rem', fontSize: '0.875rem', textAlign: 'center' }}>{successMessage}</div>}
-
-      <form className="auth-form" onSubmit={handleResetPasswordSubmit}>
-        <label>
-          NEW PASSWORD
-          <div className="auth-password-input-wrapper">
-            <input 
-              type={showPassword ? "text" : "password"} 
-              value={newPassword} 
-              onChange={(e) => setNewPassword(e.target.value)} 
-              placeholder="Enter new password" 
-              required 
-              disabled={loading}
-            />
-            <button 
-              type="button" 
-              className="auth-password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
-              disabled={loading}
-            >
-              <Icon name={showPassword ? "eye-off" : "eye"} width="18" height="18" />
-            </button>
-          </div>
-        </label>
-
-        <label>
-          CONFIRM NEW PASSWORD
-          <input 
-            type="password" 
-            value={confirmPassword} 
-            onChange={(e) => setConfirmPassword(e.target.value)} 
-            placeholder="Confirm new password" 
-            required 
-            disabled={loading}
-          />
-        </label>
-
-        <button className="auth-submit" type="submit" disabled={loading}>
-          {loading ? 'Saving...' : 'SAVE'}
-        </button>
-      </form>
-    </div>
-  }
 
   if (isForgot) {
     return <div className="auth-card auth-card--forgot">

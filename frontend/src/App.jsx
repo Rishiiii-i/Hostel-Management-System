@@ -105,8 +105,8 @@ function App() {
     )
   }
 
-  if (route === '#login' || route === '#signup' || route === '#forgot-password' || route.startsWith('#reset-password') || window.location.href.includes('oobCode=')) {
-    const mode = route === '#signup' ? 'signup' : route === '#forgot-password' ? 'forgot' : (route.startsWith('#reset-password') || window.location.href.includes('oobCode=')) ? 'reset' : 'login'
+  if (route === '#login' || route === '#signup' || route === '#forgot-password') {
+    const mode = route === '#signup' ? 'signup' : route === '#forgot-password' ? 'forgot' : 'login'
     return <AuthLayout><Login mode={mode} /></AuthLayout>
   }
 

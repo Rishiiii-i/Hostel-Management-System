@@ -160,29 +160,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const sendPasswordReset = async (email) => {
-    const actionCodeSettings = {
-      url: window.location.origin,
-    };
-    await sendPasswordResetEmail(auth, email, actionCodeSettings);
-  };
-
-  const verifyResetCode = async (oobCode) => {
-    return await verifyPasswordResetCode(auth, oobCode);
-  };
-
-  const confirmResetPassword = async (oobCode, newPassword, email) => {
-    await confirmPasswordReset(auth, oobCode, newPassword);
-    if (email) {
-      try {
-        await fetch('http://localhost:5000/api/auth/forgot-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, newPassword }),
-        });
-      } catch (err) {
-        console.error('Failed to sync updated password to backend:', err);
-      }
-    }
+    await sendPasswordResetEmail(auth, email);
   };
 
   const logOut = async () => {
@@ -208,8 +186,6 @@ export const AuthProvider = ({ children }) => {
     logInWithEmail,
     logInWithGoogle,
     sendPasswordReset,
-    verifyResetCode,
-    confirmResetPassword,
     logOut
   };
 
