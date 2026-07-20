@@ -18,26 +18,20 @@ function getRole(email) {
 // Sync Firebase Auth details to MongoDB User Schema
 router.post('/sync', async (req, res) => {
   try {
-    const { uid, name, email, role, photoURL, rollNo } = req.body;
+    const { uid, name, email, role, password, rollNo } = req.body;
 
-    if (!uid || !email) {
-      return res.status(400).json({ message: 'Firebase UID and email are required to sync' });
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required to sync' });
     }
 
-    // Try finding by firebaseUid first, or email as fallback
-    let user = await User.findOne({ 
-      $or: [{ firebaseUid: uid }, { email: email.toLowerCase() }] 
-    });
+    // Find user strictly by email
+    let user = await User.findOne({ email: email.toLowerCase() });
 
     if (user) {
-      // User exists, update firebaseUid, photoURL, and rollNo if needed
+      // User exists, update password and rollNo if provided
       let updated = false;
-      if (!user.firebaseUid) {
-        user.firebaseUid = uid;
-        updated = true;
-      }
-      if (photoURL && user.photoURL !== photoURL) {
-        user.photoURL = photoURL;
+      if (password && user.password !== password) {
+        user.password = password;
         updated = true;
       }
       if (rollNo && user.rollNo !== rollNo) {
@@ -48,23 +42,20 @@ router.post('/sync', async (req, res) => {
         await user.save();
       }
     } else {
-      // User doesn't exist, create a new record in MongoDB
+      // User doesn't exist, create a new record in MongoDB (without firebaseUid/photoURL)
       user = new User({
         id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
-        firebaseUid: uid,
         name: name || email.split('@')[0],
         email: email.toLowerCase(),
         role: role || getRole(email),
-        photoURL: photoURL || '',
-        rollNo: rollNo || '',
+        password: password || '', // Save plaintext password directly
+        rollNo: rollNo || '',      // Save rollNo directly
         createdAt: new Date()
       });
       await user.save();
     }
 
     const userObj = user.toObject();
-    if (userObj.password) delete userObj.password;
-
     res.status(200).json({
       message: 'User sync successful',
       user: userObj
