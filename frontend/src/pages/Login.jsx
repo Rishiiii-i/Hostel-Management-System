@@ -43,7 +43,19 @@ export default function Login({ mode = 'login' }) {
         await logInWithEmail(email, password)
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed')
+      if (err.code === 'auth/operation-not-allowed') {
+        setError('Email & Password sign-in is currently disabled in your Firebase console. Please go to Authentication -> Sign-in method in your Firebase console and enable Email/Password.')
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError('This email address is already in use by another account.')
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password should be at least 6 characters long.')
+      } else if (err.code === 'auth/invalid-credential') {
+        setError('Invalid email address or password.')
+      } else if (err.code === 'auth/user-not-found') {
+        setError('No account found with this email.')
+      } else {
+        setError(err.message || 'Authentication failed')
+      }
     } finally {
       setLoading(false)
     }
@@ -57,6 +69,8 @@ export default function Login({ mode = 'login' }) {
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Google sign-in popup was closed before completion.')
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('Google sign-in is currently disabled in your Firebase console. Please go to Authentication -> Sign-in method and enable Google.')
       } else {
         setError(err.message || 'Google sign-in failed')
       }
