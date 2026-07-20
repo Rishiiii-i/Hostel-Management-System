@@ -189,6 +189,25 @@ export default function Login({ mode = 'login' }) {
           </button>
         </div>
       </div>
+      {error && (
+        <div className="auth-error-message" style={{ 
+          color: '#dc2626', 
+          backgroundColor: '#fee2e2', 
+          border: '1px solid #fca5a5', 
+          padding: '10px 14px', 
+          borderRadius: '8px', 
+          marginBottom: '16px', 
+          fontSize: '0.875rem', 
+          fontWeight: '500', 
+          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justify: 'center',
+          gap: '8px'
+        }}>
+          <span>⚠️</span> <span>{error}</span>
+        </div>
+      )}
       <button className="auth-submit" type="submit" disabled={loading}>
         {loading ? (isSignup ? 'Signing up...' : 'Signing in...') : (isSignup ? 'Sign up' : 'Sign in')}
       </button>
