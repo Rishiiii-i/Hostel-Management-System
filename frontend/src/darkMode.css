@@ -1,0 +1,480 @@
+/* Premium High-Contrast Dark Mode Theme */
+
+html.dark, 
+html.dark body, 
+html.dark #root, 
+html.dark main,
+html.dark .dashboard-container, 
+html.dark .dashboard-main, 
+html.dark .dashboard-content {
+  background-color: #0b1320 !important;
+  color: #ffffff !important;
+}
+
+/* Landing Page & Navigation Bar */
+html.dark .nav {
+  background: #0f192b !important;
+  border-bottom: 1px solid #1e2e4a !important;
+}
+
+html.dark .nav .brand {
+  color: #ffffff !important;
+}
+
+html.dark .nav-links a {
+  color: #e2e8f0 !important;
+}
+
+html.dark .nav-links a:hover {
+  color: #38bdf8 !important;
+}
+
+html.dark .nav .login {
+  background: #1e6b51 !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 10px 18px !important;
+}
+
+html.dark .nav .login b {
+  color: #ffffff !important;
+}
+
+/* Hero Section */
+html.dark .hero {
+  background: #0b1320 !important;
+}
+
+html.dark .hero h1 {
+  color: #ffffff !important;
+}
+
+html.dark .hero h1 em {
+  color: #38bdf8 !important;
+}
+
+html.dark .hero>div>p:not(.label) {
+  color: #cbd5e1 !important;
+}
+
+html.dark .label {
+  background: #1e2e4a !important;
+  color: #38bdf8 !important;
+}
+
+html.dark .button {
+  background: #1e6b51 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(30, 107, 81, 0.3) !important;
+}
+
+html.dark .secondary {
+  color: #38bdf8 !important;
+}
+
+/* Hero Board Card */
+html.dark .hero-board {
+  background: #111d31 !important;
+  border-color: #243859 !important;
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .hero-board:before {
+  border-color: #243859 !important;
+}
+
+html.dark .board-head {
+  color: #ffffff !important;
+}
+
+html.dark .board-head i {
+  background: #182842 !important;
+  color: #34d399 !important;
+}
+
+html.dark .board-numbers article {
+  background: #182842 !important;
+}
+
+html.dark .board-numbers b {
+  color: #ffffff !important;
+}
+
+html.dark .board-numbers small, html.dark .board-numbers span {
+  color: #cbd5e1 !important;
+}
+
+html.dark .board-list {
+  border-top-color: #243859 !important;
+}
+
+html.dark .board-list p {
+  border-bottom-color: #243859 !important;
+  color: #ffffff !important;
+}
+
+html.dark .board-list p:hover {
+  background: #182842 !important;
+  color: #ffffff !important;
+}
+
+html.dark .board-list p:hover small {
+  color: #38bdf8 !important;
+}
+
+html.dark .board-list small {
+  color: #cbd5e1 !important;
+}
+
+/* Contact Section in Dark Mode */
+html.dark .contact-section {
+  background: #0b1320 !important;
+}
+
+html.dark .contact-intro h2 {
+  color: #ffffff !important;
+}
+
+html.dark .contact-intro p {
+  color: #cbd5e1 !important;
+}
+
+html.dark .contact-intro a {
+  color: #38bdf8 !important;
+}
+
+html.dark .contact-form {
+  background: #111d31 !important;
+  border: 1px solid #243859 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .contact-form label {
+  color: #ffffff !important;
+}
+
+html.dark .contact-form input,
+html.dark .contact-form textarea {
+  background: #182842 !important;
+  border: 1px solid #243859 !important;
+  color: #ffffff !important;
+}
+
+html.dark .contact-form input::placeholder,
+html.dark .contact-form textarea::placeholder {
+  color: #cbd5e1 !important;
+}
+
+html.dark .contact-form button {
+  background: #1e6b51 !important;
+  color: #ffffff !important;
+}
+
+/* Sections & Process */
+html.dark .section {
+  background: #0b1320 !important;
+}
+
+html.dark .section h2, html.dark .final h2 {
+  color: #ffffff !important;
+}
+
+html.dark .sub {
+  color: #cbd5e1 !important;
+}
+
+html.dark .feature-grid article, html.dark .role-grid article, html.dark .story-grid article {
+  background: #111d31 !important;
+  border-color: #243859 !important;
+}
+
+html.dark .feature-grid h3, html.dark .role-grid h3, html.dark .step-grid h3 {
+  color: #ffffff !important;
+}
+
+html.dark .feature-grid p, html.dark .role-grid p, html.dark .step-grid p, html.dark .story-grid article>p {
+  color: #cbd5e1 !important;
+}
+
+html.dark .feature-grid a, html.dark .role-grid a {
+  color: #38bdf8 !important;
+}
+
+html.dark .icon-box, html.dark .role-icon, html.dark .step-icon {
+  background: #182842 !important;
+  color: #38bdf8 !important;
+}
+
+html.dark .process {
+  background: #0f192b !important;
+}
+
+html.dark .step-number {
+  background: #1e6b51 !important;
+  color: #ffffff !important;
+}
+
+html.dark .person strong {
+  color: #ffffff !important;
+}
+
+html.dark .person small {
+  color: #cbd5e1 !important;
+}
+
+html.dark .final, html.dark footer {
+  background: #070d18 !important;
+}
+
+html.dark footer>div>p, html.dark footer>div>a:not(.brand) {
+  color: #cbd5e1 !important;
+}
+
+/* Dashboard Dark Theme */
+html.dark .dashboard-sidebar {
+  background: #111d31 !important;
+  border-right-color: #243859 !important;
+}
+
+html.dark .sidebar-logo-text {
+  color: #ffffff !important;
+}
+
+html.dark .sidebar-role-badge {
+  background: #182842 !important;
+  border-color: #243859 !important;
+  color: #38bdf8 !important;
+}
+
+html.dark .sidebar-link {
+  color: #cbd5e1 !important;
+}
+
+html.dark .sidebar-link:hover {
+  background: #182842 !important;
+  color: #38bdf8 !important;
+}
+
+html.dark .sidebar-link.active {
+  background: #1e6b51 !important;
+  color: #ffffff !important;
+}
+
+html.dark .sidebar-footer {
+  border-top-color: #243859 !important;
+}
+
+html.dark .info strong {
+  color: #ffffff !important;
+}
+
+html.dark .info small {
+  color: #cbd5e1 !important;
+}
+
+html.dark .sidebar-logout {
+  color: #f87171 !important;
+}
+
+html.dark .dashboard-header {
+  background: #111d31 !important;
+  border-bottom-color: #243859 !important;
+}
+
+html.dark .header-left h2 {
+  color: #ffffff !important;
+}
+
+html.dark .header-date {
+  color: #cbd5e1 !important;
+}
+
+html.dark .header-search {
+  background: #111d31 !important;
+  border-color: #243859 !important;
+}
+
+html.dark .header-search input {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+  height: auto !important;
+  box-shadow: none !important;
+}
+
+html.dark .header-search input::placeholder {
+  color: #cbd5e1 !important;
+}
+
+html.dark .theme-toggle-btn {
+  background: #182842 !important;
+  border-color: #243859 !important;
+  color: #ffffff !important;
+}
+
+html.dark .theme-toggle-btn:hover {
+  background: #1e3354 !important;
+  color: #38bdf8 !important;
+}
+
+html.dark .notification-btn, html.dark .user-avatar-pill {
+  background: #182842 !important;
+  border-color: #243859 !important;
+}
+
+html.dark .avatar-text .name {
+  color: #ffffff !important;
+}
+
+html.dark .avatar-text .sub {
+  color: #cbd5e1 !important;
+}
+
+html.dark .notification-dropdown {
+  background: #111d31 !important;
+  border-color: #243859 !important;
+}
+
+html.dark .dropdown-header {
+  border-bottom-color: #243859 !important;
+}
+
+html.dark .dropdown-header h4 {
+  color: #ffffff !important;
+}
+
+html.dark .dash-card, html.dark .kpi-card, html.dark .notice-full-card {
+  background: #111d31 !important;
+  border-color: #243859 !important;
+}
+
+html.dark .kpi-card:hover {
+  border-color: #38bdf8 !important;
+}
+
+html.dark .kpi-icon, html.dark .icon-room, html.dark .icon-fee, html.dark .icon-complaint, html.dark .icon-pass, html.dark .header-logo-badge {
+  background: #182842 !important;
+  border-color: #243859 !important;
+}
+
+html.dark .kpi-info strong, html.dark .card-header h3, html.dark .section-title-box h2 {
+  color: #ffffff !important;
+}
+
+html.dark .kpi-info span, html.dark .section-title-box p, html.dark .empty-state-text {
+  color: #cbd5e1 !important;
+}
+
+html.dark .mess-item, html.dark .att-stat, html.dark .gatepass-card {
+  background: #182842 !important;
+  border-color: #243859 !important;
+}
+
+html.dark .meal-title, html.dark .att-stat strong {
+  color: #38bdf8 !important;
+}
+
+html.dark .mess-item p, html.dark .att-stat span, html.dark .gatepass-card p {
+  color: #ffffff !important;
+}
+
+html.dark .custom-table th {
+  background: #182842 !important;
+  color: #ffffff !important;
+  border-bottom-color: #243859 !important;
+}
+
+html.dark .custom-table td {
+  border-bottom-color: #243859 !important;
+  color: #ffffff !important;
+}
+
+html.dark .custom-table td strong {
+  color: #ffffff !important;
+}
+
+html.dark .btn-sm, html.dark .btn-secondary {
+  background: #182842 !important;
+  border-color: #243859 !important;
+  color: #ffffff !important;
+}
+
+html.dark .modal-box {
+  background: #111d31 !important;
+  color: #ffffff !important;
+  border: 1px solid #243859 !important;
+}
+
+html.dark .modal-box h3 {
+  color: #ffffff !important;
+}
+
+html.dark .form-label {
+  color: #cbd5e1 !important;
+}
+
+html.dark .form-label input, html.dark .form-label select {
+  background: #182842 !important;
+  border-color: #243859 !important;
+  color: #ffffff !important;
+}
+
+html.dark .btn-report-problem {
+  background: #3b1d1d !important;
+  border-color: #6e2e2e !important;
+  color: #ffffff !important;
+}
+
+html.dark .btn-ask-gatepass {
+  background: #182842 !important;
+  border-color: #243859 !important;
+  color: #38bdf8 !important;
+}
+
+/* Auth Pages */
+html.dark .auth-page {
+  background: #0b1320 !important;
+}
+
+html.dark .auth-showcase {
+  background: #111d31 !important;
+  border-right-color: #243859 !important;
+}
+
+html.dark .auth-showcase h2, html.dark .auth-card h1 {
+  color: #ffffff !important;
+}
+
+html.dark .auth-description, html.dark .auth-form label, html.dark .auth-switch {
+  color: #cbd5e1 !important;
+}
+
+html.dark .auth-card {
+  background: #111d31 !important;
+  border-color: #243859 !important;
+}
+
+html.dark .auth-form input, html.dark .auth-google-btn {
+  background: #182842 !important;
+  border-color: #243859 !important;
+  color: #ffffff !important;
+}
+
+html.dark .auth-divider span {
+  background: #111d31 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark footer .brand {
+  color: #ffffff !important;
+}
+
+html.dark footer p {
+  color: #cbd5e1 !important;
+}
+
+html.dark .sidebar-brand .brand,
+html.dark .dashboard-sidebar .brand {
+  color: #ffffff !important;
+}
