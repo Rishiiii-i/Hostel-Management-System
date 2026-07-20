@@ -84,26 +84,28 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="user-profile">
-          <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <Icon name="user" width="20" height="20" />
-            )}
+        <div className="user-profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', minWidth: 0, flex: 1 }}>
+            <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <Icon name="user" width="20" height="20" />
+              )}
+            </div>
+            <div className="user-info" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+              <span className="user-name" style={{ fontWeight: 600, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.fullName}</span>
+              <span className="user-role" style={{ fontSize: '0.75rem', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.room} &bull; {profile.block}</span>
+            </div>
           </div>
-          <div className="user-info">
-            <span className="user-name">{profile.fullName}</span>
-            <span className="user-role">{profile.room} &bull; {profile.block}</span>
-            <button 
-              type="button" 
-              className="user-logout-link" 
-              onClick={handleLogout}
-            >
-              <Icon name="logout" width="13" height="13" />
-              <span>Log Out</span>
-            </button>
-          </div>
+          <button 
+            type="button" 
+            className="sidebar-logout-icon-btn" 
+            onClick={handleLogout}
+            title="Log Out"
+          >
+            <Icon name="logout" width="16" height="16" />
+          </button>
         </div>
       </div>
     </aside>
