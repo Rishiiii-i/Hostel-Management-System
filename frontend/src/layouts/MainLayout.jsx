@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Icon from '../components/Icon'
+import { useAuth } from '../context/AuthContext'
 
 export default function MainLayout({ children, activeTab, setActiveTab }) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications] = useState([])
+  const { user, logOut } = useAuth()
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (window.confirm("Are you sure you want to log out?")) {
+      await logOut()
       window.location.href = '#home'
     }
   }
@@ -77,22 +80,26 @@ export default function MainLayout({ children, activeTab, setActiveTab }) {
             </div>
 
             <div className="user-profile-header-card">
-              <div className="header-avatar-circle">
-                <svg viewBox="0 0 36 36" width="34" height="34" className="header-photo-avatar">
-                  <rect width="36" height="36" rx="18" fill="url(#hdr-avatar-grad)" />
-                  <defs>
-                    <linearGradient id="hdr-avatar-grad" x1="0" y1="0" x2="36" y2="36">
-                      <stop offset="0%" stopColor="#1e6b51" />
-                      <stop offset="100%" stopColor="#0f3d2e" />
-                    </linearGradient>
-                  </defs>
-                  <circle cx="18" cy="13" r="6" fill="#ffffff" opacity="0.95" />
-                  <path d="M6 31c0-6 5-11 12-11s12 5 12 11" fill="#ffffff" opacity="0.95" />
-                </svg>
+              <div className="header-avatar-circle" style={{ overflow: 'hidden', borderRadius: '50%', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <svg viewBox="0 0 36 36" width="34" height="34" className="header-photo-avatar">
+                    <rect width="36" height="36" rx="18" fill="url(#hdr-avatar-grad)" />
+                    <defs>
+                      <linearGradient id="hdr-avatar-grad" x1="0" y1="0" x2="36" y2="36">
+                        <stop offset="0%" stopColor="#1e6b51" />
+                        <stop offset="100%" stopColor="#0f3d2e" />
+                      </linearGradient>
+                    </defs>
+                    <circle cx="18" cy="13" r="6" fill="#ffffff" opacity="0.95" />
+                    <path d="M6 31c0-6 5-11 12-11s12 5 12 11" fill="#ffffff" opacity="0.95" />
+                  </svg>
+                )}
               </div>
               <div className="user-profile-text">
-                <span className="user-profile-name">Rahul Sharma</span>
-                <span className="user-profile-role">Student</span>
+                <span className="user-profile-name">{user?.name || 'Rahul Sharma'}</span>
+                <span className="user-profile-role" style={{ textTransform: 'capitalize' }}>{user?.role || 'Student'}</span>
               </div>
               <button 
                 type="button" 
