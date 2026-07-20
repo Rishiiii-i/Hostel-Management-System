@@ -37,8 +37,11 @@ function App() {
   useEffect(() => {
     const updateRoute = () => {
       const hash = window.location.hash || '#home'
+      const searchParams = new URLSearchParams(window.location.search)
+      const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
+
       const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
-      const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'
+      const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password' || hash === '#reset-password' || isResetAction
 
       console.log('[Routing Debug] Hash changed:', { hash, user, loading });
 
@@ -56,8 +59,11 @@ function App() {
 
     // run guard check on state/route change
     const hash = window.location.hash || '#home'
+    const searchParams = new URLSearchParams(window.location.search)
+    const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
+
     const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
-    const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'
+    const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password' || hash === '#reset-password' || isResetAction
 
     console.log('[Routing Debug] Guard effect triggered:', { hash, user, loading });
 
@@ -106,9 +112,17 @@ function App() {
     )
   }
 
-  if (route === '#login' || route === '#signup' || route === '#forgot-password') {
-    const mode = route === '#signup' ? 'signup' : route === '#forgot-password' ? 'forgot' : 'login'
-    return <AuthLayout><Login mode={mode} /></AuthLayout>
+  const searchParams = new URLSearchParams(window.location.search)
+  const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
+
+  if (route === '#login' || route === '#signup' || route === '#forgot-password' || route === '#reset-password' || isResetAction) {
+    let mode = 'login'
+    if (route === '#signup') mode = 'signup'
+    else if (route === '#forgot-password') mode = 'forgot'
+    else if (route === '#reset-password' || isResetAction) mode = 'reset'
+
+    const oobCode = searchParams.get('oobCode') || ''
+    return <AuthLayout><Login mode={mode} oobCode={oobCode} /></AuthLayout>
   }
 
   if (route === '#dashboard' || route === '#student-dashboard' || route.startsWith('#dashboard')) {

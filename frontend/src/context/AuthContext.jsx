@@ -8,7 +8,9 @@ import {
   sendPasswordResetEmail, 
   signOut, 
   updateProfile,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  confirmPasswordReset,
+  verifyPasswordResetCode
 } from 'firebase/auth';
 
 const AuthContext = createContext(null);
@@ -161,6 +163,14 @@ export const AuthProvider = ({ children }) => {
     await sendPasswordResetEmail(auth, email);
   };
 
+  const verifyResetCode = async (code) => {
+    return await verifyPasswordResetCode(auth, code);
+  };
+
+  const confirmReset = async (code, newPassword) => {
+    await confirmPasswordReset(auth, code, newPassword);
+  };
+
   const logOut = async () => {
     setLoading(true);
     try {
@@ -184,6 +194,8 @@ export const AuthProvider = ({ children }) => {
     logInWithEmail,
     logInWithGoogle,
     sendPasswordReset,
+    verifyResetCode,
+    confirmReset,
     logOut
   };
 
