@@ -145,16 +145,21 @@ html.dark .student-profile-mini .info strong {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: #dc2626;
+  border: 1px solid #b91c1c;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+.sidebar-logout-icon-btn img {
+  filter: brightness(0) invert(1);
 }
 
 .sidebar-logout-icon-btn:hover {
-  background: #ef4444;
-  color: #ffffff;
-  border-color: #ef4444;
+  background: #991b1b;
+  border-color: #7f1d1d;
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(153, 27, 27, 0.35);
 }

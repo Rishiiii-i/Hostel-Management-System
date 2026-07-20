@@ -231,16 +231,20 @@ html.dark .user-profile-role {
   gap: 5px;
   padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: #dc2626;
+  border: 1px solid #b91c1c;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
+.header-logout-pill-btn img {
+  filter: brightness(0) invert(1);
+}
+
 .header-logout-pill-btn:hover {
-  background: #ef4444;
-  color: #ffffff;
+  background: #991b1b;
+  border-color: #7f1d1d;
 }
