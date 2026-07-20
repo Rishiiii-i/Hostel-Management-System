@@ -5367,6 +5367,17 @@ html.dark .auth-password-toggle:hover {
   color: #5ccfa0 !important;
 }
 
+/* Sidebar Brand Heading Bottom Border Divider Line */
+.sidebar-brand {
+  border-bottom: 1px solid #cbd5e1 !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 20px !important;
+}
+
+html.dark .sidebar-brand {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Sidebar Footer Top Border Divider Line */
 .sidebar-footer {
   border-top: 1px solid #cbd5e1 !important; /* Highly visible light grey line in light mode */
