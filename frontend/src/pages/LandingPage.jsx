@@ -60,11 +60,14 @@ export default function LandingPage() {
         <div className="feature-grid">
           {features.map(([icon, title, copy], i) => (
             <ScrollReveal key={title} animation="fade-up" delay={i * 100}>
-              <article className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-[#1e6b51]/30">
+              <article 
+                onClick={() => window.location.hash = '#login'}
+                className="group cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-[#1e6b51]/30"
+              >
                 <span className={'icon-box box-' + i + ' group-hover:scale-110 transition-transform duration-300'}><Icon name={icon} /></span>
                 <h3>{title}</h3>
                 <p>{copy}</p>
-                <a href={'#feature-' + i} className="group-hover:translate-x-1 transition-transform duration-300">Learn More <b>&rarr;</b></a>
+                <a href="#login" className="group-hover:translate-x-1 transition-transform duration-300" onClick={(e) => e.stopPropagation()}>Learn More <b>&rarr;</b></a>
               </article>
             </ScrollReveal>
           ))}

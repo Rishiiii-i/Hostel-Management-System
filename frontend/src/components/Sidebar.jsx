@@ -1,16 +1,18 @@
 import Icon from './Icon'
+import homeIcon from '../assets/icons/home.png'
 import roomIcon from '../assets/icons/room.png'
 import feeIcon from '../assets/icons/fee.png'
 import complaintIcon from '../assets/icons/complaint.png'
 import attendanceIcon from '../assets/icons/attendance.png'
 import bellIcon from '../assets/icons/bell.png'
+import settingsIcon from '../assets/icons/settings.png'
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const navItems = [
     {
       id: 'overview',
       label: 'Home',
-      icon: <Icon name="building" />
+      icon: <img src={homeIcon} alt="Home" width="18" height="18" />
     },
     {
       id: 'room',
@@ -36,6 +38,11 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       id: 'notices',
       label: 'Notices',
       icon: <img src={bellIcon} alt="Notices" width="18" height="18" />
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: <img src={settingsIcon} alt="Settings" width="18" height="18" />
     }
   ]
 
@@ -56,10 +63,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         </a>
       </div>
 
-      <div className="portal-badge">
-        <span className="portal-dot"></span>
-        Student Portal
-      </div>
+      <div className="sidebar-divider"></div>
 
       <nav className="sidebar-nav">
         {navItems.map((item) => (

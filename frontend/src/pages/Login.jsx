@@ -17,7 +17,7 @@ export default function Login({ mode = 'login' }) {
 
   if (isForgot) {
     return <div className="auth-card auth-card--forgot">
-      <a className="auth-card-back" href="#login">Back to sign in</a>
+      <a className="auth-card-back" href="#login">&larr; Back to sign in</a>
       <div className="auth-card__top">
         <h1>Forgot password?</h1>
         <p>Enter your registered email address and we will send password reset instructions.</p>
@@ -37,19 +37,29 @@ export default function Login({ mode = 'login' }) {
     window.location.hash = '#dashboard'
   }
 
-  return <div className="auth-card">
-    <a className="auth-card-back" href="#home">Back to home</a>
+  return <div className={`auth-card ${isSignup ? 'auth-card--signup' : ''}`}>
+    <a className="auth-card-back" href="#home">&larr; Back to home</a>
     <div className="auth-card__top">
       <h1>{isSignup ? 'Create your Smart Hostel account' : 'Welcome back'}</h1>
       <p>{isSignup ? 'Set up a calmer way to manage hostel life.' : 'Sign in to continue to your hostel workspace.'}</p>
     </div>
 
     <form className="auth-form" onSubmit={handleSubmit}>
-      {isSignup && <label>YOUR NAME<input type="text" placeholder="Enter your name" autoComplete="name" required /></label>}
+      {isSignup && (
+        <>
+          <label>YOUR NAME<input type="text" placeholder="Enter your name" autoComplete="name" required /></label>
+          <label>REGISTERED ROLL NUMBER<input type="text" placeholder="Enter your roll number" required /></label>
+        </>
+      )}
       <label>EMAIL ADDRESS<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Enter your email" autoComplete="email" required /></label>
       
-      <label>PASSWORD<input type="password" placeholder="Enter your password" autoComplete={isSignup ? 'new-password' : 'current-password'} required /></label>
-      {!isSignup && <a className="auth-forgot" href="#forgot-password">Forgot password?</a>}
+      <div className="auth-password-container">
+        <label className="auth-password-label">
+          <span>PASSWORD</span>
+          {!isSignup && <a className="auth-forgot" href="#forgot-password">Forgot password?</a>}
+        </label>
+        <input type="password" placeholder="Enter your password" autoComplete={isSignup ? 'new-password' : 'current-password'} required />
+      </div>
       <button className="auth-submit" type="submit">{isSignup ? 'Sign up' : 'Sign in'}</button>
     </form>
 
