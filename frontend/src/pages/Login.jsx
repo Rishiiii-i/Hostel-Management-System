@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import GoogleSignInButton from '../components/GoogleSignInButton'
 import { useAuth } from '../context/AuthContext'
+import Icon from '../components/Icon'
 
 export default function Login({ mode = 'login' }) {
   const [email, setEmail] = useState('')
@@ -9,6 +10,7 @@ export default function Login({ mode = 'login' }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const { logInWithEmail, signUpWithEmail, logInWithGoogle, sendPasswordReset } = useAuth()
 
@@ -67,7 +69,7 @@ export default function Login({ mode = 'login' }) {
 
   if (isForgot) {
     return <div className="auth-card auth-card--forgot">
-      <a className="auth-card-back" href="#login">Back to sign in</a>
+      <a className="auth-card-back" href="#login">&larr; Back to sign in</a>
       <div className="auth-card__top">
         <h1>Forgot password?</h1>
         <p>Enter your registered email address and we will send password reset instructions.</p>
@@ -95,8 +97,8 @@ export default function Login({ mode = 'login' }) {
     </div>
   }
 
-  return <div className="auth-card">
-    <a className="auth-card-back" href="#home">Back to home</a>
+  return <div className={`auth-card ${isSignup ? 'auth-card--signup' : ''}`}>
+    <a className="auth-card-back" href="#home">&larr; Back to home</a>
     <div className="auth-card__top">
       <h1>{isSignup ? 'Create your Smart Hostel account' : 'Welcome back'}</h1>
       <p>{isSignup ? 'Set up a calmer way to manage hostel life.' : 'Sign in to continue to your hostel workspace.'}</p>
@@ -106,18 +108,29 @@ export default function Login({ mode = 'login' }) {
 
     <form className="auth-form" onSubmit={handleSubmit}>
       {isSignup && (
-        <label>
-          YOUR NAME
-          <input 
-            type="text" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name" 
-            autoComplete="name" 
-            required 
-            disabled={loading}
-          />
-        </label>
+        <>
+          <label>
+            YOUR NAME
+            <input 
+              type="text" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name" 
+              autoComplete="name" 
+              required 
+              disabled={loading}
+            />
+          </label>
+          <label>
+            REGISTERED ROLL NUMBER
+            <input 
+              type="text" 
+              placeholder="Enter your roll number" 
+              required 
+              disabled={loading}
+            />
+          </label>
+        </>
       )}
       <label>
         EMAIL ADDRESS
@@ -132,19 +145,36 @@ export default function Login({ mode = 'login' }) {
         />
       </label>
       
-      <label>
-        PASSWORD
-        <input 
-          type="password" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password" 
-          autoComplete={isSignup ? 'new-password' : 'current-password'} 
-          required 
-          disabled={loading}
-        />
-      </label>
-      {!isSignup && <a className="auth-forgot" href="#forgot-password">Forgot password?</a>}
+      <div className="auth-password-container">
+        <label className="auth-password-label">
+          <span>PASSWORD</span>
+          {!isSignup && <a className="auth-forgot" href="#forgot-password">Forgot password?</a>}
+        </label>
+        <div className="auth-password-input-wrapper">
+          <input 
+            type={showPassword ? "text" : "password"} 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password" 
+            autoComplete={isSignup ? 'new-password' : 'current-password'} 
+            required 
+            disabled={loading}
+          />
+          <button 
+            type="button" 
+            className="auth-password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            disabled={loading}
+          >
+            {showPassword ? (
+              <Icon name="eye-off" width="18" height="18" />
+            ) : (
+              <Icon name="eye" width="18" height="18" />
+            )}
+          </button>
+        </div>
+      </div>
       <button className="auth-submit" type="submit" disabled={loading}>
         {loading ? (isSignup ? 'Signing up...' : 'Signing in...') : (isSignup ? 'Sign up' : 'Sign in')}
       </button>

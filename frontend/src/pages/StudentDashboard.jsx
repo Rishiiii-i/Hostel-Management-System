@@ -3,8 +3,11 @@ import roomIcon from '../assets/icons/room.png'
 import feeIcon from '../assets/icons/fee.png'
 import complaintIcon from '../assets/icons/complaint.png'
 import attendanceIcon from '../assets/icons/attendance.png'
+import bellIcon from '../assets/icons/bell.png'
+import settingsIcon from '../assets/icons/settings.png'
+import Icon from '../components/Icon'
 
-export default function StudentDashboard({ activeTab = 'overview', setActiveTab }) {
+export default function StudentDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
   const [complaints, setComplaints] = useState([])
   const [gatePasses, setGatePasses] = useState([])
   const [transactions, setTransactions] = useState([])
@@ -18,6 +21,16 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
   const [newComplaint, setNewComplaint] = useState({ category: 'Electrical', title: '', priority: 'Medium' })
   const [newGatePass, setNewGatePass] = useState({ reason: '', departure: '', returnDate: '' })
   const [payAmount, setPayAmount] = useState('450.00')
+
+  const [savedSuccessMsg, setSavedSuccessMsg] = useState('')
+
+  const handleSaveProfile = (e) => {
+    e.preventDefault()
+    setSavedSuccessMsg('Profile updated successfully!')
+    setTimeout(() => {
+      setSavedSuccessMsg('')
+    }, 4000)
+  }
 
   const handleAddComplaint = (e) => {
     e.preventDefault()
@@ -70,15 +83,14 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="welcome-banner">
             <div className="banner-content">
-              <span className="badge-pill">Student Portal</span>
               <h1>Welcome to Smart Hostel</h1>
               <p>Manage your room, fees, and requests easily in one place.</p>
             </div>
             <div className="banner-quick-stats">
               <div className="stat-box">
                 <span className="stat-label">My Room</span>
-                <strong className="stat-value">Not Assigned</strong>
-                <small className="stat-sub">Waiting for room</small>
+                <strong className="stat-value">{profile.room}</strong>
+                <small className="stat-sub">{profile.block}</small>
               </div>
               <div className="stat-box">
                 <span className="stat-label">Pending Fees</span>
@@ -90,49 +102,33 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
             </div>
           </div>
 
-          <div className="kpi-grid">
-            <div className="kpi-card" onClick={() => setActiveTab('room')}>
-              <div className="kpi-icon icon-room">
-                <img src={roomIcon} alt="Room" width="24" height="24" />
-              </div>
-              <div className="kpi-info">
-                <span>Room</span>
-                <strong>Unassigned</strong>
-                <small>No room details</small>
-              </div>
+          <div className="dashboard-feature-grid">
+            <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('room')}>
+              <img src={roomIcon} alt="Room" width="32" height="32" />
+              <h4>Rooms and Allocation</h4>
+              <p>Check your assigned room, bed number, room status, and view roommates.</p>
+              <span className="dashboard-feature-card-link">Go to Room Details &rarr;</span>
             </div>
 
-            <div className="kpi-card" onClick={() => setActiveTab('fees')}>
-              <div className="kpi-icon icon-fee">
-                <img src={feeIcon} alt="Fees" width="24" height="24" />
-              </div>
-              <div className="kpi-info">
-                <span>Fees</span>
-                <strong>{feePaid ? 'Paid' : '$0.00 Due'}</strong>
-                <small>{transactions.length} Payments</small>
-              </div>
+            <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('fees')}>
+              <img src={feeIcon} alt="Fees" width="32" height="32" />
+              <h4>Fees & Payments</h4>
+              <p>View your pending dues, payment history, and download official receipts.</p>
+              <span className="dashboard-feature-card-link">Go to Fees &rarr;</span>
             </div>
 
-            <div className="kpi-card" onClick={() => setActiveTab('complaints')}>
-              <div className="kpi-icon icon-complaint">
-                <img src={complaintIcon} alt="Complaints" width="24" height="24" />
-              </div>
-              <div className="kpi-info">
-                <span>Complaints</span>
-                <strong>{complaints.length} Total</strong>
-                <small>{complaints.filter(c => c.status !== 'Resolved').length} Active</small>
-              </div>
+            <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('complaints')}>
+              <img src={complaintIcon} alt="Complaints" width="32" height="32" />
+              <h4>Requests & Complaints</h4>
+              <p>Report maintenance problems, register complaints, and track repair status.</p>
+              <span className="dashboard-feature-card-link">Go to Complaints &rarr;</span>
             </div>
 
-            <div className="kpi-card" onClick={() => setActiveTab('gatepass')}>
-              <div className="kpi-icon icon-pass">
-                <img src={attendanceIcon} alt="Attendance" width="24" height="24" />
-              </div>
-              <div className="kpi-info">
-                <span>Attendance</span>
-                <strong>0%</strong>
-                <small>No attendance data</small>
-              </div>
+            <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('gatepass')}>
+              <img src={attendanceIcon} alt="Attendance" width="32" height="32" />
+              <h4>Gate Pass & Attendance</h4>
+              <p>Submit gate pass outing requests and check your monthly attendance records.</p>
+              <span className="dashboard-feature-card-link">Go to Gate Pass &rarr;</span>
             </div>
           </div>
 
@@ -189,13 +185,27 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* My Room Tab */}
       {activeTab === 'room' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box">
-            <h2>My Room Details</h2>
-            <p>Check details about your room and bed.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div className="tab-title-with-icon">
+                <img src={roomIcon} alt="Room" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div>
+                  <h2 className="tab-title">My Room Details</h2>
+                  <p className="tab-subtitle">Check details about your assigned hostel room and bed.</p>
+                </div>
+              </div>
+            </div>
+            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
-            <p className="empty-state-text">No room assigned yet.</p>
+            <h3>Assigned Room Information</h3>
+            <div className="room-info-grid">
+              <p><strong>Room Number:</strong> {profile.room}</p>
+              <p><strong>Block:</strong> {profile.block}</p>
+              <p><strong>Occupants:</strong> 2 Students</p>
+              <p><strong>Status:</strong> Active Resident</p>
+            </div>
           </div>
         </div>
       )}
@@ -203,14 +213,20 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* Fees & Payments Tab */}
       {activeTab === 'fees' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box flex-between">
-            <div>
-              <h2>Fees & Payments</h2>
-              <p>Check your fees and download payment receipts.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div className="tab-title-with-icon">
+                <img src={feeIcon} alt="Fees" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div>
+                  <h2 className="tab-title">Fees & Payments</h2>
+                  <p className="tab-subtitle">Check your hostel fees and download official payment receipts.</p>
+                </div>
+              </div>
+              <button type="button" className="btn-pay-fee" onClick={() => setShowPayModal(true)}>
+                Pay Fee
+              </button>
             </div>
-            <button type="button" className="btn-pay-fee" onClick={() => setShowPayModal(true)}>
-              Pay Fee
-            </button>
+            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
@@ -250,14 +266,20 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* Complaints Tab */}
       {activeTab === 'complaints' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box flex-between">
-            <div>
-              <h2>Complaints & Repairs</h2>
-              <p>Report a problem and check repair status.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div className="tab-title-with-icon">
+                <img src={complaintIcon} alt="Complaints" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div>
+                  <h2 className="tab-title">Complaints & Repairs</h2>
+                  <p className="tab-subtitle">Report a maintenance problem and track repair progress.</p>
+                </div>
+              </div>
+              <button type="button" className="btn-report-problem" onClick={() => setShowComplaintModal(true)}>
+                Report a Problem
+              </button>
             </div>
-            <button type="button" className="btn-report-problem" onClick={() => setShowComplaintModal(true)}>
-              Report a Problem
-            </button>
+            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
@@ -300,17 +322,23 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* Gate Pass & Attendance Tab */}
       {activeTab === 'gatepass' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box flex-between">
-            <div>
-              <h2>Gate Pass & Attendance</h2>
-              <p>Ask for leave or check your attendance.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div className="tab-title-with-icon">
+                <img src={attendanceIcon} alt="Attendance" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div>
+                  <h2 className="tab-title">Gate Pass & Attendance</h2>
+                  <p className="tab-subtitle">Apply for outing gate pass or view your monthly attendance record.</p>
+                </div>
+              </div>
+              <button type="button" className="btn-ask-gatepass" onClick={() => setShowGatePassModal(true)}>
+                Ask for Gate Pass
+              </button>
             </div>
-            <button type="button" className="btn-ask-gatepass" onClick={() => setShowGatePassModal(true)}>
-              Ask for Gate Pass
-            </button>
+            <div className="tab-divider"></div>
           </div>
 
-          <div className="dashboard-grid-2col">
+          <div className="dashboard-grid-2col" style={{ marginTop: '24px' }}>
             <div className="dash-card">
               <h3>Monthly Attendance</h3>
               <div className="attendance-summary">
@@ -354,13 +382,132 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* Notices Tab */}
       {activeTab === 'notices' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box">
-            <h2>Hostel Notices</h2>
-            <p>Important news and updates from hostel.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div className="tab-title-with-icon">
+                <img src={bellIcon} alt="Notices" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div>
+                  <h2 className="tab-title">Hostel Notices</h2>
+                  <p className="tab-subtitle">Important announcements and official updates from hostel management.</p>
+                </div>
+              </div>
+            </div>
+            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
             <p className="empty-state-text">No notices right now.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Settings / Profile Tab */}
+      {activeTab === 'settings' && (
+        <div className="tab-pane animate-fade-in-slide-up">
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div className="tab-title-with-icon">
+                <img src={settingsIcon} alt="Settings" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div>
+                  <h2 className="tab-title">Account & Profile Settings</h2>
+                  <p className="tab-subtitle">View and update your personal information and contact details.</p>
+                </div>
+              </div>
+            </div>
+            <div className="tab-divider"></div>
+          </div>
+
+          {savedSuccessMsg && (
+            <div className="alert-success-box animate-fade-in">
+              <Icon name="checkmark" width="20" height="20" />
+              <span>{savedSuccessMsg}</span>
+            </div>
+          )}
+
+          <div className="settings-grid">
+            <div className="dash-card profile-card-header">
+              <div className="profile-avatar-big">
+                <Icon name="user" width="30" height="30" />
+              </div>
+              <div className="profile-card-details">
+                <h3>{profile.fullName}</h3>
+                <span className="profile-roll">{profile.rollNo} &bull; Computer Science</span>
+                <span className="profile-badge-active">Active Student</span>
+              </div>
+            </div>
+
+            <div className="dash-card">
+              <h3>Personal & Contact Details</h3>
+              <form onSubmit={handleSaveProfile} className="settings-form">
+                <div className="form-grid-2col">
+                  <label className="form-label">
+                    Full Name
+                    <input
+                      type="text"
+                      value={profile.fullName}
+                      onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                      required
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Email Address
+                    <input
+                      type="email"
+                      value={profile.email}
+                      onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                      required
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Phone Number
+                    <input
+                      type="tel"
+                      value={profile.phone}
+                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                      required
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Emergency Contact
+                    <input
+                      type="tel"
+                      value={profile.emergencyContact}
+                      onChange={(e) => setProfile({ ...profile, emergencyContact: e.target.value })}
+                      required
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Room Number
+                    <input
+                      type="text"
+                      value={profile.room}
+                      onChange={(e) => setProfile({ ...profile, room: e.target.value })}
+                      required
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Hostel Block
+                    <input
+                      type="text"
+                      value={profile.block}
+                      onChange={(e) => setProfile({ ...profile, block: e.target.value })}
+                      required
+                    />
+                  </label>
+                </div>
+
+                <div className="form-actions-right">
+                  <button type="submit" className="btn-save-profile">
+                    Save Profile Changes
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
@@ -372,11 +519,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
             <h3>Pay Fee</h3>
             <label className="form-label">
               Enter Amount ($)
-              <input 
-                type="number" 
-                value={payAmount} 
-                onChange={(e) => setPayAmount(e.target.value)} 
-                required 
+              <input
+                type="number"
+                value={payAmount}
+                onChange={(e) => setPayAmount(e.target.value)}
+                required
               />
             </label>
             <div className="payment-options">
@@ -399,8 +546,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
             <form onSubmit={handleAddComplaint}>
               <label className="form-label">
                 Category
-                <select 
-                  value={newComplaint.category} 
+                <select
+                  value={newComplaint.category}
                   onChange={(e) => setNewComplaint({ ...newComplaint, category: e.target.value })}
                 >
                   <option value="Electrical">Electrical</option>
@@ -413,19 +560,19 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
 
               <label className="form-label">
                 Problem Description
-                <input 
-                  type="text" 
-                  placeholder="Describe your problem" 
-                  value={newComplaint.title} 
+                <input
+                  type="text"
+                  placeholder="Describe your problem"
+                  value={newComplaint.title}
                   onChange={(e) => setNewComplaint({ ...newComplaint, title: e.target.value })}
-                  required 
+                  required
                 />
               </label>
 
               <label className="form-label">
                 Priority
-                <select 
-                  value={newComplaint.priority} 
+                <select
+                  value={newComplaint.priority}
                   onChange={(e) => setNewComplaint({ ...newComplaint, priority: e.target.value })}
                 >
                   <option value="Low">Low</option>
@@ -451,32 +598,32 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
             <form onSubmit={handleAddGatePass}>
               <label className="form-label">
                 Reason
-                <input 
-                  type="text" 
-                  placeholder="Reason for going out" 
-                  value={newGatePass.reason} 
+                <input
+                  type="text"
+                  placeholder="Reason for going out"
+                  value={newGatePass.reason}
                   onChange={(e) => setNewGatePass({ ...newGatePass, reason: e.target.value })}
-                  required 
+                  required
                 />
               </label>
 
               <label className="form-label">
                 Departure Time
-                <input 
-                  type="datetime-local" 
-                  value={newGatePass.departure} 
+                <input
+                  type="datetime-local"
+                  value={newGatePass.departure}
                   onChange={(e) => setNewGatePass({ ...newGatePass, departure: e.target.value })}
-                  required 
+                  required
                 />
               </label>
 
               <label className="form-label">
                 Return Time
-                <input 
-                  type="datetime-local" 
-                  value={newGatePass.returnDate} 
+                <input
+                  type="datetime-local"
+                  value={newGatePass.returnDate}
                   onChange={(e) => setNewGatePass({ ...newGatePass, returnDate: e.target.value })}
-                  required 
+                  required
                 />
               </label>
 

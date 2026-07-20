@@ -11,6 +11,27 @@ function App() {
   const [route, setRoute] = useState(() => window.location.hash || '#home')
   const [activeTab, setActiveTab] = useState('overview')
   const { user, loading } = useAuth()
+  
+  const [profile, setProfile] = useState({
+    fullName: 'Rahul Sharma',
+    email: 'student@smarthostel.com',
+    phone: '+91 98765 43210',
+    emergencyContact: '+91 98765 00000',
+    room: 'Room 204',
+    block: 'Block A',
+    rollNo: '2024CS108'
+  })
+
+  // Synchronize local editable profile state when authenticated user changes
+  useEffect(() => {
+    if (user) {
+      setProfile(prev => ({
+        ...prev,
+        fullName: user.name || prev.fullName,
+        email: user.email || prev.email
+      }))
+    }
+  }, [user])
 
   useEffect(() => {
     const updateRoute = () => {
@@ -82,8 +103,8 @@ function App() {
   if (route === '#dashboard' || route === '#student-dashboard' || route.startsWith('#dashboard')) {
     return (
       <ProtectedRoute>
-        <MainLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-          <StudentDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
+        <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
+          <StudentDashboard activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
         </MainLayout>
       </ProtectedRoute>
     )
