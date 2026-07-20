@@ -1,3 +1,4 @@
+/* Sidebar styles */
 .dashboard-sidebar {
   width: 270px;
   background: #ffffff;
@@ -11,51 +12,42 @@
   box-shadow: 2px 0 16px rgba(24, 64, 45, 0.03);
 }
 
-.sidebar-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
+html.dark .dashboard-sidebar {
+  background: #12211a;
+  border-right-color: #233e30;
 }
 
-.sidebar-logo-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: #1e6b51 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-shrink: 0;
+.sidebar-brand {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #cbd5e1;
 }
 
-.sidebar-logo-icon svg {
-  display: block !important;
-  width: 24px !important;
-  height: 24px !important;
-  fill: #ffffff !important;
+html.dark .sidebar-brand {
+  border-bottom-color: #334155;
 }
 
-.sidebar-logo-text {
-  font-size: 20px;
-  font-weight: 800;
-  color: #143628;
-  font-family: 'Manrope', sans-serif;
+.sidebar-brand .brand {
+  font: 800 22px 'Manrope', sans-serif;
   letter-spacing: -0.5px;
-}
-
-.sidebar-role-badge {
-  margin: 18px 0 24px;
-  padding: 8px 14px;
-  background: #eef6f0;
-  border: 1px solid #d3e7d7;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #267554;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  color: #143628;
+}
+
+html.dark .sidebar-brand .brand {
+  color: #e2f0e6;
+}
+
+.sidebar-brand .brand span {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #1e6b51;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
 }
 
 .sidebar-nav {
@@ -81,9 +73,18 @@
   width: 100%;
 }
 
+html.dark .sidebar-link {
+  color: #9ab4a6;
+}
+
 .sidebar-link:hover {
   background: #f0f7f2;
   color: #1e6b51;
+}
+
+html.dark .sidebar-link:hover {
+  background: #1c3327;
+  color: #38b387;
 }
 
 .sidebar-link.active {
@@ -100,211 +101,60 @@
   justify-content: space-between;
 }
 
-.sidebar-logout {
-  color: #92a89b;
-  font-size: 12px;
-  text-decoration: none;
-  font-weight: 700;
-  transition: color 0.2s ease;
-}
-
-.sidebar-logout:hover {
-  color: #e53935;
-}
-
-@media(max-width: 900px) {
-  .dashboard-container {
-    flex-direction: column;
-  }
-
-  .dashboard-sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .dashboard-grid-2col {
-    grid-template-columns: 1fr;
-  }
-}
-
-html.dark .dashboard-sidebar {
-  background: #121f1a;
-  border-right-color: #1f352c;
-  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.25);
-}
-
-html.dark .sidebar-logo-text {
-  color: #ffffff;
-}
-
-html.dark .sidebar-role-badge {
-  background: #182c23;
-  border-color: #244437;
-  color: #5ccfa0;
-}
-
-html.dark .sidebar-link {
-  color: #9ab4a5;
-}
-
-html.dark .sidebar-link:hover {
-  background: #1a3026;
-  color: #5ccfa0;
-}
-
-html.dark .sidebar-link.active {
-  background: #1e6b51;
-  color: #ffffff;
-}
-
 html.dark .sidebar-footer {
-  border-top-color: #1f352c;
+  border-top-color: #233e30;
 }
 
-html.dark .kpi-icon,
-html.dark .icon-room,
-html.dark .icon-fee,
-html.dark .icon-complaint,
-html.dark .icon-pass,
-html.dark .sidebar-logo-icon {
-  background: #1a3328;
+.student-profile-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* sidebar brand high contrast styling */
-.sidebar-brand .brand,
-.dashboard-sidebar .brand {
-  color: #17291f !important;
-  font: 800 24px 'Manrope', sans-serif !important;
-  letter-spacing: -0.8px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  text-decoration: none !important;
+.student-profile-mini .avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #25785a;
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
 }
 
-html.dark .sidebar-brand .brand,
-html.dark .dashboard-sidebar .brand {
-  color: #ffffff !important;
+.student-profile-mini .info strong {
+  display: block;
+  font-size: 13px;
+  color: #1a362a;
 }
 
-/* dashboard header & sidebar alignment fixes */
-.sidebar-footer {
-  padding: 16px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  margin-top: auto !important;
+html.dark .student-profile-mini .info strong {
+  color: #e2f0e6;
 }
 
-/* sidebar brand title formatting */
-.dashboard-sidebar {
-  padding: 0 !important; /* reset layout padding to allow brand corner alignment */
-}
-
-.sidebar-brand {
-  padding: 18px 20px 10px 20px !important; /* push brand logo to top-left corner */
-  width: 100% !important;
-  overflow: visible !important;
-}
-
-.sidebar-nav {
-  padding: 10px 20px !important; /* pad nav items uniformly */
-}
-
-.sidebar-divider {
-  height: 1px !important;
-  background: #cbd5e1 !important;
-  margin: 4px 0 16px 0 !important; /* spans full width cleanly */
-}
-
-html.dark .sidebar-divider {
-  background: rgba(255, 255, 255, 0.08) !important;
-}
-
-.sidebar-brand .brand {
-  font: 800 22px 'Manrope', sans-serif !important;
-  letter-spacing: -0.5px !important;
-  white-space: nowrap !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  text-decoration: none !important;
-}
-
-/* logout button styling */
-.sidebar-logout-btn {
-  background: transparent !important;
-  border: none !important;
-  color: #94a3b8 !important;
-  cursor: pointer !important;
-  padding: 6px !important;
-  border-radius: 8px !important;
-  display: grid !important;
-  place-items: center !important;
-  margin-left: auto !important;
-  transition: all 0.2s ease !important;
-}
-
-.sidebar-logout-btn:hover {
-  background: rgba(239, 68, 68, 0.15) !important;
-  color: #ef4444 !important;
-  transform: translateX(1px) !important;
-}
-
-/* sidebar brand heading bottom border divider line */
-.sidebar-brand {
-  border-bottom: 1px solid #cbd5e1 !important;
-  padding-bottom: 16px !important;
-  margin-bottom: 20px !important;
-}
-
-html.dark .sidebar-brand {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* sidebar footer top border divider line */
-.sidebar-footer {
-  border-top: 1px solid #cbd5e1 !important; /* highly visible light grey line in light mode */
-  padding-top: 20px !important;
-  margin-top: auto !important;
-}
-
-html.dark .sidebar-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+.student-profile-mini .info small {
+  font-size: 11px;
+  color: #71887b;
 }
 
 .sidebar-logout-icon-btn {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 10px !important;
-  background: rgba(239, 68, 68, 0.08) !important;
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
-  color: #ef4444 !important;
-  cursor: pointer !important;
-  flex-shrink: 0 !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .sidebar-logout-icon-btn:hover {
-  background: #ef4444 !important;
-  color: #ffffff !important;
-  border-color: #ef4444 !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
-  transform: translateY(-1px) scale(1.04) !important;
-}
-
-.sidebar-logout-icon-btn img {
-  filter: invert(34%) sepia(85%) saturate(2400%) hue-rotate(338deg) brightness(98%) contrast(93%) !important;
-  transition: filter 0.2s ease !important;
-}
-
-.sidebar-logout-icon-btn:hover img {
-  filter: brightness(0) invert(1) !important;
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  transform: translateY(-1px);
 }
