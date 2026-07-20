@@ -83,6 +83,7 @@ export default function Login({ mode = 'login' }) {
       } else {
         await logInWithEmail(email, password)
       }
+      window.location.hash = '#dashboard'
     } catch (err) {
       console.error('Auth error:', err?.code, err?.message)
       if (err.code === 'auth/operation-not-allowed') {
@@ -106,6 +107,7 @@ export default function Login({ mode = 'login' }) {
     setLoading(true)
     try {
       await logInWithGoogle()
+      window.location.hash = '#dashboard'
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Google sign-in popup was closed before completion.')
@@ -130,17 +132,17 @@ export default function Login({ mode = 'login' }) {
       </div>
       {error && <div className="auth-error-message" style={{ color: '#ef4444', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
       {successMessage && <div className="auth-success-message" style={{ color: '#10b981', marginBottom: '1rem', fontSize: '0.875rem' }}>{successMessage}</div>}
-      
+
       <form className="auth-form" onSubmit={handleForgotSubmit}>
         <label>
           REGISTERED EMAIL ADDRESS
-          <input 
-            type="email" 
-            value={email} 
-            onChange={(event) => setEmail(event.target.value)} 
-            placeholder="Enter your email" 
-            autoComplete="email" 
-            required 
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Enter your email"
+            autoComplete="email"
+            required
             disabled={loading}
           />
         </label>
@@ -157,32 +159,29 @@ export default function Login({ mode = 'login' }) {
       <h1>{isSignup ? 'Create your Smart Hostel account' : 'Welcome back'}</h1>
       <p>{isSignup ? 'Set up a calmer way to manage hostel life.' : 'Sign in to continue to your hostel workspace.'}</p>
     </div>
-
-    {error && <div className="auth-error-message" style={{ color: '#ef4444', marginBottom: '1.25rem', fontSize: '0.875rem', padding: '0.5rem', borderRadius: '4px', backgroundColor: 'rgba(239, 68, 68, 0.1)', textAlign: 'center' }}>{error}</div>}
-
     <form className="auth-form" onSubmit={handleSubmit}>
       {isSignup && (
         <>
           <label>
             YOUR NAME
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name" 
-              autoComplete="name" 
-              required 
+              placeholder="Enter your name"
+              autoComplete="name"
+              required
               disabled={loading}
             />
           </label>
           <label>
             REGISTERED ROLL NUMBER
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={rollNo}
               onChange={(e) => setRollNo(e.target.value)}
-              placeholder="Enter your roll number" 
-              required 
+              placeholder="Enter your roll number"
+              required
               disabled={loading}
             />
           </label>
@@ -190,34 +189,34 @@ export default function Login({ mode = 'login' }) {
       )}
       <label>
         EMAIL ADDRESS
-        <input 
-          type="email" 
-          value={email} 
-          onChange={(event) => setEmail(event.target.value)} 
-          placeholder="Enter your email" 
-          autoComplete="email" 
-          required 
+        <input
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Enter your email"
+          autoComplete="email"
+          required
           disabled={loading}
         />
       </label>
-      
+
       <div className="auth-password-container">
         <label className="auth-password-label">
           <span>PASSWORD</span>
           {!isSignup && <a className="auth-forgot" href="#forgot-password">Forgot password?</a>}
         </label>
         <div className="auth-password-input-wrapper">
-          <input 
-            type={showPassword ? "text" : "password"} 
+          <input
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password" 
-            autoComplete={isSignup ? 'new-password' : 'current-password'} 
-            required 
+            placeholder="Enter your password"
+            autoComplete={isSignup ? 'new-password' : 'current-password'}
+            required
             disabled={loading}
           />
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="auth-password-toggle"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "Hide password" : "Show password"}
@@ -232,15 +231,15 @@ export default function Login({ mode = 'login' }) {
         </div>
       </div>
       {error && (
-        <div className="auth-error-message" style={{ 
-          color: '#dc2626', 
-          backgroundColor: '#fee2e2', 
-          border: '1px solid #fca5a5', 
-          padding: '10px 14px', 
-          borderRadius: '8px', 
-          marginBottom: '16px', 
-          fontSize: '0.875rem', 
-          fontWeight: '500', 
+        <div className="auth-error-message" style={{
+          color: '#dc2626',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #fca5a5',
+          padding: '10px 14px',
+          borderRadius: '8px',
+          marginBottom: '16px',
+          fontSize: '0.875rem',
+          fontWeight: '500',
           textAlign: 'center'
         }}>
           {error}
@@ -255,8 +254,8 @@ export default function Login({ mode = 'login' }) {
       <span>OR</span>
     </div>
 
-    <GoogleSignInButton 
-      text={isSignup ? 'Sign up with Google' : 'Sign in with Google'} 
+    <GoogleSignInButton
+      text={isSignup ? 'Sign up with Google' : 'Sign in with Google'}
       onClick={handleGoogleClick}
     />
 

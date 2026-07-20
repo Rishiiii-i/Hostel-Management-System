@@ -1,13 +1,14 @@
 /* Login and Auth forms styles */
 .auth-card {
-  width: min(100%, 530px);
-  padding: 43px;
-  padding-top: 72px;
+  width: min(100%, 540px);
+  padding: 38px 44px 34px;
   border: 1px solid #dce7dd;
   border-radius: 24px;
   background: #fff;
-  box-shadow: 0 22px 56px rgba(24, 64, 45, 0.12);
+  box-shadow: 0 20px 50px rgba(24, 64, 45, 0.12);
   position: relative;
+  box-sizing: border-box;
+  margin: auto;
 }
 
 html.dark .auth-card {
@@ -20,10 +21,10 @@ html.dark .auth-card {
   align-items: center;
   gap: 6px;
   color: #1e6b51;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   text-decoration: none;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   transition: transform 0.2s ease;
 }
 
@@ -33,8 +34,8 @@ html.dark .auth-card {
 
 .auth-card h1 {
   margin: 0;
-  font: 800 36px/1.15 'Manrope', sans-serif;
-  letter-spacing: -2px;
+  font: 800 32px/1.2 'Manrope', sans-serif;
+  letter-spacing: -1.5px;
   color: #143528;
 }
 
@@ -43,7 +44,7 @@ html.dark .auth-card h1 {
 }
 
 .auth-card__top > p:last-child {
-  margin: 10px 0 28px;
+  margin: 6px 0 18px;
   color: #718578;
   font-size: 15px;
 }
@@ -51,30 +52,31 @@ html.dark .auth-card h1 {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 17px;
-  margin-top: 30px;
+  gap: 15px;
+  margin-top: 16px;
 }
 
 .auth-form label {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   color: #687d70;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 }
 
 .auth-form input {
   width: 100%;
-  height: 52px;
-  padding: 0 15px;
+  height: 48px;
+  padding: 0 16px;
   border: 1px solid #dbe4dc;
-  border-radius: 11px;
+  border-radius: 12px;
   outline: 0;
   background: #f8faf7;
   color: #183d2c;
   font: 15px 'DM Sans', sans-serif;
+  box-sizing: border-box;
 }
 
 html.dark .auth-form input {
@@ -88,15 +90,36 @@ html.dark .auth-form input {
   box-shadow: 0 0 0 3px #e3f2e5;
 }
 
+.auth-password-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-form .auth-password-label,
+.auth-password-label {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100%;
+  color: #687d70;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  margin: 0;
+}
+
 .auth-password-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .auth-password-toggle {
   position: absolute;
-  right: 12px;
+  right: 14px;
   background: transparent;
   border: 0;
   color: #687d70;
@@ -106,23 +129,34 @@ html.dark .auth-form input {
 }
 
 .auth-forgot {
-  align-self: flex-end;
-  margin-top: -7px;
-  color: #2c7556;
+  color: #1e6b51;
   font-size: 13px;
   font-weight: 700;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: normal;
+  transition: color 0.2s ease;
+  margin: 0;
+}
+
+html.dark .auth-forgot {
+  color: #34d399;
+}
+
+.auth-forgot:hover {
+  text-decoration: underline;
 }
 
 .auth-submit {
-  height: 54px;
-  margin-top: 2px;
+  height: 50px;
+  margin-top: 6px;
   border: 0;
-  border-radius: 11px;
+  border-radius: 12px;
   background: #1e6b51;
   color: #fff;
   cursor: pointer;
-  font: 700 15px 'DM Sans', sans-serif;
-  box-shadow: 0 12px 20px rgba(30, 107, 81, 0.19);
+  font: 700 15.5px 'DM Sans', sans-serif;
+  box-shadow: 0 10px 22px rgba(30, 107, 81, 0.2);
   transition: all 0.2s ease;
 }
 
@@ -132,10 +166,10 @@ html.dark .auth-form input {
 }
 
 .auth-switch {
-  margin: 23px 0 0;
+  margin: 18px 0 0;
   text-align: center;
   color: #738579;
-  font-size: 14px;
+  font-size: 14.5px;
 }
 
 .auth-switch a {

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './LandingPage.css'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -5,186 +6,497 @@ import Icon from '../components/Icon'
 import ScrollReveal from '../components/ScrollReveal'
 
 const features = [
-  ['users', 'Student Records', 'Store student details, documents, and emergency contacts safely.'],
-  ['fee', 'Fees and Payments', 'Track fees, send reminders, and manage payments easily.'],
-  ['note', 'Requests and Notices', 'Manage complaints, maintenance requests, and announcements in one place.'],
-  ['room', 'Rooms and Allocation', 'Assign rooms, check available beds, and manage room details.']
+  {
+    icon: 'user',
+    title: 'Student Records',
+    copy: 'Keep student details, contact information, room history, and documents in one place.',
+    badge: 'Core'
+  },
+  {
+    icon: 'fee',
+    title: 'Fee Management',
+    copy: 'Track hostel fees, send payment reminders, and generate digital receipts.',
+    badge: 'Finance'
+  },
+  {
+    icon: 'note',
+    title: 'Maintenance Requests',
+    copy: 'Students can report issues like plumbing, electricity, or Wi-Fi. Wardens can track and manage them easily.',
+    badge: 'Support'
+  },
+  {
+    icon: 'room',
+    title: 'Room Management',
+    copy: 'Assign rooms, check available beds, and manage room changes.',
+    badge: 'Operations'
+  },
+  {
+    icon: 'check',
+    title: 'Attendance & Outpass',
+    copy: 'Record attendance, approve leave requests, and track entry and exit.',
+    badge: 'Security'
+  },
+  {
+    icon: 'bell',
+    title: 'Notice Board',
+    copy: 'Share important notices, hostel rules, and updates with all students.',
+    badge: 'Updates'
+  }
 ]
-const roles = [
-  ['building', 'Administrator', 'Manage students, rooms, fees, and hostel activities from one place.'],
-  ['chart', 'Warden', 'Track attendance, room checks, visitors, and student requests.'],
-  ['check', 'Student', 'View room details, pay fees, submit requests, and receive notices.']
-]
+
+const roleData = {
+  admin: {
+    title: 'Administrator',
+    badge: 'User Roles',
+    copy: 'Manage hostel settings, fees, staff, students, and reports from one dashboard.',
+    highlights: ['View fee reports', 'Manage room allocation', 'Control staff access', 'Export data']
+  },
+  warden: {
+    title: 'Warden',
+    badge: 'User Roles',
+    copy: 'Real-time tools for daily room inspections, attendance tracking, gate passes approval, and resolving student complaints.',
+    highlights: ['Live Nightly Attendance Log', 'Maintenance Work Order Management', 'Outpass Approval Requests', 'Emergency Contact Quick Dial']
+  },
+  student: {
+    title: 'Student',
+    badge: 'User Roles',
+    copy: 'Empower students to check dues, pay fees digitally, log repair tickets, check food menus, and read official notices.',
+    highlights: ['Instant Fee Payment Receipts', 'Track Complaint Resolution Status', 'Digital Outpass Requests', 'Hostel Notice Feed']
+  }
+}
+
 const steps = [
-  ['login', 'Create Your Hostel', 'Add your hostel details, invite your team, and set user roles.'],
-  ['chart', 'Add Hostel Information', 'Add students, rooms, fees, and other important records.'],
-  ['check', 'Manage Every Day', 'Track fees, requests, and daily updates from one dashboard.']
+  {
+    step: '01',
+    icon: 'building',
+    title: 'Register Your Hostel',
+    copy: 'Add your hostel details, blocks, rooms, and fee information.'
+  },
+  {
+    step: '02',
+    icon: 'user',
+    title: 'Add Staff and Students',
+    copy: 'Upload student data or let students register online. Add wardens and staff.'
+  },
+  {
+    step: '03',
+    icon: 'attendance',
+    title: 'Manage Daily Work',
+    copy: 'Track fees, attendance, maintenance requests, and room allocation from one dashboard.'
+  }
+]
+
+const testimonials = [
+  {
+    stars: 5,
+    quote: "Smart Hostel made room management and fee collection much easier. It saves us a lot of time.",
+    author: "Bale Dileep",
+    role: "Hostel Warden",
+    initials: "BD"
+  },
+  {
+    stars: 5,
+    quote: "Now I can pay hostel fees and report problems from my phone without visiting the office.",
+    author: "Rishi Macha",
+    role: "Engineering Student",
+    initials: "RM"
+  },
+  {
+    stars: 5,
+    quote: "The dashboard helps us manage rooms, students, and maintenance requests very easily.",
+    author: "Sade Kavya",
+    role: "Hostel Director",
+    initials: "SK"
+  }
 ]
 
 export default function LandingPage() {
+  const [activeRole, setActiveRole] = useState('admin')
+  const [heroBoardTab, setHeroBoardTab] = useState('overview')
+  const [formSubmitted, setFormSubmitted] = useState(false)
+
+  const handleContactSubmit = (e) => {
+    e.preventDefault()
+    setFormSubmitted(true)
+    setTimeout(() => setFormSubmitted(false), 5000)
+  }
+
   return (
-    <main id="home" className="overflow-x-hidden">
+    <main id="home" className="landing-page-root">
       <Navbar />
-      
-      <section className="hero">
-        <div className="animate-fade-in-slide-up" style={{ animationFillMode: 'both' }}>
-          <p className="label coral animate-fade-in-slide-up" style={{ animationDelay: '100ms', animationFillMode: 'both' }}>A Better Way to Manage Your Hostel</p>
-          <h1 className="animate-fade-in-slide-up" style={{ animationDelay: '250ms', animationFillMode: 'both' }}>Simple hostel management<br />for <em>everyone</em></h1>
-          <p className="animate-fade-in-slide-up" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>Everything you need to manage rooms, students, fees, and requests in one place.</p>
-          <div className="hero-actions animate-fade-in-slide-up" style={{ animationDelay: '550ms', animationFillMode: 'both' }}>
-            <a className="button hover:-translate-y-1 hover:shadow-lg transition-all duration-300" href="#roles">Explore Smart Hostel <b>&rarr;</b></a>
-            <a href="#process" className="secondary hover:text-[#1e6b51] transition-colors duration-300">See How It Works</a>
-          </div>
-        </div>
-        <div className="hero-board animate-fade-in-slide-left" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
-          <div className="board-head"><span>Today's Hostel Updates</span><i className="animate-pulse">Live Overview</i></div>
-          <div className="board-numbers">
-            <article className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-sm"><small>Students</small><b>328</b><span>+12 this week</span></article>
-            <article className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-sm"><small>Available Rooms</small><b>16</b><span>Ready to assign</span></article>
-          </div>
-          <div className="board-list">
-            <p className="transition-colors duration-200"><b></b> Fee reminder sent <small>just now</small></p>
-            <p className="transition-colors duration-200"><b></b> Room 216 maintenance completed <small>12 min ago</small></p>
-            <p className="transition-colors duration-200"><b></b> 8 visitor requests waiting <small>24 min ago</small></p>
-          </div>
-        </div>
-      </section>
 
-      <section className="section feature-section" id="features">
-        <ScrollReveal animation="fade-up">
-          <header>
-            <p className="label violet">Features</p>
-            <h2>Everything You Need<br />in One Place</h2>
-            <p className="sub">Simple tools for administrators, wardens, and students.</p>
-          </header>
-        </ScrollReveal>
-        <div className="feature-grid">
-          {features.map(([icon, title, copy], i) => (
-            <ScrollReveal key={title} animation="fade-up" delay={i * 100}>
-              <article 
-                onClick={() => window.location.hash = '#login'}
-                className="group cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-[#1e6b51]/30"
-              >
-                <span className={'icon-box box-' + i + ' group-hover:scale-110 transition-transform duration-300'}><Icon name={icon} /></span>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-                <a href="#login" className="group-hover:translate-x-1 transition-transform duration-300" onClick={(e) => e.stopPropagation()}>Learn More <b>&rarr;</b></a>
-              </article>
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-container">
+          <div className="hero-content">
+            <ScrollReveal animation="fade-up" delay={100}>
+              <h1 className="hero-title">
+                Manage Your Hostel <span className="highlight-text">Easily</span>
+              </h1>
             </ScrollReveal>
-          ))}
-        </div>
-      </section>
 
-      <section className="section process" id="process">
-        <ScrollReveal animation="fade-up">
-          <header>
-            <p className="label violet">How It Works</p>
-            <h2>Get Started in<br />3 Easy Steps</h2>
-            <p className="sub">Set up your hostel and manage every day from one place.</p>
-          </header>
-        </ScrollReveal>
-        <div className="step-grid">
-          {steps.map(([icon, title, copy], i) => (
-            <ScrollReveal key={title} animation="fade-up" delay={i * 150}>
-              <article className="group transition-all duration-300 hover:scale-[1.03]">
-                <div className="step-number group-hover:scale-110 group-hover:bg-[#1e6b51] transition-transform duration-300">{i + 1}</div>
-                <span className="step-icon group-hover:rotate-6 transition-transform duration-300"><Icon name={icon} /></span>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-              </article>
+            <ScrollReveal animation="fade-up" delay={200}>
+              <p className="hero-subtitle">
+                Everything you need to manage rooms, students, fees, and maintenance in one simple system.
+              </p>
             </ScrollReveal>
-          ))}
-        </div>
-      </section>
 
-      <section className="section roles" id="roles">
-        <ScrollReveal animation="fade-up">
-          <header>
-            <p className="label pink">Dashboards</p>
-            <h2>A Dashboard for<br />Every User</h2>
-            <p className="sub">The right tools and information for every hostel role.</p>
-          </header>
-        </ScrollReveal>
-        <div className="role-grid">
-          {roles.map(([icon, title, copy], i) => (
-            <ScrollReveal key={title} animation="fade-up" delay={i * 100}>
-              <article className="group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-[#1e6b51]/30">
-                <span className={'role-icon role-' + i + ' group-hover:scale-110 group-hover:rotate-3 transition-all duration-300'}><Icon name={icon} /></span>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-                <a href="#login">View Dashboard <b>&rarr;</b></a>
-              </article>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
-      <section className="section stories">
-        <ScrollReveal animation="fade-up">
-          <header>
-            <p className="label coral">Testimonials</p>
-            <h2>Made for Everyday<br />Hostel Life</h2>
-          </header>
-        </ScrollReveal>
-        <div className="story-grid">
-          <ScrollReveal animation="fade-up" delay={0}>
-            <article className="group transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-[#1e6b51]/20">
-              <div className="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-              <p>&quot;I can check room status and pending work quickly. It saves a lot of time.&quot;</p>
-              <div className="person">
-                <b className="group-hover:bg-[#1e6b51] group-hover:text-white transition-colors duration-300">bd</b>
-                <span><strong>Bale Dileep</strong><small>Residence Warden</small></span>
+            <ScrollReveal animation="fade-up" delay={300}>
+              <div className="hero-actions">
+                <a className="btn-primary" href="#login">
+                  <span>Get Started</span>
+                  <Icon name="room" width={16} height={16} />
+                </a>
+                <a href="#features" className="btn-secondary">
+                  <span>Explore Features</span>
+                  <Icon name="search" width={16} height={16} />
+                </a>
               </div>
-            </article>
-          </ScrollReveal>
+            </ScrollReveal>
+
+            <ScrollReveal animation="fade-up" delay={400}>
+              <div className="hero-guarantees">
+                <span><Icon name="checkmark" width={16} height={16} /> Easy to Set Up</span>
+                <span><Icon name="checkmark" width={16} height={16} /> Secure Cloud Backup</span>
+                <span><Icon name="checkmark" width={16} height={16} /> 24/7 Support</span>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          <div className="hero-board-wrapper">
+            <ScrollReveal animation="slide-left" delay={200}>
+              <div className="hero-board-card">
+                <div className="board-top-bar">
+                  <div className="board-tabs">
+                    <button 
+                      className={`board-tab-btn ${heroBoardTab === 'overview' ? 'active' : ''}`}
+                      onClick={() => setHeroBoardTab('overview')}
+                    >
+                      Live Dashboard
+                    </button>
+                    <button 
+                      className={`board-tab-btn ${heroBoardTab === 'activity' ? 'active' : ''}`}
+                      onClick={() => setHeroBoardTab('activity')}
+                    >
+                      Recent Updates
+                    </button>
+                  </div>
+                  <span className="live-status-pill">
+                    <span className="pulse-dot"></span> Live Dashboard
+                  </span>
+                </div>
+
+                {heroBoardTab === 'overview' ? (
+                  <div className="board-content-overview">
+                    <div className="board-stats-row">
+                      <article className="stat-box emerald">
+                        <small>Total Students</small>
+                        <b>328</b>
+                        <span className="stat-trend">+12 this week</span>
+                      </article>
+                      <article className="stat-box amber">
+                        <small>Available Beds</small>
+                        <b>16</b>
+                        <span className="stat-sub">Ready to assign</span>
+                      </article>
+                    </div>
+
+                    <div className="board-progress-section">
+                      <div className="progress-info">
+                        <span>Fee Collection</span>
+                        <strong>94.2%</strong>
+                      </div>
+                      <div className="progress-bar-bg">
+                        <div className="progress-bar-fill" style={{ width: '94.2%' }}></div>
+                      </div>
+                    </div>
+
+                    <div className="board-feed">
+                      <div className="feed-item">
+                        <span className="feed-dot active"></span>
+                        <div className="feed-text">
+                          <p><strong>Room 204</strong> fee payment received</p>
+                          <small>2 minutes ago</small>
+                        </div>
+                      </div>
+                      <div className="feed-item">
+                        <span className="feed-dot pending"></span>
+                        <div className="feed-text">
+                          <p><strong>Block B AC</strong> maintenance request received</p>
+                          <small>15 minutes ago</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="board-content-activity">
+                    <div className="activity-list">
+                      <div className="activity-card">
+                        <span className="activity-icon"><Icon name="fee" width={18} height={18} /></span>
+                        <div>
+                          <p>Room 204 fee payment received &ndash; 2 minutes ago</p>
+                          <small>Just now &bull; Automated System</small>
+                        </div>
+                      </div>
+                      <div className="activity-card">
+                        <span className="activity-icon"><Icon name="room" width={18} height={18} /></span>
+                        <div>
+                          <p>Block B AC maintenance request received &ndash; 15 minutes ago</p>
+                          <small>15 minutes ago &bull; Warden Dileep</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="section-wrapper" id="features">
+        <ScrollReveal animation="fade-up">
+          <div className="section-header text-center">
+            <span className="section-eyebrow">Features</span>
+            <h2 className="section-title">Everything You Need</h2>
+            <p className="section-subtitle">Simple tools to help hostel admins, wardens, and students manage daily hostel work.</p>
+          </div>
+        </ScrollReveal>
+
+        <div className="features-grid">
+          {features.map((item, i) => (
+            <ScrollReveal key={item.title} animation="fade-up" delay={i * 80}>
+              <div className="feature-card group">
+                <div className="feature-top">
+                  <div className="feature-icon-wrapper">
+                    <Icon name={item.icon} width={24} height={24} />
+                  </div>
+                  <span className="feature-category-badge">{item.badge}</span>
+                </div>
+                <h3 className="feature-title">{item.title}</h3>
+                <p className="feature-copy">{item.copy}</p>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Interactive Role Dashboards Section */}
+      <section className="section-wrapper roles-section" id="roles">
+        <ScrollReveal animation="fade-up">
+          <div className="section-header text-center">
+            <span className="section-eyebrow">User Roles</span>
+            <h2 className="section-title">Made for Everyone</h2>
+            <p className="section-subtitle">Different dashboards for administrators, wardens, and students.</p>
+          </div>
+        </ScrollReveal>
+
+        <div className="role-switcher-container">
           <ScrollReveal animation="fade-up" delay={100}>
-            <article className="group transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-[#1e6b51]/20">
-              <div className="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-              <p>&quot;Paying fees and checking notices is now simple and easy.&quot;</p>
-              <div className="person">
-                <b className="group-hover:bg-[#1e6b51] group-hover:text-white transition-colors duration-300">rm</b>
-                <span><strong>Rishi Macha</strong><small>Student</small></span>
-              </div>
-            </article>
+            <div className="role-tabs-header">
+              <button 
+                className={`role-tab-btn ${activeRole === 'admin' ? 'active' : ''}`}
+                onClick={() => setActiveRole('admin')}
+              >
+                <Icon name="building" width={18} height={18} /> Administrator
+              </button>
+              <button 
+                className={`role-tab-btn ${activeRole === 'warden' ? 'active' : ''}`}
+                onClick={() => setActiveRole('warden')}
+              >
+                <Icon name="users" width={18} height={18} /> Warden
+              </button>
+              <button 
+                className={`role-tab-btn ${activeRole === 'student' ? 'active' : ''}`}
+                onClick={() => setActiveRole('student')}
+              >
+                <Icon name="user" width={18} height={18} /> Student
+              </button>
+            </div>
           </ScrollReveal>
-          <ScrollReveal animation="fade-up" delay={200}>
-            <article className="group transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-[#1e6b51]/20">
-              <div className="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-              <p>&quot;Everything is in one place, so managing the hostel is much easier.&quot;</p>
-              <div className="person">
-                <b className="group-hover:bg-[#1e6b51] group-hover:text-white transition-colors duration-300">sk</b>
-                <span><strong>Sade Kavya</strong><small>Hostel Administrator</small></span>
+
+          <ScrollReveal animation="scale-up" delay={200}>
+            <div className="role-display-card">
+              <div className="role-card-left">
+                <span className="role-badge">{roleData[activeRole].badge}</span>
+                <h3>{roleData[activeRole].title}</h3>
+                <p>{roleData[activeRole].copy}</p>
+                <ul className="role-highlights-list">
+                  {roleData[activeRole].highlights.map((h, idx) => (
+                    <li key={idx}><Icon name="checkmark" width={16} height={16} /> {h}</li>
+                  ))}
+                </ul>
+                <a href="#login" className="btn-role-action">
+                  <span>Open {roleData[activeRole].title} Dashboard</span>
+                  <Icon name="user" width={16} height={16} />
+                </a>
               </div>
-            </article>
+              <div className="role-card-right">
+                <div className="role-mock-window">
+                  <div className="window-dots">
+                    <span className="dot red"></span>
+                    <span className="dot yellow"></span>
+                    <span className="dot green"></span>
+                    <span className="window-title">{roleData[activeRole].title} Preview</span>
+                  </div>
+                  <div className="window-content">
+                    <div className="mock-stat-grid">
+                      <div className="mock-box">
+                        <small>Success Rate</small>
+                        <b>99.4%</b>
+                      </div>
+                      <div className="mock-box">
+                        <small>Pending Tasks</small>
+                        <b>3</b>
+                      </div>
+                    </div>
+                    <div className="mock-list-item">
+                      <span className="mock-avatar"></span>
+                      <div>
+                        <strong>System Status</strong>
+                        <small>All data is up to date.</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </ScrollReveal>
         </div>
       </section>
 
-      <ScrollReveal animation="scale-up" className="w-full">
-        <section className="final animate-float">
-          <p className="label coral">Built for Every Hostel</p>
-          <h2>Make hostel management<br />simple, fast, and organized.</h2>
-          <a className="button light hover:-translate-y-1 hover:shadow-md transition-all duration-300" href="#signup">Get Started Today <b>&rarr;</b></a>
-        </section>
-      </ScrollReveal>
-
-      <section className="contact-section" id="contact">
-        <ScrollReveal animation="slide-right">
-          <div className="contact-intro">
-            <p className="label coral">Contact Us</p>
-            <h2>Let&apos;s talk about<br />your hostel.</h2>
-            <p>Tell us a little about your hostel and how we can help. Our team will get back to you soon.</p>
-            <a href="mailto:rishi@snhoor.com" className="hover:text-[#1e6b51] transition-colors">rishi@snhoor.com</a>
-            <a href="mailto:dileep@shnoor.com" className="hover:text-[#1e6b51] transition-colors">dileep@shnoor.com</a>
+      {/* Process Section */}
+      <section className="section-wrapper process-section" id="process">
+        <ScrollReveal animation="fade-up">
+          <div className="section-header text-center">
+            <span className="section-eyebrow">How It Works</span>
+            <h2 className="section-title">Start in 3 Simple Steps</h2>
+            <p className="section-subtitle">No long onboarding calls or complex hardware installation required.</p>
           </div>
         </ScrollReveal>
-        <ScrollReveal animation="slide-left">
-          <form className="contact-form" onSubmit={(event) => event.preventDefault()}>
-            <label>Name<input type="text" placeholder="Enter your name" className="focus:scale-[1.01] transition-all duration-300" required /></label>
-            <label>Feedback<textarea placeholder="Write your feedback" className="focus:scale-[1.01] transition-all duration-300" required></textarea></label>
-            <button className="button hover:-translate-y-1 hover:shadow-lg transition-all duration-300" type="submit">Submit <b>&rarr;</b></button>
-          </form>
+
+        <div className="steps-grid">
+          {steps.map((st, i) => (
+            <ScrollReveal key={st.step} animation="fade-up" delay={i * 120}>
+              <div className="step-card">
+                <div className="step-badge">{st.step}</div>
+                <div className="step-icon-box">
+                  <Icon name={st.icon} width={26} height={26} />
+                </div>
+                <h3>{st.title}</h3>
+                <p>{st.copy}</p>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="section-wrapper stories-section">
+        <ScrollReveal animation="fade-up">
+          <div className="section-header text-center">
+            <span className="section-eyebrow">Reviews</span>
+            <h2 className="section-title">What Our Users Say</h2>
+            <p className="section-subtitle">See why wardens and students love using Smart Hostel every day.</p>
+          </div>
         </ScrollReveal>
+
+        <div className="testimonials-grid">
+          {testimonials.map((t, i) => (
+            <ScrollReveal key={t.author} animation="fade-up" delay={i * 100}>
+              <div className="testimonial-card">
+                <div className="stars-row">
+                  {'★'.repeat(t.stars)}
+                </div>
+                <p className="quote-text">&ldquo;{t.quote}&rdquo;</p>
+                <div className="author-info">
+                  <div className="author-avatar">{t.initials}</div>
+                  <div>
+                    <strong className="author-name">{t.author}</strong>
+                    <small className="author-role">{t.role}</small>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA Banner */}
+      <section className="final-cta-section">
+        <div className="final-cta-container">
+          <ScrollReveal animation="scale-up">
+            <div className="final-cta-card">
+              <span className="cta-eyebrow">Call to Action</span>
+              <h2>Manage Your Hostel Smarter</h2>
+              <p>Make hostel management simple and organized.</p>
+              <div className="cta-buttons">
+                <a className="btn-cta-white" href="#signup">
+                  Create Free Account &rarr;
+                </a>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="contact-section" id="contact">
+        <div className="contact-container">
+          <ScrollReveal animation="slide-right">
+            <div className="contact-info-side">
+              <span className="section-eyebrow">Contact Us</span>
+              <h2>We&apos;re Here to Help</h2>
+              <p>Have questions about the system or pricing? Contact our team anytime.</p>
+
+              <div className="contact-cards-list">
+                <div className="contact-item-card">
+                  <span className="contact-icon"><Icon name="building" width={20} height={20} /></span>
+                  <div>
+                    <strong>Email Support</strong>
+                    <a href="mailto:rishi@shnoor.com">rishi@shnoor.com</a> &bull; <a href="mailto:dileep@shnoor.com">dileep@shnoor.com</a>
+                  </div>
+                </div>
+                <div className="contact-item-card">
+                  <span className="contact-icon"><Icon name="user" width={20} height={20} /></span>
+                  <div>
+                    <strong>Support Hours</strong>
+                    <p>Monday to Saturday &bull; 9:00 AM &ndash; 7:00 PM</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal animation="slide-left">
+            <div className="contact-form-side">
+              <form className="contact-form" onSubmit={handleContactSubmit}>
+                <h3>Send Us a Message</h3>
+                {formSubmitted && (
+                  <div className="form-success-alert">
+                    ✓ Thank you! Your message has been sent successfully.
+                  </div>
+                )}
+                <div className="form-group">
+                  <label htmlFor="contact-name">Your Name</label>
+                  <input id="contact-name" type="text" placeholder="Enter your name" required />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="contact-email">Email Address</label>
+                  <input id="contact-email" type="email" placeholder="Enter your email address" required />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="contact-message">Message</label>
+                  <textarea id="contact-message" rows={4} placeholder="Enter your message..." required></textarea>
+                </div>
+                <button type="submit" className="btn-submit-contact">
+                  Send Message &rarr;
+                </button>
+              </form>
+            </div>
+          </ScrollReveal>
+        </div>
       </section>
 
       <Footer />

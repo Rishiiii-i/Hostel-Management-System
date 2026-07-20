@@ -1,8 +1,7 @@
-/* Google sign in button styles */
 .auth-divider {
   display: flex;
   align-items: center;
-  margin: 22px 0 18px;
+  margin: 18px 0 14px;
   text-align: center;
 }
 
@@ -32,10 +31,10 @@ html.dark .auth-divider::after {
   justify-content: center;
   gap: 12px;
   width: 100%;
-  height: 52px;
+  height: 50px;
   padding: 0 20px;
   border: 1px solid #dce5dd;
-  border-radius: 11px;
+  border-radius: 12px;
   background: #ffffff;
   color: #1c3628;
   font: 600 15px 'DM Sans', sans-serif;

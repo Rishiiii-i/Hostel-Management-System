@@ -53,10 +53,8 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
   const handleLogout = async () => {
     try {
       await logOut()
-      window.location.href = '#home'
     } catch (err) {
       console.error('Logout failed:', err)
-      window.location.href = '#home'
     }
   }
 

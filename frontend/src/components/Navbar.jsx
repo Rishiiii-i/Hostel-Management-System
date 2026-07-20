@@ -6,6 +6,7 @@ import ThemeToggle from './ThemeToggle'
 
 export default function Navbar() {
   const [activeHash, setActiveHash] = useState(() => window.location.hash || '#home')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user, logOut } = useAuth()
 
   useEffect(() => {
@@ -16,39 +17,81 @@ export default function Navbar() {
     return () => window.removeEventListener('hashchange', handleHash)
   }, [])
 
+  const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev)
+
   return (
-    <nav className="nav">
-      <a className="brand" href="#home">
-        <span>
-          <Icon name="building" />
-        </span>
-        {' '}Smart Hostel
-      </a>
+    <header className="nav-header">
+      <nav className="nav-container">
+        <a className="brand" href="#home">
+          <span className="brand-icon-wrapper">
+            <Icon name="building" width={22} height={22} />
+          </span>
+          <span className="brand-text">Smart<span className="brand-highlight">Hostel</span></span>
+        </a>
 
-      <div className="nav-links">
-        <a className={`nav-link-item ${activeHash === '#home' ? 'active' : ''}`} href="#home">Home</a>
-        <a className={`nav-link-item ${activeHash === '#features' ? 'active' : ''}`} href="#features">Features</a>
-        <a className={`nav-link-item ${activeHash === '#contact' ? 'active' : ''}`} href="#contact">Contacts</a>
-        {user && <a className={`nav-link-item ${activeHash === '#dashboard' ? 'active' : ''}`} href="#dashboard">Dashboard</a>}
-      </div>
+        <div className={`nav-right-actions ${mobileMenuOpen ? 'open' : ''}`}>
+          <ThemeToggle />
 
-      <div className="nav-right-actions">
-        <ThemeToggle />
-
-        {user ? (
-          <button 
-            type="button"
-            onClick={logOut} 
-            className="login"
+          <a 
+            className={`nav-link-item ${activeHash === '#home' || activeHash === '' ? 'active' : ''}`} 
+            href="#home"
+            onClick={() => setMobileMenuOpen(false)}
           >
-            Logout <span className="login-arrow">→</span>
-          </button>
-        ) : (
-          <a className="login" href="#login">
-            Sign In <span className="login-arrow">→</span>
+            Home
           </a>
-        )}
-      </div>
-    </nav>
+          <a 
+            className={`nav-link-item ${activeHash === '#features' ? 'active' : ''}`} 
+            href="#features"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Features
+          </a>
+          <a 
+            className={`nav-link-item ${activeHash === '#contact' ? 'active' : ''}`} 
+            href="#contact"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Contacts
+          </a>
+          {user && (
+            <a 
+              className={`nav-link-item ${activeHash === '#dashboard' || activeHash === '#student-dashboard' ? 'active' : ''}`} 
+              href="#dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Dashboard
+            </a>
+          )}
+
+          {user ? (
+            <button 
+              type="button"
+              onClick={logOut} 
+              className="nav-link-login"
+            >
+              Logout <span className="arrow">→</span>
+            </button>
+          ) : (
+            <a className="nav-link-login" href="#login">
+              <span>Sign In</span>
+              <span className="arrow">→</span>
+            </a>
+          )}
+
+          <button 
+            type="button" 
+            className="mobile-hamburger"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle Navigation Menu"
+          >
+            <span className={`bar ${mobileMenuOpen ? 'open' : ''}`}></span>
+            <span className={`bar ${mobileMenuOpen ? 'open' : ''}`}></span>
+            <span className={`bar ${mobileMenuOpen ? 'open' : ''}`}></span>
+          </button>
+        </div>
+      </nav>
+    </header>
   )
 }
+
+
