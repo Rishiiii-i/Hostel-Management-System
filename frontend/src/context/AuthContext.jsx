@@ -110,6 +110,7 @@ export const AuthProvider = ({ children }) => {
       // Sync user profile to backend MongoDB
       const syncedUser = await syncUserWithBackend(userCredential.user, name);
       setFirebaseUser(userCredential.user);
+      setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
       setLoading(false);
@@ -123,6 +124,7 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const syncedUser = await syncUserWithBackend(userCredential.user);
       setFirebaseUser(userCredential.user);
+      setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
       setLoading(false);
@@ -138,6 +140,7 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await signInWithPopup(auth, provider);
       const syncedUser = await syncUserWithBackend(userCredential.user);
       setFirebaseUser(userCredential.user);
+      setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
       setLoading(false);
