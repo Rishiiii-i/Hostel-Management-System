@@ -34,14 +34,6 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  firebaseUid: {
-    type: String,
-    unique: true,
-    sparse: true
-  },
-  photoURL: {
-    type: String
-  },
   rollNo: {
     type: String
   },
