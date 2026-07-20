@@ -28,8 +28,8 @@ export default function Login({ mode = 'login' }) {
     const url = window.location.href
     let code = ''
     if (url.includes('oobCode=')) {
-      const match = url.match(/oobCode=([^&]+)/)
-      if (match) code = match[1]
+      const match = url.match(/oobCode=([^&#]+)/)
+      if (match) code = decodeURIComponent(match[1])
     }
     if (code && verifyResetCode) {
       setOobCode(code)

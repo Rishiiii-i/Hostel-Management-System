@@ -162,7 +162,6 @@ export const AuthProvider = ({ children }) => {
   const sendPasswordReset = async (email) => {
     const actionCodeSettings = {
       url: `${window.location.origin}/#reset-password`,
-      handleCodeInApp: true,
     };
     await sendPasswordResetEmail(auth, email, actionCodeSettings);
   };
@@ -216,4 +215,5 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
 export default AuthContext;
