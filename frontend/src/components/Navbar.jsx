@@ -1,3 +1,4 @@
+import './Navbar.css'
 import { useState, useEffect } from 'react'
 import Icon from './Icon'
 import { useAuth } from '../context/AuthContext'
