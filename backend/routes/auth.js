@@ -7,7 +7,7 @@ import { authenticateToken } from '../middleware/auth.js';
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'smart-hostel-secret-key-12345';
 
-// Helper to determine role from email
+// helper to determine role from email
 function getRole(email) {
   const value = email.toLowerCase();
   if (value.includes('admin')) return 'administrator';
@@ -15,7 +15,7 @@ function getRole(email) {
   return 'student';
 }
 
-// Sync Firebase Auth details to MongoDB User Schema
+// sync firebase auth details to mongodb user schema
 router.post('/sync', async (req, res) => {
   try {
     const { uid, name, email, role, password, rollNo } = req.body;
@@ -24,11 +24,11 @@ router.post('/sync', async (req, res) => {
       return res.status(400).json({ message: 'Email is required to sync' });
     }
 
-    // Find user strictly by email
+    // find user strictly by email
     let user = await User.findOne({ email: email.toLowerCase() });
 
     if (user) {
-      // User exists, update password and rollNo if provided
+      // user exists update password and rollno if provided
       let updated = false;
       if (password && user.password !== password) {
         user.password = password;
@@ -42,14 +42,14 @@ router.post('/sync', async (req, res) => {
         await user.save();
       }
     } else {
-      // User doesn't exist, create a new record in MongoDB (without firebaseUid/photoURL)
+      // user doesn't exist create a new record in mongodb (without firebaseuid/photourl)
       user = new User({
         id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
         name: name || email.split('@')[0],
         email: email.toLowerCase(),
         role: role || getRole(email),
-        password: password || '', // Save plaintext password directly
-        rollNo: rollNo || '',      // Save rollNo directly
+        password: password || '', // save plaintext password directly
+        rollNo: rollNo || '',      // save rollno directly
         createdAt: new Date()
       });
       await user.save();
@@ -66,7 +66,7 @@ router.post('/sync', async (req, res) => {
   }
 });
 
-// Signup route
+// signup route
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -80,14 +80,14 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
 
-    // Hash the password
+    // hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Determine role
+    // determine role
     const role = getRole(email);
 
-    // Create user
+    // create user
     const newUser = {
       id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
       name,
@@ -99,14 +99,14 @@ router.post('/signup', async (req, res) => {
 
     await createUser(newUser);
 
-    // Generate token
+    // generate token
     const token = jwt.sign(
       { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // Return token and user details (omitting password)
+    // return token and user details (omitting password)
     const { password: _, ...userWithoutPassword } = newUser;
     res.status(201).json({
       message: 'User registered successfully',
@@ -119,7 +119,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// Login route
+// login route
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -133,13 +133,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Verify password
+    // verify password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Generate token
+    // generate token
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role },
       JWT_SECRET,
@@ -158,7 +158,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Forgot password route
+// forgot password route
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -172,7 +172,7 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(404).json({ message: 'User with this email was not found' });
     }
 
-    // Mock sending reset link
+    // mock sending reset link
     res.status(200).json({
       message: 'Password reset instructions have been sent to your email.'
     });
@@ -182,7 +182,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-// Get current user profile route
+// get current user profile route
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const user = await findUserByEmail(req.user.email);

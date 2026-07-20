@@ -1,3 +1,4 @@
+import './Footer.css'
 import Icon from './Icon'
 
 export default function Footer() {

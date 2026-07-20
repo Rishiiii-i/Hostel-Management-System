@@ -1,0 +1,29 @@
+/* Theme toggle button styles */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f0f7f2;
+  border: 1px solid #d4e5d8;
+  color: #1e6b51;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+html.dark .theme-toggle-btn {
+  background: #1c3327;
+  border-color: #2a4738;
+  color: #38b387;
+}
+
+.theme-toggle-btn:hover {
+  background: #e1f0e4;
+  transform: translateY(-1px);
+}
+
+html.dark .theme-toggle-btn:hover {
+  background: #254234;
+}

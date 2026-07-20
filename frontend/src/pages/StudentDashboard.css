@@ -1,0 +1,130 @@
+/* Student Dashboard styles */
+.student-dashboard {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #1e6b51 0%, #154c39 100%);
+  color: #ffffff;
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 14px 36px rgba(30, 107, 81, 0.2);
+}
+
+.welcome-card h2 {
+  font: 800 28px 'Manrope', sans-serif;
+  margin: 0 0 8px;
+}
+
+.welcome-card p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 15px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.kpi-card {
+  background: #ffffff;
+  border: 1px solid #dce7dd;
+  border-radius: 16px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+html.dark .kpi-card {
+  background: #14241c;
+  border-color: #253e30;
+}
+
+.kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #eef6f0;
+  color: #1e6b51;
+  display: grid;
+  place-items: center;
+}
+
+.kpi-info h4 {
+  margin: 0;
+  font-size: 13px;
+  color: #6a8274;
+}
+
+.kpi-info b {
+  font: 800 24px 'Manrope', sans-serif;
+  color: #143528;
+}
+
+html.dark .kpi-info b {
+  color: #e2f0e6;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.action-card {
+  background: #ffffff;
+  border: 1px solid #dce7dd;
+  border-radius: 16px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+html.dark .action-card {
+  background: #14241c;
+  border-color: #253e30;
+}
+
+.action-card:hover {
+  transform: translateY(-2px);
+  border-color: #1e6b51;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 15, 0.6);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.modal-box {
+  background: #ffffff;
+  border-radius: 20px;
+  width: min(500px, 100%);
+  padding: 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .modal-box {
+  background: #14241c;
+  color: #e2f0e6;
+}
+
+@media (max-width: 900px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,14 +4,14 @@ import authRoutes from './routes/auth.js';
 
 const app = express();
 
-// Middlewares
+// middlewares
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// routes
 app.use('/api/auth', authRoutes);
 
-// Health check endpoint
+// health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Smart Hostel backend server is running' });
 });

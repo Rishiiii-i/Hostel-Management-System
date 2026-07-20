@@ -1,3 +1,4 @@
+import './Login.css'
 import { useState } from 'react'
 import GoogleSignInButton from '../components/GoogleSignInButton'
 import { useAuth } from '../context/AuthContext'
@@ -83,16 +84,15 @@ export default function Login({ mode = 'login' }) {
         await logInWithEmail(email, password)
       }
     } catch (err) {
+      console.error('Auth error:', err?.code, err?.message)
       if (err.code === 'auth/operation-not-allowed') {
         setError('Email & Password sign-in is currently disabled in your Firebase console. Please go to Authentication -> Sign-in method in your Firebase console and enable Email/Password.')
       } else if (err.code === 'auth/email-already-in-use') {
         setError('This email address is already in use by another account.')
       } else if (err.code === 'auth/weak-password') {
         setError('Password should be at least 6 characters long.')
-      } else if (err.code === 'auth/invalid-credential') {
-        setError('Invalid email address or password.')
-      } else if (err.code === 'auth/user-not-found') {
-        setError('No account found with this email.')
+      } else if (!isSignup) {
+        setError('Wrong password. Please check your password and try again.')
       } else {
         setError(err.message || 'Authentication failed')
       }
@@ -118,6 +118,8 @@ export default function Login({ mode = 'login' }) {
       setLoading(false)
     }
   }
+
+
 
   if (isForgot) {
     return <div className="auth-card auth-card--forgot">
@@ -229,6 +231,21 @@ export default function Login({ mode = 'login' }) {
           </button>
         </div>
       </div>
+      {error && (
+        <div className="auth-error-message" style={{ 
+          color: '#dc2626', 
+          backgroundColor: '#fee2e2', 
+          border: '1px solid #fca5a5', 
+          padding: '10px 14px', 
+          borderRadius: '8px', 
+          marginBottom: '16px', 
+          fontSize: '0.875rem', 
+          fontWeight: '500', 
+          textAlign: 'center'
+        }}>
+          {error}
+        </div>
+      )}
       <button className="auth-submit" type="submit" disabled={loading}>
         {loading ? (isSignup ? 'Signing up...' : 'Signing in...') : (isSignup ? 'Sign up' : 'Sign in')}
       </button>

@@ -1,14 +1,15 @@
+import './Sidebar.css'
 import Icon from './Icon'
-import homeIcon from '../assets/icons/home.png'
+import { useAuth } from '../context/AuthContext'
 import roomIcon from '../assets/icons/room.png'
 import feeIcon from '../assets/icons/fee.png'
 import complaintIcon from '../assets/icons/complaint.png'
 import attendanceIcon from '../assets/icons/attendance.png'
 import bellIcon from '../assets/icons/bell.png'
+import homeIcon from '../assets/icons/home.png'
 import settingsIcon from '../assets/icons/settings.png'
-import { useAuth } from '../context/AuthContext'
 
-export default function Sidebar({ activeTab, setActiveTab, profile }) {
+export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
   const { user, logOut } = useAuth()
 
   const navItems = [
@@ -20,7 +21,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
     {
       id: 'room',
       label: 'My Room',
-      icon: <img src={roomIcon} alt="My Room" width="18" height="18" />
+      icon: <img src={roomIcon} alt="Room" width="18" height="18" />
     },
     {
       id: 'fees',
@@ -34,7 +35,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
     },
     {
       id: 'gatepass',
-      label: 'Gate Pass & Attendance',
+      label: 'Gate Pass',
       icon: <img src={attendanceIcon} alt="Attendance" width="18" height="18" />
     },
     {
@@ -44,14 +45,17 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
     },
     {
       id: 'settings',
-      label: 'Settings',
+      label: 'Profile',
       icon: <img src={settingsIcon} alt="Settings" width="18" height="18" />
     }
   ]
 
   const handleLogout = async () => {
-    if (window.confirm("Are you sure you want to log out?")) {
+    try {
       await logOut()
+      window.location.href = '#home'
+    } catch (err) {
+      console.error('Logout failed:', err)
       window.location.href = '#home'
     }
   }
@@ -59,17 +63,17 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
   return (
     <aside className="dashboard-sidebar">
       <div className="sidebar-brand">
-        <a className="brand" href="#home">
+        <button 
+          type="button" 
+          className="brand" 
+          onClick={() => setActiveTab('overview')}
+          style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+        >
           <span>
             <Icon name="building" />
           </span>
           Smart Hostel
-        </a>
-      </div>
-
-      <div className="portal-badge" style={{ textTransform: 'capitalize' }}>
-        <span className="portal-dot"></span>
-        {user?.role || 'Student'} Portal
+        </button>
       </div>
 
       <nav className="sidebar-nav">
@@ -87,26 +91,28 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="user-profile">
-          <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <Icon name="user" width="20" height="20" />
-            )}
+        <div className="user-profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', minWidth: 0, flex: 1 }}>
+            <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'grid', placeItems: 'center', background: '#1e6b51', color: '#ffffff', flexShrink: 0 }}>
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <Icon name="user" width="20" height="20" />
+              )}
+            </div>
+            <div className="user-info" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+              <span className="user-name" style={{ fontWeight: 600, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.fullName || user?.name || 'Rishi Macha'}</span>
+              <span className="user-role" style={{ fontSize: '0.75rem', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.room || 'Room 204'} &bull; {profile.block || 'Block A'}</span>
+            </div>
           </div>
-          <div className="user-info">
-            <span className="user-name">{profile.fullName}</span>
-            <span className="user-role">{profile.room} &bull; {profile.block}</span>
-            <button 
-              type="button" 
-              className="user-logout-link" 
-              onClick={handleLogout}
-            >
-              <Icon name="logout" width="13" height="13" />
-              <span>Log Out</span>
-            </button>
-          </div>
+          <button 
+            type="button" 
+            className="sidebar-logout-icon-btn" 
+            onClick={handleLogout}
+            title="Log Out"
+          >
+            <Icon name="logout" width="16" height="16" />
+          </button>
         </div>
       </div>
     </aside>

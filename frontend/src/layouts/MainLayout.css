@@ -1,0 +1,250 @@
+/* Main layout styles */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f6faf7;
+  font-family: 'DM Sans', sans-serif;
+  color: #1a3328;
+}
+
+html.dark .dashboard-container {
+  background-color: #0d1712;
+  color: #e2f0e6;
+}
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dashboard-header {
+  height: 80px;
+  padding: 0 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #dce7dd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+html.dark .dashboard-header {
+  background: #12211a;
+  border-bottom-color: #233e30;
+}
+
+.header-title-flex {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #1e6b51;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(30, 107, 81, 0.15);
+  color: #ffffff;
+}
+
+.header-left h2 {
+  margin: 0;
+  font: 800 22px 'Manrope', sans-serif;
+  color: #143528;
+}
+
+html.dark .header-left h2 {
+  color: #e2f0e6;
+}
+
+.header-date {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #6a8274;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.header-search img,
+.header-search svg {
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+}
+
+.header-search input {
+  height: 42px;
+  padding: 0 16px 0 38px;
+  border-radius: 10px;
+  border: 1px solid #d6e3d7;
+  background: #f7faf7;
+  font: 14px 'DM Sans', sans-serif;
+  color: #143528;
+  outline: none;
+}
+
+html.dark .header-search input {
+  background: #1a2d24;
+  border-color: #294537;
+  color: #e2f0e6;
+}
+
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f0f7f2;
+  border: 1px solid #d4e5d8;
+  color: #1e6b51;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+html.dark .notification-btn {
+  background: #1c3327;
+  border-color: #2a4738;
+  color: #38b387;
+}
+
+.notification-btn .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.notification-dropdown {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #dce7dd;
+  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(24, 64, 45, 0.12);
+  padding: 16px;
+  z-index: 100;
+}
+
+html.dark .notification-dropdown {
+  background: #16261f;
+  border-color: #264032;
+}
+
+.user-profile-header-card,
+.user-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: #f0f7f2;
+  border: 1px solid #d4e5d8;
+}
+
+html.dark .user-profile-header-card,
+html.dark .user-profile-card {
+  background: #1c3327;
+  border-color: #2a4738;
+}
+
+.header-avatar-circle,
+.user-profile-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #1e6b51;
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-profile-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.user-profile-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #143528;
+  display: block;
+  line-height: 1.2;
+}
+
+html.dark .user-profile-name {
+  color: #e2f0e6;
+}
+
+.user-profile-role {
+  font-size: 11px;
+  color: #64748b;
+  display: block;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+html.dark .user-profile-role {
+  color: #a3b8aa;
+}
+
+.header-logout-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #dc2626;
+  border: 1px solid #b91c1c;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.header-logout-pill-btn img {
+  filter: brightness(0) invert(1);
+}
+
+.header-logout-pill-btn:hover {
+  background: #991b1b;
+  border-color: #7f1d1d;
+}

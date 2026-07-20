@@ -1,3 +1,4 @@
+import './StudentDashboard.css'
 import { useState } from 'react'
 import roomIcon from '../assets/icons/room.png'
 import feeIcon from '../assets/icons/fee.png'
@@ -78,7 +79,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
 
   return (
     <div className="student-dashboard">
-      {/* Home / Overview Tab */}
+      {/*
+
+home / overview tab
+
+ */}
       {activeTab === 'overview' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="welcome-banner">
@@ -182,7 +187,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* My Room Tab */}
+      {/*
+
+my room tab
+
+ */}
       {activeTab === 'room' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -210,7 +219,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* Fees & Payments Tab */}
+      {/*
+
+fees & payments tab
+
+ */}
       {activeTab === 'fees' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -263,7 +276,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* Complaints Tab */}
+      {/*
+
+complaints tab
+
+ */}
       {activeTab === 'complaints' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -319,7 +336,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* Gate Pass & Attendance Tab */}
+      {/*
+
+gate pass & attendance tab
+
+ */}
       {activeTab === 'gatepass' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -379,7 +400,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* Notices Tab */}
+      {/*
+
+notices tab
+
+ */}
       {activeTab === 'notices' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -401,7 +426,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* Settings / Profile Tab */}
+      {/*
+
+settings / profile tab
+
+ */}
       {activeTab === 'settings' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -512,7 +541,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* Fee Payment Modal */}
+      {/*
+
+fee payment modal
+
+ */}
       {showPayModal && (
         <div className="modal-backdrop modal-pay-fee animate-fade-in">
           <div className="modal-box animate-scale-in">
@@ -538,7 +571,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* Report a Problem Modal */}
+      {/*
+
+report a problem modal
+
+ */}
       {showComplaintModal && (
         <div className="modal-backdrop modal-report-problem animate-fade-in">
           <div className="modal-box animate-scale-in">
@@ -590,7 +627,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* Gate Pass Modal */}
+      {/*
+
+gate pass modal
+
+ */}
       {showGatePassModal && (
         <div className="modal-backdrop modal-ask-gatepass animate-fade-in">
           <div className="modal-box animate-scale-in">
