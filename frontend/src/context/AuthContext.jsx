@@ -113,6 +113,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
+      console.error('Firebase signUpWithEmail error details:', error);
       setLoading(false);
       throw error;
     }
@@ -127,6 +128,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
+      console.error('Firebase logInWithEmail error details:', error);
       setLoading(false);
       throw error;
     }
@@ -143,6 +145,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
+      console.error('Firebase logInWithGoogle error details:', error);
       setLoading(false);
       throw error;
     }
