@@ -201,13 +201,9 @@ export default function Login({ mode = 'login' }) {
           marginBottom: '16px', 
           fontSize: '0.875rem', 
           fontWeight: '500', 
-          textAlign: 'center',
-          display: 'flex',
-          alignItems: 'center',
-          justify: 'center',
-          gap: '8px'
+          textAlign: 'center'
         }}>
-          <span>⚠️</span> <span>{error}</span>
+          {error}
         </div>
       )}
       <button className="auth-submit" type="submit" disabled={loading}>

@@ -13,14 +13,14 @@ const MONGODB_URI = process.env.MONGODB_URI || '';
 const hasPlaceholders = MONGODB_URI.includes('<db_username>') || MONGODB_URI.includes('<db_password>');
 
 if (!MONGODB_URI) {
-  console.warn('⚠️ MONGODB_URI is not set in backend/.env.');
+  console.warn('MONGODB_URI is not set in backend/.env.');
 } else if (hasPlaceholders) {
-  console.warn('⚠️ MONGODB_URI contains placeholder values (<db_username> / <db_password>). Please edit your backend/.env file and enter your actual database credentials.');
+  console.warn('MONGODB_URI contains placeholder values (<db_username> / <db_password>). Please edit your backend/.env file and enter your actual database credentials.');
 } else {
   mongoose.connect(MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB successfully.'))
+    .then(() => console.log('Connected to MongoDB successfully.'))
     .catch((error) => {
-      console.error('❌ MongoDB connection error:', error.message);
+      console.error('MongoDB connection error:', error.message);
       console.error('Please verify your connection string and credentials in backend/.env.');
     });
 }
