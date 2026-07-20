@@ -19,6 +19,26 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
   const [newGatePass, setNewGatePass] = useState({ reason: '', departure: '', returnDate: '' })
   const [payAmount, setPayAmount] = useState('450.00')
 
+  // Profile Settings State
+  const [profile, setProfile] = useState({
+    fullName: 'Rahul Sharma',
+    email: 'rahul.sharma@example.com',
+    phone: '+91 98765 43210',
+    emergencyContact: '+91 98765 00000',
+    room: 'Room 204',
+    block: 'Block A',
+    rollNo: '2024CS108'
+  })
+  const [savedSuccessMsg, setSavedSuccessMsg] = useState('')
+
+  const handleSaveProfile = (e) => {
+    e.preventDefault()
+    setSavedSuccessMsg('Profile updated successfully!')
+    setTimeout(() => {
+      setSavedSuccessMsg('')
+    }, 4000)
+  }
+
   const handleAddComplaint = (e) => {
     e.preventDefault()
     if (!newComplaint.title) return
@@ -70,15 +90,14 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="welcome-banner">
             <div className="banner-content">
-              <span className="badge-pill">Student Portal</span>
               <h1>Welcome to Smart Hostel</h1>
               <p>Manage your room, fees, and requests easily in one place.</p>
             </div>
             <div className="banner-quick-stats">
               <div className="stat-box">
                 <span className="stat-label">My Room</span>
-                <strong className="stat-value">Not Assigned</strong>
-                <small className="stat-sub">Waiting for room</small>
+                <strong className="stat-value">{profile.room}</strong>
+                <small className="stat-sub">{profile.block}</small>
               </div>
               <div className="stat-box">
                 <span className="stat-label">Pending Fees</span>
@@ -97,8 +116,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
               </div>
               <div className="kpi-info">
                 <span>Room</span>
-                <strong>Unassigned</strong>
-                <small>No room details</small>
+                <strong>{profile.room}</strong>
+                <small>{profile.block}</small>
               </div>
             </div>
 
@@ -189,13 +208,24 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* My Room Tab */}
       {activeTab === 'room' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box">
-            <h2>My Room Details</h2>
-            <p>Check details about your room and bed.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div>
+                <h2 className="tab-title">My Room Details</h2>
+                <p className="tab-subtitle">Check details about your assigned hostel room and bed.</p>
+              </div>
+            </div>
+            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
-            <p className="empty-state-text">No room assigned yet.</p>
+            <h3>Assigned Room Information</h3>
+            <div className="room-info-grid">
+              <p><strong>Room Number:</strong> {profile.room}</p>
+              <p><strong>Block:</strong> {profile.block}</p>
+              <p><strong>Occupants:</strong> 2 Students</p>
+              <p><strong>Status:</strong> Active Resident</p>
+            </div>
           </div>
         </div>
       )}
@@ -203,14 +233,17 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* Fees & Payments Tab */}
       {activeTab === 'fees' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box flex-between">
-            <div>
-              <h2>Fees & Payments</h2>
-              <p>Check your fees and download payment receipts.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div>
+                <h2 className="tab-title">Fees & Payments</h2>
+                <p className="tab-subtitle">Check your hostel fees and download official payment receipts.</p>
+              </div>
+              <button type="button" className="btn-pay-fee" onClick={() => setShowPayModal(true)}>
+                Pay Fee
+              </button>
             </div>
-            <button type="button" className="btn-pay-fee" onClick={() => setShowPayModal(true)}>
-              Pay Fee
-            </button>
+            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
@@ -250,14 +283,17 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* Complaints Tab */}
       {activeTab === 'complaints' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box flex-between">
-            <div>
-              <h2>Complaints & Repairs</h2>
-              <p>Report a problem and check repair status.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div>
+                <h2 className="tab-title">Complaints & Repairs</h2>
+                <p className="tab-subtitle">Report a maintenance problem and track repair progress.</p>
+              </div>
+              <button type="button" className="btn-report-problem" onClick={() => setShowComplaintModal(true)}>
+                Report a Problem
+              </button>
             </div>
-            <button type="button" className="btn-report-problem" onClick={() => setShowComplaintModal(true)}>
-              Report a Problem
-            </button>
+            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
@@ -300,17 +336,20 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* Gate Pass & Attendance Tab */}
       {activeTab === 'gatepass' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box flex-between">
-            <div>
-              <h2>Gate Pass & Attendance</h2>
-              <p>Ask for leave or check your attendance.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div>
+                <h2 className="tab-title">Gate Pass & Attendance</h2>
+                <p className="tab-subtitle">Apply for outing gate pass or view your monthly attendance record.</p>
+              </div>
+              <button type="button" className="btn-ask-gatepass" onClick={() => setShowGatePassModal(true)}>
+                Ask for Gate Pass
+              </button>
             </div>
-            <button type="button" className="btn-ask-gatepass" onClick={() => setShowGatePassModal(true)}>
-              Ask for Gate Pass
-            </button>
+            <div className="tab-divider"></div>
           </div>
 
-          <div className="dashboard-grid-2col">
+          <div className="dashboard-grid-2col" style={{ marginTop: '24px' }}>
             <div className="dash-card">
               <h3>Monthly Attendance</h3>
               <div className="attendance-summary">
@@ -354,13 +393,138 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab 
       {/* Notices Tab */}
       {activeTab === 'notices' && (
         <div className="tab-pane animate-fade-in-slide-up">
-          <div className="section-title-box">
-            <h2>Hostel Notices</h2>
-            <p>Important news and updates from hostel.</p>
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div>
+                <h2 className="tab-title">Hostel Notices</h2>
+                <p className="tab-subtitle">Important announcements and official updates from hostel management.</p>
+              </div>
+            </div>
+            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
             <p className="empty-state-text">No notices right now.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Settings / Profile Tab */}
+      {activeTab === 'settings' && (
+        <div className="tab-pane animate-fade-in-slide-up">
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div>
+                <h2 className="tab-title">Account & Profile Settings</h2>
+                <p className="tab-subtitle">View and update your personal information and contact details.</p>
+              </div>
+            </div>
+            <div className="tab-divider"></div>
+          </div>
+
+          {savedSuccessMsg && (
+            <div className="alert-success-box animate-fade-in">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span>{savedSuccessMsg}</span>
+            </div>
+          )}
+
+          <div className="settings-grid">
+            <div className="dash-card profile-card-header">
+              <div className="profile-avatar-big">
+                <svg viewBox="0 0 60 60" width="60" height="60" className="settings-photo-avatar">
+                  <rect width="60" height="60" rx="30" fill="url(#settings-avatar-grad)" />
+                  <defs>
+                    <linearGradient id="settings-avatar-grad" x1="0" y1="0" x2="60" y2="60">
+                      <stop offset="0%" stopColor="#1e6b51" />
+                      <stop offset="100%" stopColor="#0f3d2e" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="30" cy="22" r="10" fill="#ffffff" opacity="0.95" />
+                  <path d="M10 50c0-10 8-18 20-18s20 8 20 18" fill="#ffffff" opacity="0.95" />
+                </svg>
+              </div>
+              <div className="profile-card-details">
+                <h3>{profile.fullName}</h3>
+                <span className="profile-roll">{profile.rollNo} &bull; Computer Science</span>
+                <span className="profile-badge-active">Active Student</span>
+              </div>
+            </div>
+
+            <div className="dash-card">
+              <h3>Personal & Contact Details</h3>
+              <form onSubmit={handleSaveProfile} className="settings-form">
+                <div className="form-grid-2col">
+                  <label className="form-label">
+                    Full Name
+                    <input 
+                      type="text" 
+                      value={profile.fullName} 
+                      onChange={(e) => setProfile({ ...profile, fullName: e.target.value })} 
+                      required 
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Email Address
+                    <input 
+                      type="email" 
+                      value={profile.email} 
+                      onChange={(e) => setProfile({ ...profile, email: e.target.value })} 
+                      required 
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Phone Number
+                    <input 
+                      type="tel" 
+                      value={profile.phone} 
+                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })} 
+                      required 
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Emergency Contact
+                    <input 
+                      type="tel" 
+                      value={profile.emergencyContact} 
+                      onChange={(e) => setProfile({ ...profile, emergencyContact: e.target.value })} 
+                      required 
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Room Number
+                    <input 
+                      type="text" 
+                      value={profile.room} 
+                      onChange={(e) => setProfile({ ...profile, room: e.target.value })} 
+                      required 
+                    />
+                  </label>
+
+                  <label className="form-label">
+                    Hostel Block
+                    <input 
+                      type="text" 
+                      value={profile.block} 
+                      onChange={(e) => setProfile({ ...profile, block: e.target.value })} 
+                      required 
+                    />
+                  </label>
+                </div>
+
+                <div className="form-actions-right">
+                  <button type="submit" className="btn-save-profile">
+                    Save Profile Changes
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

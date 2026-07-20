@@ -26,18 +26,24 @@ html.dark .nav-links a {
 }
 
 html.dark .nav-links a:hover {
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .nav .login {
-  background: #1e6b51 !important;
-  color: #ffffff !important;
-  border-radius: 8px !important;
-  padding: 10px 18px !important;
+  background: transparent !important;
+  color: #e2e8f0 !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
 }
 
-html.dark .nav .login b {
+html.dark .nav .login:hover {
   color: #ffffff !important;
+  background: transparent !important;
 }
 
 /* Hero Section */
@@ -50,7 +56,7 @@ html.dark .hero h1 {
 }
 
 html.dark .hero h1 em {
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .hero>div>p:not(.label) {
@@ -59,7 +65,7 @@ html.dark .hero>div>p:not(.label) {
 
 html.dark .label {
   background: #1e2e4a !important;
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .button {
@@ -69,7 +75,7 @@ html.dark .button {
 }
 
 html.dark .secondary {
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 /* Hero Board Card */
@@ -119,7 +125,7 @@ html.dark .board-list p:hover {
 }
 
 html.dark .board-list p:hover small {
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .board-list small {
@@ -140,7 +146,7 @@ html.dark .contact-intro p {
 }
 
 html.dark .contact-intro a {
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .contact-form {
@@ -197,12 +203,12 @@ html.dark .feature-grid p, html.dark .role-grid p, html.dark .step-grid p, html.
 }
 
 html.dark .feature-grid a, html.dark .role-grid a {
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .icon-box, html.dark .role-icon, html.dark .step-icon {
   background: #182842 !important;
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .process {
@@ -243,7 +249,7 @@ html.dark .sidebar-logo-text {
 html.dark .sidebar-role-badge {
   background: #182842 !important;
   border-color: #243859 !important;
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .sidebar-link {
@@ -252,7 +258,7 @@ html.dark .sidebar-link {
 
 html.dark .sidebar-link:hover {
   background: #182842 !important;
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .sidebar-link.active {
@@ -315,7 +321,7 @@ html.dark .theme-toggle-btn {
 
 html.dark .theme-toggle-btn:hover {
   background: #1e3354 !important;
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .notification-btn, html.dark .user-avatar-pill {
@@ -350,7 +356,7 @@ html.dark .dash-card, html.dark .kpi-card, html.dark .notice-full-card {
 }
 
 html.dark .kpi-card:hover {
-  border-color: #38bdf8 !important;
+  border-color: #5ccfa0 !important;
 }
 
 html.dark .kpi-icon, html.dark .icon-room, html.dark .icon-fee, html.dark .icon-complaint, html.dark .icon-pass, html.dark .header-logo-badge {
@@ -372,7 +378,7 @@ html.dark .mess-item, html.dark .att-stat, html.dark .gatepass-card {
 }
 
 html.dark .meal-title, html.dark .att-stat strong {
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 html.dark .mess-item p, html.dark .att-stat span, html.dark .gatepass-card p {
@@ -429,7 +435,7 @@ html.dark .btn-report-problem {
 html.dark .btn-ask-gatepass {
   background: #182842 !important;
   border-color: #243859 !important;
-  color: #38bdf8 !important;
+  color: #5ccfa0 !important;
 }
 
 /* Auth Pages */
@@ -477,4 +483,26 @@ html.dark footer p {
 html.dark .sidebar-brand .brand,
 html.dark .dashboard-sidebar .brand {
   color: #ffffff !important;
+}
+
+/* Remove Spotlight Glows & Radial Gradients */
+html.dark .dashboard-header,
+html.dark .dashboard-main,
+html.dark .dashboard-container,
+html.dark .dashboard-content {
+  background-color: #0b1320 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html.dark .dashboard-header {
+  background-color: #111d31 !important;
+  border-bottom: 1px solid #243859 !important;
+}
+
+html.dark .welcome-banner {
+  background: linear-gradient(135deg, #111d31 0%, #0b1320 100%) !important;
+  border: 1px solid #243859 !important;
+  box-shadow: none !important;
 }
