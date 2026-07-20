@@ -25,31 +25,21 @@ export default function Navbar() {
         {' '}Smart Hostel
       </a>
 
-      <div className="nav-right-actions">
-        <ThemeToggle />
-
+      <div className="nav-links">
         <a className={`nav-link-item ${activeHash === '#home' ? 'active' : ''}`} href="#home">Home</a>
         <a className={`nav-link-item ${activeHash === '#features' ? 'active' : ''}`} href="#features">Features</a>
         <a className={`nav-link-item ${activeHash === '#contact' ? 'active' : ''}`} href="#contact">Contacts</a>
         {user && <a className={`nav-link-item ${activeHash === '#dashboard' ? 'active' : ''}`} href="#dashboard">Dashboard</a>}
+      </div>
+
+      <div className="nav-right-actions">
+        <ThemeToggle />
 
         {user ? (
           <button 
             type="button"
             onClick={logOut} 
-            className="login" 
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              cursor: 'pointer', 
-              color: 'var(--text-primary)', 
-              fontFamily: 'inherit',
-              fontSize: 'inherit',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-              padding: 0
-            }}
+            className="login"
           >
             Logout <span className="login-arrow">→</span>
           </button>
