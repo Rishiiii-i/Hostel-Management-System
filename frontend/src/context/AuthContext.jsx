@@ -161,7 +161,7 @@ export const AuthProvider = ({ children }) => {
 
   const sendPasswordReset = async (email) => {
     const actionCodeSettings = {
-      url: `${window.location.origin}/#reset-password`,
+      url: window.location.origin,
     };
     await sendPasswordResetEmail(auth, email, actionCodeSettings);
   };
