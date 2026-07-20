@@ -1,4 +1,4 @@
-/* Premium High-Contrast Dark Mode Theme */
+/* premium high-contrast dark mode theme */
 
 html.dark, 
 html.dark body, 
@@ -11,7 +11,7 @@ html.dark .dashboard-content {
   color: #ffffff !important;
 }
 
-/* Landing Page & Navigation Bar */
+/* landing page & navigation bar */
 html.dark .nav {
   background: #0f192b !important;
   border-bottom: 1px solid #1e2e4a !important;
@@ -46,7 +46,7 @@ html.dark .nav .login:hover {
   background: transparent !important;
 }
 
-/* Hero Section */
+/* hero section */
 html.dark .hero {
   background: #0b1320 !important;
 }
@@ -78,7 +78,7 @@ html.dark .secondary {
   color: #5ccfa0 !important;
 }
 
-/* Hero Board Card */
+/* hero board card */
 html.dark .hero-board {
   background: #111d31 !important;
   border-color: #243859 !important;
@@ -132,7 +132,7 @@ html.dark .board-list small {
   color: #cbd5e1 !important;
 }
 
-/* Contact Section in Dark Mode */
+/* contact section in dark mode */
 html.dark .contact-section {
   background: #0b1320 !important;
 }
@@ -176,7 +176,7 @@ html.dark .contact-form button {
   color: #ffffff !important;
 }
 
-/* Sections & Process */
+/* sections & process */
 html.dark .section {
   background: #0b1320 !important;
 }
@@ -236,7 +236,7 @@ html.dark footer>div>p, html.dark footer>div>a:not(.brand) {
   color: #cbd5e1 !important;
 }
 
-/* Dashboard Dark Theme */
+/* dashboard dark theme */
 html.dark .dashboard-sidebar {
   background: #111d31 !important;
   border-right-color: #243859 !important;
@@ -438,7 +438,7 @@ html.dark .btn-ask-gatepass {
   color: #5ccfa0 !important;
 }
 
-/* Auth Pages */
+/* auth pages */
 html.dark .auth-page {
   background: #0b1320 !important;
 }
@@ -485,7 +485,7 @@ html.dark .dashboard-sidebar .brand {
   color: #ffffff !important;
 }
 
-/* Remove Spotlight Glows & Radial Gradients */
+/* remove spotlight glows & radial gradients */
 html.dark .dashboard-header,
 html.dark .dashboard-main,
 html.dark .dashboard-container,

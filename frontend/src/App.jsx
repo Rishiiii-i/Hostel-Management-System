@@ -22,7 +22,7 @@ function App() {
     rollNo: '2024CS108'
   })
 
-  // Synchronize local editable profile state when authenticated user changes
+  // synchronize local editable profile state when authenticated user changes
   useEffect(() => {
     if (user) {
       setProfile(prev => ({
@@ -53,7 +53,7 @@ function App() {
       }
     }
 
-    // Run guard check on state/route change
+    // run guard check on state/route change
     const hash = window.location.hash || '#home'
     const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
     const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'

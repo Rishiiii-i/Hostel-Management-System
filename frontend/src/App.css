@@ -1807,7 +1807,7 @@ footer {
   }
 }
 
-/* Header: keep every navigation group on a shared, predictable alignment grid. */
+/* header keep every navigation group on a shared predictable alignment grid */
 .nav {
   --nav-gutter: 32px;
   height: 96px;
@@ -1889,7 +1889,7 @@ footer {
   }
 }
 
-/* Authentication screens */
+/* authentication screens */
 .auth-page {
   min-height: 100vh;
   display: grid;
@@ -2270,7 +2270,7 @@ footer {
   }
 }
 
-/* Simplified credential-based authentication */
+/* simplified credential-based authentication */
 .auth-showcase:before,
 .auth-showcase:after {
   display: none
@@ -2364,7 +2364,7 @@ footer {
   left: 28px
 }
 
-/* Landing-page visual refinement */
+/* landing-page visual refinement */
 body {
   background: radial-gradient(circle at 72% 14%, #e8f3e8 0, transparent 27%), linear-gradient(135deg, #f7faf5 0%, #f2f6ef 100%)
 }
@@ -2560,7 +2560,7 @@ footer .copyright {
   }
 }
 
-/* Contact section */
+/* contact section */
 .contact-section {
   width: min(1440px, calc(100% - 64px));
   margin: 0 auto;
@@ -2685,7 +2685,7 @@ footer .copyright {
   }
 }
 
-/* Simple contact form */
+/* simple contact form */
 .contact-section {
   grid-template-columns: minmax(0, .85fr) minmax(460px, 1.15fr);
   align-items: start;
@@ -2825,7 +2825,7 @@ html {
   }
 }
 
-/* Google Sign-In button styles */
+/* google sign-in button styles */
 .auth-divider {
   display: flex;
   align-items: center;
@@ -2866,7 +2866,7 @@ html {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
-/* Contact Section */
+/* contact section */
 .contact-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2962,7 +2962,7 @@ html {
   flex-shrink: 0;
 }
 
-/* Dashboard Layout & Components */
+/* dashboard layout & components */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
@@ -3155,7 +3155,7 @@ html {
   width: 36px !important;
   height: 36px !important;
   border-radius: 10px !important;
-  background: #1e6b51 !important; /* Vibrant green background badge */
+  background: #1e6b51 !important; /* vibrant green background badge */
   border: none !important;
   display: grid !important;
   place-items: center !important;
@@ -4023,7 +4023,7 @@ html {
   }
 }
 
-/* Animations */
+/* animations */
 .animate-fade-in-slide-up {
   animation: fadeInSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -4079,7 +4079,7 @@ html {
   padding: 16px 0;
 }
 
-/* Dedicated styles for Pay Fee, Report a Problem, and Ask for Gate Pass */
+/* dedicated styles for pay fee report a problem and ask for gate pass */
 .btn-pay-fee {
   display: inline-flex;
   align-items: center;
@@ -4175,7 +4175,7 @@ html {
   border-top: 4px solid #0284c7;
 }
 
-/* Theme Toggle Button */
+/* theme toggle button */
 .theme-toggle-btn {
   height: 38px;
   padding: 0 14px;
@@ -4192,7 +4192,7 @@ html {
   background: #e4f0e7;
 }
 
-/* Dark Mode Styles */
+/* dark mode styles */
 html.dark,
 html.dark body {
   background-color: #0d1713;
@@ -4391,7 +4391,7 @@ html.dark .btn-sm:hover {
   background: #203c30;
 }
 
-/* Constant Sticky Landing Navbar */
+/* constant sticky landing navbar */
 .nav {
   position: fixed !important;
   top: 0 !important;
@@ -4566,7 +4566,7 @@ html.dark .auth-google-btn:hover {
   background: #203c30;
 }
 
-/* Stylish Pill Theme Toggle Switch (Icon Only) */
+/* stylish pill theme toggle switch (icon only) */
 .theme-toggle-switch {
   display: inline-flex !important;
   align-items: center !important;
@@ -4684,7 +4684,7 @@ html.dark .nav-link-item:hover {
   color: #ffffff !important;
 }
 
-/* Footer Brand High Contrast Styling */
+/* footer brand high contrast styling */
 footer .brand {
   color: #ffffff !important;
   font: 800 24px 'Manrope', sans-serif !important;
@@ -4707,7 +4707,7 @@ footer a {
   color: #cbd5e1 !important;
 }
 
-/* Sidebar Brand High Contrast Styling */
+/* sidebar brand high contrast styling */
 .sidebar-brand .brand,
 .dashboard-sidebar .brand {
   color: #17291f !important;
@@ -4724,7 +4724,7 @@ html.dark .dashboard-sidebar .brand {
   color: #ffffff !important;
 }
 
-/* Dashboard Header & Sidebar Alignment Fixes */
+/* dashboard header & sidebar alignment fixes */
 .sidebar-footer {
   padding: 16px !important;
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -4911,25 +4911,25 @@ html.dark .avatar-text .sub {
   color: #cbd5e1 !important;
 }
 
-/* Sidebar Brand Title Formatting */
+/* sidebar brand title formatting */
 .dashboard-sidebar {
-  padding: 0 !important; /* Reset layout padding to allow brand corner alignment */
+  padding: 0 !important; /* reset layout padding to allow brand corner alignment */
 }
 
 .sidebar-brand {
-  padding: 18px 20px 10px 20px !important; /* Push brand logo to top-left corner */
+  padding: 18px 20px 10px 20px !important; /* push brand logo to top-left corner */
   width: 100% !important;
   overflow: visible !important;
 }
 
 .sidebar-nav {
-  padding: 10px 20px !important; /* Pad nav items uniformly */
+  padding: 10px 20px !important; /* pad nav items uniformly */
 }
 
 .sidebar-divider {
   height: 1px !important;
   background: #cbd5e1 !important;
-  margin: 4px 0 16px 0 !important; /* Spans full width cleanly */
+  margin: 4px 0 16px 0 !important; /* spans full width cleanly */
 }
 
 html.dark .sidebar-divider {
@@ -4946,7 +4946,7 @@ html.dark .sidebar-divider {
   text-decoration: none !important;
 }
 
-/* Logout Button Styling */
+/* logout button styling */
 .sidebar-logout-btn {
   background: transparent !important;
   border: none !important;
@@ -4984,7 +4984,7 @@ html.dark .sidebar-divider {
   color: #ef4444 !important;
 }
 
-/* Ultra Professional Header Right Controls */
+/* ultra professional header right controls */
 .header-right {
   display: flex !important;
   align-items: center !important;
@@ -5139,7 +5139,7 @@ html.dark .user-profile-role {
   border-color: #ef4444 !important;
 }
 
-/* Search Pill Clean Input Styling */
+/* search pill clean input styling */
 .header-search {
   display: flex !important;
   align-items: center !important;
@@ -5178,7 +5178,7 @@ html.dark .header-search input {
   height: auto !important;
 }
 
-/* Compact Auth Page Styles for Login/Forgot */
+/* compact auth page styles for login/forgot */
 .auth-card {
   padding: 40px 48px !important;
   max-width: 460px !important;
@@ -5233,7 +5233,7 @@ html.dark .header-search input {
   font-size: 14px !important;
 }
 
-/* Ultra-Compact Signup Form specifically to avoid vertical scroll */
+/* ultra-compact signup form specifically to avoid vertical scroll */
 .auth-card--signup {
   padding: 28px 44px !important;
   max-width: 480px !important;
@@ -5264,21 +5264,21 @@ html.dark .header-search input {
 }
 
 .auth-card--signup .auth-form input {
-  height: 42px !important; /* Increased from 38px to 42px */
+  height: 42px !important; /* increased from 38px to 42px */
   padding: 0 12px !important;
   font-size: 14px !important;
   border-radius: 7px !important;
 }
 
 .auth-card--signup .auth-submit {
-  height: 42px !important; /* Increased from 38px to 42px */
+  height: 42px !important; /* increased from 38px to 42px */
   border-radius: 7px !important;
   font-size: 14px !important;
   margin-top: 8px !important;
 }
 
 .auth-card--signup .auth-google-btn {
-  height: 42px !important; /* Increased from 38px to 42px */
+  height: 42px !important; /* increased from 38px to 42px */
   font-size: 14px !important;
   border-radius: 7px !important;
 }
@@ -5292,7 +5292,7 @@ html.dark .header-search input {
   font-size: 13px !important;
 }
 
-/* Password Row Layout */
+/* password row layout */
 .auth-password-container {
   display: flex !important;
   flex-direction: column !important;
@@ -5367,7 +5367,7 @@ html.dark .auth-password-toggle:hover {
   color: #5ccfa0 !important;
 }
 
-/* Sidebar Brand Heading Bottom Border Divider Line */
+/* sidebar brand heading bottom border divider line */
 .sidebar-brand {
   border-bottom: 1px solid #cbd5e1 !important;
   padding-bottom: 16px !important;
@@ -5378,9 +5378,9 @@ html.dark .sidebar-brand {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Sidebar Footer Top Border Divider Line */
+/* sidebar footer top border divider line */
 .sidebar-footer {
-  border-top: 1px solid #cbd5e1 !important; /* Highly visible light grey line in light mode */
+  border-top: 1px solid #cbd5e1 !important; /* highly visible light grey line in light mode */
   padding-top: 20px !important;
   margin-top: auto !important;
 }
@@ -5422,7 +5422,7 @@ html.dark .sidebar-footer {
   filter: brightness(0) invert(1) !important;
 }
 
-/* Centralized User Avatar Circles */
+/* centralized user avatar circles */
 .user-avatar-wrapper,
 .header-avatar-circle {
   width: 38px !important;
@@ -5464,7 +5464,7 @@ html.dark .profile-avatar-big {
   color: #5ccfa0 !important;
 }
 
-/* Tab Header Title Row Icon Badges */
+/* tab header title row icon badges */
 .tab-title-row {
   display: flex !important;
   justify-content: space-between !important;
@@ -5482,17 +5482,17 @@ html.dark .profile-avatar-big {
 .header-search img,
 .notification-btn img,
 .auth-password-toggle img {
-  filter: invert(27%) sepia(51%) saturate(735%) hue-rotate(114deg) brightness(95%) contrast(92%) !important; /* Converts white PNG to brand green in light mode */
+  filter: invert(27%) sepia(51%) saturate(735%) hue-rotate(114deg) brightness(95%) contrast(92%) !important; /* converts white png to brand green in light mode */
 }
 
 html.dark .tab-title-with-icon img,
 html.dark .header-search img,
 html.dark .notification-btn img,
 html.dark .auth-password-toggle img {
-  filter: none !important; /* Keeps original white outline in dark mode */
+  filter: none !important; /* keeps original white outline in dark mode */
 }
 
-/* Dashboard Feature Grid (Landing Page Style to Dashboard) */
+/* dashboard feature grid (landing page style to dashboard) */
 .dashboard-feature-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
@@ -5531,11 +5531,11 @@ html.dark .dashboard-feature-card:hover {
 
 .dashboard-feature-card img {
   margin-bottom: 16px !important;
-  filter: invert(27%) sepia(51%) saturate(735%) hue-rotate(114deg) brightness(95%) contrast(92%) !important; /* Converts white PNG to brand green in light mode */
+  filter: invert(27%) sepia(51%) saturate(735%) hue-rotate(114deg) brightness(95%) contrast(92%) !important; /* converts white png to brand green in light mode */
 }
 
 html.dark .dashboard-feature-card img {
-  filter: none !important; /* Keeps original white outline in dark mode */
+  filter: none !important; /* keeps original white outline in dark mode */
 }
 
 .dashboard-feature-card h4 {
@@ -5575,7 +5575,7 @@ html.dark .dashboard-feature-card-link {
   color: #5ccfa0 !important;
 }
 
-/* Settings & Profile Tab Styling */
+/* settings & profile tab styling */
 .settings-grid {
   display: flex !important;
   flex-direction: column !important;
@@ -5672,7 +5672,7 @@ html.dark .profile-badge-active {
   margin-bottom: 16px !important;
 }
 
-/* Tab Section Headers with Horizontal Dividers & Spacing */
+/* tab section headers with horizontal dividers & spacing */
 .tab-header-box {
   margin-bottom: 28px !important;
 }

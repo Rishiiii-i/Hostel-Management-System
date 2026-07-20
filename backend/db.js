@@ -2,14 +2,14 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import dns from 'dns';
 
-// Override default DNS servers to resolve MongoDB SRV queries (fixes ECONNREFUSED error on Windows)
+// override default dns servers to resolve mongodb srv queries (fixes econnrefused error on windows)
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
-// Check if URI contains placeholder symbols
+// check if uri contains placeholder symbols
 const hasPlaceholders = MONGODB_URI.includes('<db_username>') || MONGODB_URI.includes('<db_password>');
 
 if (!MONGODB_URI) {
@@ -25,7 +25,7 @@ if (!MONGODB_URI) {
     });
 }
 
-// User Schema definition
+// user schema definition
 const userSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Find user by email
+// find user by email
 async function findUserByEmail(email) {
   try {
     return await User.findOne({ email: email.toLowerCase() });
@@ -73,7 +73,7 @@ async function findUserByEmail(email) {
   }
 }
 
-// Create user
+// create user
 async function createUser(userData) {
   try {
     const user = new User(userData);

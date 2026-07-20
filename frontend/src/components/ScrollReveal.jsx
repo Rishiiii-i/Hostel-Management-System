@@ -20,7 +20,7 @@ export default function ScrollReveal({
       },
       { 
         threshold: 0.15,
-        rootMargin: '0px 0px -50px 0px' // Trigger slightly before the element fully enters
+        rootMargin: '0px 0px -50px 0px' // trigger slightly before the element fully enters
       }
     )
 
@@ -36,7 +36,7 @@ export default function ScrollReveal({
     }
   }, [])
 
-  // Map simple animation names to Tailwind class names
+  // map simple animation names to tailwind class names
   const getAnimationClasses = () => {
     switch (animation) {
       case 'fade-up':
