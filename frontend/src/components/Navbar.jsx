@@ -2,7 +2,7 @@ import Icon from './Icon'
 
 export default function Navbar() {
   return (
-    <nav className="nav">
+    <nav className="nav animate-fade-in-slide-down" style={{ animationFillMode: 'both' }}>
       <a className="brand" href="#home">
         <span>
           <Icon name="building" />
