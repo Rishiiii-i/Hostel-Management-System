@@ -1,12 +1,43 @@
-// updated frontend
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import AuthLayout from './layouts/AuthLayout'
 import MainLayout from './layouts/MainLayout'
-import Login from './pages/Login'
-import LandingPage from './pages/LandingPage'
-import StudentDashboard from './pages/StudentDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/AuthContext'
+
+// Lazy load heavy page components for instant initial load speed
+const Login = lazy(() => import('./pages/Login'))
+const LandingPage = lazy(() => import('./pages/LandingPage'))
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard'))
+
+function LoadingSpinner() {
+  return (
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '100vh', 
+      backgroundColor: 'var(--bg-primary, #f8fafc)',
+      flexDirection: 'column',
+      gap: '1rem'
+    }}>
+      <div className="loader-spinner" style={{ 
+        width: '36px', 
+        height: '36px', 
+        border: '3px solid rgba(16, 185, 129, 0.15)', 
+        borderTopColor: '#10b981', 
+        borderRadius: '50%', 
+        animation: 'spin-loader 0.8s linear infinite' 
+      }}></div>
+      <span style={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>Loading...</span>
+      <style>{`
+        @keyframes spin-loader {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  )
+}
 
 function App() {
   const [route, setRoute] = useState(() => window.location.hash || '#home')
@@ -14,16 +45,16 @@ function App() {
   const { user, loading } = useAuth()
   
   const [profile, setProfile] = useState({
-    fullName: 'Rahul Sharma',
-    email: 'student@smarthostel.com',
-    phone: '+91 98765 43210',
-    emergencyContact: '+91 98765 00000',
-    room: 'Room 204',
-    block: 'Block A',
-    rollNo: '2024CS108'
+    fullName: '',
+    email: '',
+    phone: '',
+    emergencyContact: '',
+    room: '',
+    block: '',
+    rollNo: ''
   })
 
-  // synchronize local editable profile state when authenticated user changes
+  // Synchronize local editable profile state when authenticated user changes
   useEffect(() => {
     if (user) {
       setProfile(prev => ({
@@ -43,21 +74,15 @@ function App() {
       const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
       const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password' || hash === '#reset-password' || isResetAction
 
-      console.log('[Routing Debug] Hash changed:', { hash, user, loading });
-
       if (isDashboardRoute && !user && !loading) {
-        console.log('[Routing Debug] Dashboard block: No user, not loading. Redirecting to #login');
         window.location.hash = '#login'
       } else if (isAuthRoute && user) {
-        console.log('[Routing Debug] Auth screen bypass: User is logged in. Redirecting to #dashboard');
         window.location.hash = '#dashboard'
       } else {
-        console.log('[Routing Debug] No guard match. Setting route state to:', hash);
         setRoute(hash)
       }
     }
 
-    // run guard check on state/route change
     const hash = window.location.hash || '#home'
     const searchParams = new URLSearchParams(window.location.search)
     const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
@@ -65,16 +90,11 @@ function App() {
     const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
     const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password' || hash === '#reset-password' || isResetAction
 
-    console.log('[Routing Debug] Guard effect triggered:', { hash, user, loading });
-
     if (isDashboardRoute && !user && !loading) {
-      console.log('[Routing Debug] Direct load block: No user, not loading. Redirecting to #login');
       window.location.hash = '#login'
     } else if (isAuthRoute && user) {
-      console.log('[Routing Debug] Direct load bypass: User is logged in. Redirecting to #dashboard');
       window.location.hash = '#dashboard'
     } else {
-      console.log('[Routing Debug] Direct load fallback. Setting route state to:', hash);
       setRoute(hash)
     }
 
@@ -83,33 +103,7 @@ function App() {
   }, [user, loading])
 
   if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '100vh', 
-        backgroundColor: 'var(--bg-primary, #f8fafc)',
-        flexDirection: 'column',
-        gap: '1rem'
-      }}>
-        <div className="loader-spinner" style={{ 
-          width: '36px', 
-          height: '36px', 
-          border: '3px solid rgba(16, 185, 129, 0.15)', 
-          borderTopColor: '#10b981', 
-          borderRadius: '50%', 
-          animation: 'spin-loader 0.8s linear infinite' 
-        }}></div>
-        <span style={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>Initializing Smart Hostel...</span>
-        <style>{`
-          @keyframes spin-loader {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   const searchParams = new URLSearchParams(window.location.search)
@@ -122,20 +116,30 @@ function App() {
     else if (route === '#reset-password' || isResetAction) mode = 'reset'
 
     const oobCode = searchParams.get('oobCode') || ''
-    return <AuthLayout><Login mode={mode} oobCode={oobCode} /></AuthLayout>
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <AuthLayout><Login mode={mode} oobCode={oobCode} /></AuthLayout>
+      </Suspense>
+    )
   }
 
   if (route === '#dashboard' || route === '#student-dashboard' || route.startsWith('#dashboard')) {
     return (
       <ProtectedRoute>
-        <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
-          <StudentDashboard activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
-        </MainLayout>
+        <Suspense fallback={<LoadingSpinner />}>
+          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
+            <StudentDashboard activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
+          </MainLayout>
+        </Suspense>
       </ProtectedRoute>
     )
   }
 
-  return <LandingPage />
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <LandingPage />
+    </Suspense>
+  )
 }
 
 export default App
