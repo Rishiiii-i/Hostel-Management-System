@@ -6,6 +6,8 @@ import {
   signInWithPopup, 
   GoogleAuthProvider, 
   sendPasswordResetEmail, 
+  confirmPasswordReset,
+  verifyPasswordResetCode,
   signOut, 
   updateProfile,
   onAuthStateChanged 
@@ -86,14 +88,16 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      setFirebaseUser(fbUser);
+      console.log('Firebase onAuthStateChanged event:', fbUser?.email || 'No user');
       if (fbUser) {
+        setFirebaseUser(fbUser);
         try {
           await syncUserWithBackend(fbUser);
         } catch (err) {
-          console.error('Could not sync user profile on session refresh:', err);
+          console.error('Error during automatic auth sync:', err);
         }
       } else {
+        setFirebaseUser(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
@@ -156,7 +160,30 @@ export const AuthProvider = ({ children }) => {
   };
 
   const sendPasswordReset = async (email) => {
-    await sendPasswordResetEmail(auth, email);
+    const actionCodeSettings = {
+      url: `${window.location.origin}/#reset-password`,
+      handleCodeInApp: true,
+    };
+    await sendPasswordResetEmail(auth, email, actionCodeSettings);
+  };
+
+  const verifyResetCode = async (oobCode) => {
+    return await verifyPasswordResetCode(auth, oobCode);
+  };
+
+  const confirmResetPassword = async (oobCode, newPassword, email) => {
+    await confirmPasswordReset(auth, oobCode, newPassword);
+    if (email) {
+      try {
+        await fetch('http://localhost:5000/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, newPassword }),
+        });
+      } catch (err) {
+        console.error('Failed to sync updated password to backend:', err);
+      }
+    }
   };
 
   const logOut = async () => {
@@ -182,6 +209,8 @@ export const AuthProvider = ({ children }) => {
     logInWithEmail,
     logInWithGoogle,
     sendPasswordReset,
+    verifyResetCode,
+    confirmResetPassword,
     logOut
   };
 
