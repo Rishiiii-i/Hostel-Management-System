@@ -5389,29 +5389,37 @@ html.dark .sidebar-footer {
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-.user-logout-link {
-  display: inline-flex !important;
+.sidebar-logout-icon-btn {
+  display: flex !important;
   align-items: center !important;
-  gap: 6px !important;
-  background: transparent !important;
-  border: none !important;
-  color: #f87171 !important; /* Soft red text */
-  font-size: 11px !important;
-  font-weight: 700 !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  color: #ef4444 !important;
   cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   padding: 0 !important;
-  margin-top: 6px !important;
-  transition: opacity 0.2s ease !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
 }
 
-.user-logout-link:hover {
-  opacity: 0.8 !important;
+.sidebar-logout-icon-btn:hover {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+  transform: translateY(-1px) scale(1.04) !important;
 }
 
-.user-logout-link img {
-  filter: invert(65%) sepia(35%) saturate(1600%) hue-rotate(315deg) brightness(101%) contrast(97%) !important; /* Soft red color (#f87171) */
+.sidebar-logout-icon-btn img {
+  filter: invert(34%) sepia(85%) saturate(2400%) hue-rotate(338deg) brightness(98%) contrast(93%) !important;
+  transition: filter 0.2s ease !important;
+}
+
+.sidebar-logout-icon-btn:hover img {
+  filter: brightness(0) invert(1) !important;
 }
 
 /* Centralized User Avatar Circles */
