@@ -1,15 +1,15 @@
 import './Sidebar.css'
 import Icon from './Icon'
-import homeIcon from '../assets/icons/home.png'
+import { useAuth } from '../context/AuthContext'
 import roomIcon from '../assets/icons/room.png'
 import feeIcon from '../assets/icons/fee.png'
 import complaintIcon from '../assets/icons/complaint.png'
 import attendanceIcon from '../assets/icons/attendance.png'
 import bellIcon from '../assets/icons/bell.png'
+import homeIcon from '../assets/icons/home.png'
 import settingsIcon from '../assets/icons/settings.png'
-import { useAuth } from '../context/AuthContext'
 
-export default function Sidebar({ activeTab, setActiveTab, profile }) {
+export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
   const { user, logOut } = useAuth()
 
   const navItems = [
@@ -21,7 +21,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
     {
       id: 'room',
       label: 'My Room',
-      icon: <img src={roomIcon} alt="My Room" width="18" height="18" />
+      icon: <img src={roomIcon} alt="Room" width="18" height="18" />
     },
     {
       id: 'fees',
@@ -35,7 +35,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
     },
     {
       id: 'gatepass',
-      label: 'Gate Pass & Attendance',
+      label: 'Gate Pass',
       icon: <img src={attendanceIcon} alt="Attendance" width="18" height="18" />
     },
     {
@@ -45,14 +45,17 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
     },
     {
       id: 'settings',
-      label: 'Settings',
+      label: 'Profile',
       icon: <img src={settingsIcon} alt="Settings" width="18" height="18" />
     }
   ]
 
   const handleLogout = async () => {
-    if (window.confirm("Are you sure you want to log out?")) {
+    try {
       await logOut()
+      window.location.href = '#home'
+    } catch (err) {
+      console.error('Logout failed:', err)
       window.location.href = '#home'
     }
   }
@@ -73,8 +76,6 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
         </button>
       </div>
 
-
-
       <nav className="sidebar-nav">
         {navItems.map((item) => (
           <button
@@ -92,7 +93,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
       <div className="sidebar-footer">
         <div className="user-profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', minWidth: 0, flex: 1 }}>
-            <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'grid', placeItems: 'center', background: '#1e6b51', color: '#ffffff', flexShrink: 0 }}>
               {user?.photoURL ? (
                 <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
@@ -100,8 +101,8 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
               )}
             </div>
             <div className="user-info" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-              <span className="user-name" style={{ fontWeight: 600, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.fullName}</span>
-              <span className="user-role" style={{ fontSize: '0.75rem', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.room} &bull; {profile.block}</span>
+              <span className="user-name" style={{ fontWeight: 600, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.fullName || user?.name || 'Rishi Macha'}</span>
+              <span className="user-role" style={{ fontSize: '0.75rem', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.room || 'Room 204'} &bull; {profile.block || 'Block A'}</span>
             </div>
           </div>
           <button 

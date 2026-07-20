@@ -83,10 +83,11 @@ html.dark .header-left h2 {
   align-items: center;
 }
 
+.header-search img,
 .header-search svg {
   position: absolute;
   left: 12px;
-  color: #6a8274;
+  pointer-events: none;
 }
 
 .header-search input {
@@ -162,6 +163,7 @@ html.dark .notification-dropdown {
   border-color: #264032;
 }
 
+.user-profile-header-card,
 .user-profile-card {
   display: flex;
   align-items: center;
@@ -172,27 +174,39 @@ html.dark .notification-dropdown {
   border: 1px solid #d4e5d8;
 }
 
+html.dark .user-profile-header-card,
 html.dark .user-profile-card {
   background: #1c3327;
   border-color: #2a4738;
 }
 
+.header-avatar-circle,
 .user-profile-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   background: #1e6b51;
   color: #fff;
   font-weight: 800;
   font-size: 12px;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-profile-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
 }
 
 .user-profile-name {
   font-size: 13px;
   font-weight: 700;
   color: #143528;
+  display: block;
+  line-height: 1.2;
 }
 
 html.dark .user-profile-name {
@@ -202,6 +216,13 @@ html.dark .user-profile-name {
 .user-profile-role {
   font-size: 11px;
   color: #64748b;
+  display: block;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+html.dark .user-profile-role {
+  color: #a3b8aa;
 }
 
 .header-logout-pill-btn {
