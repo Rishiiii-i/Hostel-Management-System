@@ -1,29 +1,66 @@
-/* Theme toggle button styles */
-.theme-toggle-btn {
+/* Container button */
+.theme-toggle-switch {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: inline-flex;
+  outline: none;
+  transition: transform 0.15s ease;
+}
+
+.theme-toggle-switch:active {
+  transform: scale(0.95);
+}
+
+/* Outer track */
+.theme-toggle-switch .toggle-track {
+  width: 50px;
+  height: 26px;
+  background: #dce6df;
+  border: 1px solid #c8dcd0;
+  border-radius: 26px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+html.dark .theme-toggle-switch .toggle-track {
+  background: #14241c;
+  border-color: #233e30;
+}
+
+/* Sliding thumb */
+.theme-toggle-switch .toggle-thumb {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  left: 2px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #f0f7f2;
-  border: 1px solid #d4e5d8;
-  color: #1e6b51;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-html.dark .theme-toggle-btn {
-  background: #1c3327;
-  border-color: #2a4738;
-  color: #38b387;
+html.dark .theme-toggle-switch .toggle-thumb {
+  background: #2b7959;
 }
 
-.theme-toggle-btn:hover {
-  background: #e1f0e4;
-  transform: translateY(-1px);
+/* Sliding translation distance */
+.theme-toggle-switch.light .toggle-thumb {
+  transform: translateX(0);
 }
 
-html.dark .theme-toggle-btn:hover {
-  background: #254234;
+.theme-toggle-switch.dark .toggle-thumb {
+  transform: translateX(24px);
+}
+
+/* Icon styling adjustments */
+.theme-toggle-switch .toggle-thumb svg {
+  display: block;
+  transition: transform 0.25s ease;
 }
