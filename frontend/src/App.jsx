@@ -1,3 +1,4 @@
+// updated frontend
 import { useEffect, useState } from 'react'
 import AuthLayout from './layouts/AuthLayout'
 import MainLayout from './layouts/MainLayout'
