@@ -93,6 +93,25 @@ html.dark .nav-links a:hover {
   width: 100%;
 }
 
+.nav-links a.active {
+  color: #1e6b51;
+  font-weight: 700;
+}
+
+html.dark .nav-links a.active {
+  color: #38b387;
+}
+
+.nav-links a.active::after {
+  width: 100%;
+}
+
+.nav-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
 .nav .login {
   font-size: 16px;
   font-weight: 800;
@@ -107,13 +126,22 @@ html.dark .nav .login {
   color: #e2f0e6;
 }
 
-.nav .login b {
+.nav button.login {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 10px 0;
+}
+
+.nav .login .login-arrow {
   color: #2b7959;
   font-size: 21px;
   transition: transform 0.18s ease;
+  display: inline-block;
 }
 
-.nav .login:hover b {
+.nav .login:hover .login-arrow {
   transform: translateX(4px);
 }
 
