@@ -6,8 +6,6 @@ import {
   signInWithPopup, 
   GoogleAuthProvider, 
   sendPasswordResetEmail, 
-  confirmPasswordReset,
-  verifyPasswordResetCode,
   signOut, 
   updateProfile,
   onAuthStateChanged 
