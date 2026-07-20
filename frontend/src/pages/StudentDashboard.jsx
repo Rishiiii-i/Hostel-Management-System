@@ -79,7 +79,9 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   return (
     <div className="student-dashboard">
       {/*
+
 home / overview tab
+
  */}
       {activeTab === 'overview' && (
         <div className="tab-pane animate-fade-in-slide-up">
@@ -185,7 +187,9 @@ home / overview tab
       )}
 
       {/*
+
 my room tab
+
  */}
       {activeTab === 'room' && (
         <div className="tab-pane animate-fade-in-slide-up">
@@ -215,7 +219,9 @@ my room tab
       )}
 
       {/*
+
 fees & payments tab
+
  */}
       {activeTab === 'fees' && (
         <div className="tab-pane animate-fade-in-slide-up">
@@ -270,7 +276,9 @@ fees & payments tab
       )}
 
       {/*
+
 complaints tab
+
  */}
       {activeTab === 'complaints' && (
         <div className="tab-pane animate-fade-in-slide-up">
@@ -328,7 +336,9 @@ complaints tab
       )}
 
       {/*
+
 gate pass & attendance tab
+
  */}
       {activeTab === 'gatepass' && (
         <div className="tab-pane animate-fade-in-slide-up">
@@ -390,7 +400,9 @@ gate pass & attendance tab
       )}
 
       {/*
+
 notices tab
+
  */}
       {activeTab === 'notices' && (
         <div className="tab-pane animate-fade-in-slide-up">
@@ -414,7 +426,9 @@ notices tab
       )}
 
       {/*
+
 settings / profile tab
+
  */}
       {activeTab === 'settings' && (
         <div className="tab-pane animate-fade-in-slide-up">
@@ -527,7 +541,9 @@ settings / profile tab
       )}
 
       {/*
+
 fee payment modal
+
  */}
       {showPayModal && (
         <div className="modal-backdrop modal-pay-fee animate-fade-in">
@@ -555,7 +571,9 @@ fee payment modal
       )}
 
       {/*
+
 report a problem modal
+
  */}
       {showComplaintModal && (
         <div className="modal-backdrop modal-report-problem animate-fade-in">
@@ -609,7 +627,9 @@ report a problem modal
       )}
 
       {/*
+
 gate pass modal
+
  */}
       {showGatePassModal && (
         <div className="modal-backdrop modal-ask-gatepass animate-fade-in">
