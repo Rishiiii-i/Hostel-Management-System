@@ -22,12 +22,51 @@ export default function Login({ mode = 'login' }) {
     e.preventDefault()
     setError('')
     setSuccessMessage('')
+
+    // Trim whitespace
+    const trimmedEmail = email.trim()
+
+    // Email validation: Reject empty email
+    if (!trimmedEmail) {
+      setError('Email address is required.')
+      return
+    }
+
+    // Email validation: Reject invalid email formats
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(trimmedEmail)) {
+      setError('Please enter a valid email address.')
+      return
+    }
+
     setLoading(true)
     try {
-      await sendPasswordReset(email)
-      setSuccessMessage('Password reset link has been sent to your email!')
+      await sendPasswordReset(trimmedEmail)
+      setSuccessMessage('Password reset email has been sent successfully. Please check your Inbox and Spam folder.')
+      setEmail('') // Clear the email input
+
+      // Redirect to login page after 3 seconds
+      setTimeout(() => {
+        window.location.hash = '#login'
+      }, 3000)
     } catch (err) {
-      setError(err.message || 'Failed to request password reset')
+      console.error('Password reset error:', err)
+      // Map Firebase error codes to user-friendly messages
+      if (err.code === 'auth/user-not-found') {
+        setError('No account exists with this email address.')
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.')
+      } else if (err.code === 'auth/missing-email') {
+        setError('Email address is required.')
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Network error. Please check your internet connection.')
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many requests. Please try again later.')
+      } else if (err.code === 'auth/internal-error') {
+        setError('Firebase encountered an internal error.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
