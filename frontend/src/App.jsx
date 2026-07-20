@@ -4,19 +4,75 @@ import MainLayout from './layouts/MainLayout'
 import Login from './pages/Login'
 import LandingPage from './pages/LandingPage'
 import StudentDashboard from './pages/StudentDashboard'
+import ProtectedRoute from './components/ProtectedRoute'
+import { useAuth } from './context/AuthContext'
 
 function App() {
   const [route, setRoute] = useState(() => window.location.hash || '#home')
   const [activeTab, setActiveTab] = useState('overview')
+  const { user, loading } = useAuth()
 
   useEffect(() => {
     const updateRoute = () => {
       const hash = window.location.hash || '#home'
+      const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
+      const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'
+
+      if (isDashboardRoute && !user && !loading) {
+        window.location.hash = '#login'
+      } else if (isAuthRoute && user) {
+        window.location.hash = '#dashboard'
+      } else {
+        setRoute(hash)
+      }
+    }
+
+    // Run guard check on state/route change
+    const hash = window.location.hash || '#home'
+    const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
+    const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'
+
+    if (isDashboardRoute && !user && !loading) {
+      window.location.hash = '#login'
+    } else if (isAuthRoute && user) {
+      window.location.hash = '#dashboard'
+    } else {
       setRoute(hash)
     }
+
     window.addEventListener('hashchange', updateRoute)
     return () => window.removeEventListener('hashchange', updateRoute)
-  }, [])
+  }, [user, loading])
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '100vh', 
+        backgroundColor: 'var(--bg-primary, #f8fafc)',
+        flexDirection: 'column',
+        gap: '1rem'
+      }}>
+        <div className="loader-spinner" style={{ 
+          width: '36px', 
+          height: '36px', 
+          border: '3px solid rgba(16, 185, 129, 0.15)', 
+          borderTopColor: '#10b981', 
+          borderRadius: '50%', 
+          animation: 'spin-loader 0.8s linear infinite' 
+        }}></div>
+        <span style={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>Initializing Smart Hostel...</span>
+        <style>{`
+          @keyframes spin-loader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    )
+  }
 
   if (route === '#login' || route === '#signup' || route === '#forgot-password') {
     const mode = route === '#signup' ? 'signup' : route === '#forgot-password' ? 'forgot' : 'login'
@@ -25,9 +81,11 @@ function App() {
 
   if (route === '#dashboard' || route === '#student-dashboard' || route.startsWith('#dashboard')) {
     return (
-      <MainLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-        <StudentDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
-      </MainLayout>
+      <ProtectedRoute>
+        <MainLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+          <StudentDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
+        </MainLayout>
+      </ProtectedRoute>
     )
   }
 

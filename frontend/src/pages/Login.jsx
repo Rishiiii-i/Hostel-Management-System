@@ -1,19 +1,69 @@
 import { useState } from 'react'
 import GoogleSignInButton from '../components/GoogleSignInButton'
-
-function getRole(email) {
-  const value = email.toLowerCase()
-  if (value.includes('admin')) return 'administrator'
-  if (value.includes('warden')) return 'warden'
-  return 'student'
-}
+import { useAuth } from '../context/AuthContext'
 
 export default function Login({ mode = 'login' }) {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+
+  const { logInWithEmail, signUpWithEmail, logInWithGoogle, sendPasswordReset } = useAuth()
+
   const isSignup = mode === 'signup'
   const isForgot = mode === 'forgot'
-  const role = getRole(email)
-  const roleName = role[0].toUpperCase() + role.slice(1)
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setSuccessMessage('')
+    setLoading(true)
+    try {
+      await sendPasswordReset(email)
+      setSuccessMessage('Password reset link has been sent to your email!')
+    } catch (err) {
+      setError(err.message || 'Failed to request password reset')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      if (isSignup) {
+        await signUpWithEmail(name, email, password)
+      } else {
+        await logInWithEmail(email, password)
+      }
+      window.location.hash = '#dashboard'
+    } catch (err) {
+      setError(err.message || 'Authentication failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleClick = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      await logInWithGoogle()
+      window.location.hash = '#dashboard'
+    } catch (err) {
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Google sign-in popup was closed before completion.')
+      } else {
+        setError(err.message || 'Google sign-in failed')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (isForgot) {
     return <div className="auth-card auth-card--forgot">
@@ -22,19 +72,27 @@ export default function Login({ mode = 'login' }) {
         <h1>Forgot password?</h1>
         <p>Enter your registered email address and we will send password reset instructions.</p>
       </div>
-      <form className="auth-form" onSubmit={(event) => event.preventDefault()}>
-        <label>REGISTERED EMAIL ADDRESS<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Enter your email" autoComplete="email" required /></label>
-        <button className="auth-submit" type="submit">Send reset link</button>
+      {error && <div className="auth-error-message" style={{ color: '#ef4444', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
+      {successMessage && <div className="auth-success-message" style={{ color: '#10b981', marginBottom: '1rem', fontSize: '0.875rem' }}>{successMessage}</div>}
+      
+      <form className="auth-form" onSubmit={handleForgotSubmit}>
+        <label>
+          REGISTERED EMAIL ADDRESS
+          <input 
+            type="email" 
+            value={email} 
+            onChange={(event) => setEmail(event.target.value)} 
+            placeholder="Enter your email" 
+            autoComplete="email" 
+            required 
+            disabled={loading}
+          />
+        </label>
+        <button className="auth-submit" type="submit" disabled={loading}>
+          {loading ? 'Sending...' : 'Send reset link'}
+        </button>
       </form>
     </div>
-  }
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    window.location.hash = '#dashboard'
-  }
-
-  const handleGoogleClick = () => {
-    window.location.hash = '#dashboard'
   }
 
   return <div className="auth-card">
@@ -44,13 +102,52 @@ export default function Login({ mode = 'login' }) {
       <p>{isSignup ? 'Set up a calmer way to manage hostel life.' : 'Sign in to continue to your hostel workspace.'}</p>
     </div>
 
+    {error && <div className="auth-error-message" style={{ color: '#ef4444', marginBottom: '1.25rem', fontSize: '0.875rem', padding: '0.5rem', borderRadius: '4px', backgroundColor: 'rgba(239, 68, 68, 0.1)', textAlign: 'center' }}>{error}</div>}
+
     <form className="auth-form" onSubmit={handleSubmit}>
-      {isSignup && <label>YOUR NAME<input type="text" placeholder="Enter your name" autoComplete="name" required /></label>}
-      <label>EMAIL ADDRESS<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Enter your email" autoComplete="email" required /></label>
+      {isSignup && (
+        <label>
+          YOUR NAME
+          <input 
+            type="text" 
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name" 
+            autoComplete="name" 
+            required 
+            disabled={loading}
+          />
+        </label>
+      )}
+      <label>
+        EMAIL ADDRESS
+        <input 
+          type="email" 
+          value={email} 
+          onChange={(event) => setEmail(event.target.value)} 
+          placeholder="Enter your email" 
+          autoComplete="email" 
+          required 
+          disabled={loading}
+        />
+      </label>
       
-      <label>PASSWORD<input type="password" placeholder="Enter your password" autoComplete={isSignup ? 'new-password' : 'current-password'} required /></label>
+      <label>
+        PASSWORD
+        <input 
+          type="password" 
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password" 
+          autoComplete={isSignup ? 'new-password' : 'current-password'} 
+          required 
+          disabled={loading}
+        />
+      </label>
       {!isSignup && <a className="auth-forgot" href="#forgot-password">Forgot password?</a>}
-      <button className="auth-submit" type="submit">{isSignup ? 'Sign up' : 'Sign in'}</button>
+      <button className="auth-submit" type="submit" disabled={loading}>
+        {loading ? (isSignup ? 'Signing up...' : 'Signing in...') : (isSignup ? 'Sign up' : 'Sign in')}
+      </button>
     </form>
 
     <div className="auth-divider">

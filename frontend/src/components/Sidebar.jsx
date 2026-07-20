@@ -4,8 +4,11 @@ import feeIcon from '../assets/icons/fee.png'
 import complaintIcon from '../assets/icons/complaint.png'
 import attendanceIcon from '../assets/icons/attendance.png'
 import bellIcon from '../assets/icons/bell.png'
+import { useAuth } from '../context/AuthContext'
 
 export default function Sidebar({ activeTab, setActiveTab }) {
+  const { user, logOut } = useAuth()
+
   const navItems = [
     {
       id: 'overview',
@@ -39,8 +42,9 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     }
   ]
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (window.confirm("Are you sure you want to log out?")) {
+      await logOut()
       window.location.href = '#home'
     }
   }
@@ -56,9 +60,9 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         </a>
       </div>
 
-      <div className="portal-badge">
+      <div className="portal-badge" style={{ textTransform: 'capitalize' }}>
         <span className="portal-dot"></span>
-        Student Portal
+        {user?.role || 'Student'} Portal
       </div>
 
       <nav className="sidebar-nav">
@@ -77,22 +81,26 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
       <div className="sidebar-footer">
         <div className="user-profile">
-          <div className="user-avatar-wrapper">
-            <svg viewBox="0 0 40 40" width="38" height="38" className="user-photo-avatar">
-              <rect width="40" height="40" rx="20" fill="url(#sidebar-avatar-grad)" />
-              <defs>
-                <linearGradient id="sidebar-avatar-grad" x1="0" y1="0" x2="40" y2="40">
-                  <stop offset="0%" stopColor="#1e6b51" />
-                  <stop offset="100%" stopColor="#0f3d2e" />
-                </linearGradient>
-              </defs>
-              <circle cx="20" cy="14" r="7" fill="#ffffff" opacity="0.95" />
-              <path d="M7 34c0-6.8 5.4-12 13-12s13 5.2 13 12" fill="#ffffff" opacity="0.95" />
-            </svg>
+          <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {user?.photoURL ? (
+              <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <svg viewBox="0 0 40 40" width="38" height="38" className="user-photo-avatar">
+                <rect width="40" height="40" rx="20" fill="url(#sidebar-avatar-grad)" />
+                <defs>
+                  <linearGradient id="sidebar-avatar-grad" x1="0" y1="0" x2="40" y2="40">
+                    <stop offset="0%" stopColor="#1e6b51" />
+                    <stop offset="100%" stopColor="#0f3d2e" />
+                  </linearGradient>
+                </defs>
+                <circle cx="20" cy="14" r="7" fill="#ffffff" opacity="0.95" />
+                <path d="M7 34c0-6.8 5.4-12 13-12s13 5.2 13 12" fill="#ffffff" opacity="0.95" />
+              </svg>
+            )}
           </div>
           <div className="user-info">
-            <span className="user-name">Rahul Sharma</span>
-            <span className="user-role">Room 204 • Block A</span>
+            <span className="user-name">{user?.name || 'Rahul Sharma'}</span>
+            <span className="user-role" style={{ textTransform: 'capitalize' }}>{user?.role || 'Student'}</span>
           </div>
           <button 
             type="button" 
