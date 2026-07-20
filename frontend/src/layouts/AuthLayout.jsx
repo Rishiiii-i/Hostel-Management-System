@@ -1,3 +1,4 @@
+import './AuthLayout.css'
 import Icon from '../components/Icon'
 
 export default function AuthLayout({ children }) {

@@ -1,0 +1,155 @@
+/* Login and Auth forms styles */
+.auth-card {
+  width: min(100%, 530px);
+  padding: 43px;
+  padding-top: 72px;
+  border: 1px solid #dce7dd;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 22px 56px rgba(24, 64, 45, 0.12);
+  position: relative;
+}
+
+html.dark .auth-card {
+  background: #14241c;
+  border-color: #253e30;
+}
+
+.auth-card-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1e6b51;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+}
+
+.auth-card-back:hover {
+  transform: translateX(-4px);
+}
+
+.auth-card h1 {
+  margin: 0;
+  font: 800 36px/1.15 'Manrope', sans-serif;
+  letter-spacing: -2px;
+  color: #143528;
+}
+
+html.dark .auth-card h1 {
+  color: #e2f0e6;
+}
+
+.auth-card__top > p:last-child {
+  margin: 10px 0 28px;
+  color: #718578;
+  font-size: 15px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  margin-top: 30px;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #687d70;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.auth-form input {
+  width: 100%;
+  height: 52px;
+  padding: 0 15px;
+  border: 1px solid #dbe4dc;
+  border-radius: 11px;
+  outline: 0;
+  background: #f8faf7;
+  color: #183d2c;
+  font: 15px 'DM Sans', sans-serif;
+}
+
+html.dark .auth-form input {
+  background: #1a2d24;
+  border-color: #294537;
+  color: #e2f0e6;
+}
+
+.auth-form input:focus {
+  border-color: #4e9a75;
+  box-shadow: 0 0 0 3px #e3f2e5;
+}
+
+.auth-password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: 0;
+  color: #687d70;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.auth-forgot {
+  align-self: flex-end;
+  margin-top: -7px;
+  color: #2c7556;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.auth-submit {
+  height: 54px;
+  margin-top: 2px;
+  border: 0;
+  border-radius: 11px;
+  background: #1e6b51;
+  color: #fff;
+  cursor: pointer;
+  font: 700 15px 'DM Sans', sans-serif;
+  box-shadow: 0 12px 20px rgba(30, 107, 81, 0.19);
+  transition: all 0.2s ease;
+}
+
+.auth-submit:hover {
+  background: #16543f;
+  transform: translateY(-1px);
+}
+
+.auth-switch {
+  margin: 23px 0 0;
+  text-align: center;
+  color: #738579;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  color: #227453;
+  font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .auth-card {
+    padding: 30px 22px;
+    padding-top: 65px;
+    border-radius: 19px;
+  }
+  .auth-card h1 {
+    font-size: 29px;
+  }
+}

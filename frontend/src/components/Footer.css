@@ -1,0 +1,69 @@
+/* Footer styles */
+footer {
+  color: #fff;
+  background: #10271e;
+  width: 100%;
+  padding: 58px max(48px, calc((100% - 1440px)/2)) 45px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 70px;
+  position: relative;
+  min-height: 260px;
+}
+
+footer .brand > span {
+  background: #317a5a;
+}
+
+footer > div > p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #a6a9bd;
+  max-width: 250px;
+  margin: 17px 0;
+}
+
+footer h4 {
+  font-size: 15px;
+  margin: 2px 0 15px;
+}
+
+footer > div > a:not(.brand) {
+  display: block;
+  color: #b6b8c6;
+  font-size: 14px;
+  margin: 12px 0;
+}
+
+.copyright {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #777b91;
+  margin: 0;
+  white-space: nowrap;
+  width: max-content;
+  text-align: center;
+}
+
+@media (max-width: 850px) {
+  footer {
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 560px) {
+  footer {
+    padding: 45px 16px 55px;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    min-height: 0;
+  }
+
+  footer > div:first-child {
+    grid-column: span 2;
+  }
+}

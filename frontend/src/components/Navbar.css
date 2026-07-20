@@ -1,0 +1,138 @@
+/* Navbar styles */
+.nav {
+  height: 96px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #dce6db;
+  background: rgba(248, 251, 246, 0.86);
+  box-shadow: 0 1px 0 rgba(35, 89, 61, 0.05), 0 12px 30px rgba(37, 78, 55, 0.045);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+html.dark .nav {
+  background: rgba(18, 30, 24, 0.86);
+  border-bottom-color: #233e30;
+}
+
+.nav .brand {
+  font: 800 29px 'Manrope', sans-serif;
+  letter-spacing: -1.3px;
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  color: #17291f;
+}
+
+html.dark .nav .brand {
+  color: #e2f0e6;
+}
+
+.nav .brand > span {
+  background: #1e6b51;
+  color: #fff;
+  border-radius: 12px;
+  height: 40px;
+  width: 40px;
+  display: grid;
+  place-items: center;
+}
+
+.nav .brand svg {
+  width: 23px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.nav-links a {
+  font-size: 16px;
+  font-weight: 500;
+  color: #536d61;
+  position: relative;
+  transition: color 0.18s ease;
+}
+
+html.dark .nav-links a {
+  color: #a3c4b3;
+}
+
+.nav-links a:hover {
+  color: #1e6b51;
+}
+
+html.dark .nav-links a:hover {
+  color: #38b387;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background: #2a7657;
+  transition: width 0.2s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.nav .login {
+  font-size: 16px;
+  font-weight: 800;
+  color: #173126;
+  padding: 10px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html.dark .nav .login {
+  color: #e2f0e6;
+}
+
+.nav .login b {
+  color: #2b7959;
+  font-size: 21px;
+  transition: transform 0.18s ease;
+}
+
+.nav .login:hover b {
+  transform: translateX(4px);
+}
+
+@media (max-width: 850px) {
+  .nav {
+    height: 82px;
+    padding: 0 24px;
+  }
+  .nav-links {
+    gap: 22px;
+  }
+}
+
+@media (max-width: 700px) {
+  .nav {
+    height: 74px;
+    padding: 0 16px;
+  }
+  .nav-links {
+    display: none;
+  }
+}

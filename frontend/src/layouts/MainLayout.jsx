@@ -1,3 +1,4 @@
+import './MainLayout.css'
 import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Icon from '../components/Icon'
@@ -15,7 +16,12 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile 
       <div className="dashboard-main">
         <header className="dashboard-header">
           <div className="header-left">
-            <div className="header-title-flex">
+            <div 
+              className="header-title-flex" 
+              onClick={() => setActiveTab('overview')}
+              style={{ cursor: 'pointer' }}
+              title="Go to Home section"
+            >
               <span className="header-logo-badge">
                 <Icon name="building" />
               </span>
