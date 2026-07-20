@@ -50,8 +50,10 @@ export default function Login({ mode = 'login' }) {
         setError('This email address is already in use by another account.')
       } else if (err.code === 'auth/weak-password') {
         setError('Password should be at least 6 characters long.')
+      } else if (err.code === 'auth/wrong-password') {
+        setError('Wrong password. Please try again.')
       } else if (err.code === 'auth/invalid-credential') {
-        setError('Invalid email address or password.')
+        setError('Wrong password or invalid email. Please try again.')
       } else if (err.code === 'auth/user-not-found') {
         setError('No account found with this email.')
       } else {
