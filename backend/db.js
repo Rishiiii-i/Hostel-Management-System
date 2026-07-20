@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import dns from 'dns';
 
-// Override default DNS servers to resolve MongoDB SRV queries (fixes ECONNREFUSED error)
+// Override default DNS servers to resolve MongoDB SRV queries (fixes ECONNREFUSED error on Windows)
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 dotenv.config();

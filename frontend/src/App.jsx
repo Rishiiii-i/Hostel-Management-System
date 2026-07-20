@@ -39,11 +39,16 @@ function App() {
       const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
       const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'
 
+      console.log('[Routing Debug] Hash changed:', { hash, user, loading });
+
       if (isDashboardRoute && !user && !loading) {
+        console.log('[Routing Debug] Dashboard block: No user, not loading. Redirecting to #login');
         window.location.hash = '#login'
       } else if (isAuthRoute && user) {
+        console.log('[Routing Debug] Auth screen bypass: User is logged in. Redirecting to #dashboard');
         window.location.hash = '#dashboard'
       } else {
+        console.log('[Routing Debug] No guard match. Setting route state to:', hash);
         setRoute(hash)
       }
     }
@@ -53,11 +58,16 @@ function App() {
     const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
     const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'
 
+    console.log('[Routing Debug] Guard effect triggered:', { hash, user, loading });
+
     if (isDashboardRoute && !user && !loading) {
+      console.log('[Routing Debug] Direct load block: No user, not loading. Redirecting to #login');
       window.location.hash = '#login'
     } else if (isAuthRoute && user) {
+      console.log('[Routing Debug] Direct load bypass: User is logged in. Redirecting to #dashboard');
       window.location.hash = '#dashboard'
     } else {
+      console.log('[Routing Debug] Direct load fallback. Setting route state to:', hash);
       setRoute(hash)
     }
 
