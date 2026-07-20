@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import GoogleSignInButton from '../components/GoogleSignInButton'
+import Icon from '../components/Icon'
 
 function getRole(email) {
   const value = email.toLowerCase()
@@ -10,6 +11,7 @@ function getRole(email) {
 
 export default function Login({ mode = 'login' }) {
   const [email, setEmail] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const isSignup = mode === 'signup'
   const isForgot = mode === 'forgot'
   const role = getRole(email)
@@ -58,7 +60,26 @@ export default function Login({ mode = 'login' }) {
           <span>PASSWORD</span>
           {!isSignup && <a className="auth-forgot" href="#forgot-password">Forgot password?</a>}
         </label>
-        <input type="password" placeholder="Enter your password" autoComplete={isSignup ? 'new-password' : 'current-password'} required />
+        <div className="auth-password-input-wrapper">
+          <input 
+            type={showPassword ? "text" : "password"} 
+            placeholder="Enter your password" 
+            autoComplete={isSignup ? 'new-password' : 'current-password'} 
+            required 
+          />
+          <button 
+            type="button" 
+            className="auth-password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? (
+              <Icon name="eye-off" width="18" height="18" />
+            ) : (
+              <Icon name="eye" width="18" height="18" />
+            )}
+          </button>
+        </div>
       </div>
       <button className="auth-submit" type="submit">{isSignup ? 'Sign up' : 'Sign in'}</button>
     </form>

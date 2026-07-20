@@ -4638,6 +4638,30 @@ html.dark .auth-google-btn:hover {
   color: #486659 !important;
   text-decoration: none !important;
   transition: color 0.2s ease !important;
+  position: relative !important;
+  padding: 6px 0 !important;
+}
+
+.nav-link-item::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -4px !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 2.5px !important;
+  background: #1e6b51 !important;
+  transform: scaleX(0) !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform-origin: bottom center !important;
+  border-radius: 99px !important;
+}
+
+.nav-link-item.active {
+  color: #1e6b51 !important;
+}
+
+.nav-link-item.active::after {
+  transform: scaleX(1) !important;
 }
 
 .nav-link-item:hover {
@@ -4646,6 +4670,14 @@ html.dark .auth-google-btn:hover {
 
 html.dark .nav-link-item {
   color: #cbd5e1 !important;
+}
+
+html.dark .nav-link-item.active {
+  color: #5ccfa0 !important;
+}
+
+html.dark .nav-link-item::after {
+  background: #5ccfa0 !important;
 }
 
 html.dark .nav-link-item:hover {
@@ -5298,6 +5330,43 @@ html.dark .auth-password-container .auth-forgot {
   color: #5ccfa0 !important;
 }
 
+.auth-password-input-wrapper {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.auth-password-input-wrapper input {
+  padding-right: 42px !important;
+}
+
+.auth-password-toggle {
+  position: absolute !important;
+  right: 12px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #687d70 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: color 0.2s ease !important;
+}
+
+.auth-password-toggle:hover {
+  color: #1e6b51 !important;
+}
+
+html.dark .auth-password-toggle {
+  color: #cbd5e1 !important;
+}
+
+html.dark .auth-password-toggle:hover {
+  color: #5ccfa0 !important;
+}
+
 /* Sidebar Footer Top Border Divider Line */
 .sidebar-footer {
   border-top: 1px solid #cbd5e1 !important; /* Highly visible light grey line in light mode */
@@ -5307,6 +5376,184 @@ html.dark .auth-password-container .auth-forgot {
 
 html.dark .sidebar-footer {
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.user-logout-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #f87171 !important; /* Soft red text */
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  margin-top: 6px !important;
+  transition: opacity 0.2s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+.user-logout-link:hover {
+  opacity: 0.8 !important;
+}
+
+.user-logout-link img {
+  filter: invert(65%) sepia(35%) saturate(1600%) hue-rotate(315deg) brightness(101%) contrast(97%) !important; /* Soft red color (#f87171) */
+}
+
+/* Centralized User Avatar Circles */
+.user-avatar-wrapper,
+.header-avatar-circle {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #1e6b51 0%, #0f3d2e 100%) !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #ffffff !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+}
+
+.header-avatar-circle {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+html.dark .user-avatar-wrapper,
+html.dark .header-avatar-circle {
+  background: linear-gradient(135deg, #1e6b51 0%, #0b1320 100%) !important;
+  color: #5ccfa0 !important;
+}
+
+.profile-avatar-big {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #1e6b51 0%, #0f3d2e 100%) !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #ffffff !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+}
+
+html.dark .profile-avatar-big {
+  background: linear-gradient(135deg, #1e6b51 0%, #0b1320 100%) !important;
+  color: #5ccfa0 !important;
+}
+
+/* Tab Header Title Row Icon Badges */
+.tab-title-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.tab-title-with-icon {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.tab-title-with-icon img,
+.header-search img,
+.notification-btn img,
+.auth-password-toggle img {
+  filter: invert(27%) sepia(51%) saturate(735%) hue-rotate(114deg) brightness(95%) contrast(92%) !important; /* Converts white PNG to brand green in light mode */
+}
+
+html.dark .tab-title-with-icon img,
+html.dark .header-search img,
+html.dark .notification-btn img,
+html.dark .auth-password-toggle img {
+  filter: none !important; /* Keeps original white outline in dark mode */
+}
+
+/* Dashboard Feature Grid (Landing Page Style to Dashboard) */
+.dashboard-feature-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 20px !important;
+  margin-top: 24px !important;
+  margin-bottom: 30px !important;
+}
+
+.dashboard-feature-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  padding: 24px !important;
+  cursor: pointer !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 16px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+html.dark .dashboard-feature-card {
+  background: #0b1320 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dashboard-feature-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: #1e6b51 !important;
+  box-shadow: 0 12px 24px rgba(30, 107, 81, 0.08) !important;
+}
+
+html.dark .dashboard-feature-card:hover {
+  border-color: #5ccfa0 !important;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dashboard-feature-card img {
+  margin-bottom: 16px !important;
+  filter: invert(27%) sepia(51%) saturate(735%) hue-rotate(114deg) brightness(95%) contrast(92%) !important; /* Converts white PNG to brand green in light mode */
+}
+
+html.dark .dashboard-feature-card img {
+  filter: none !important; /* Keeps original white outline in dark mode */
+}
+
+.dashboard-feature-card h4 {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #0b1320 !important;
+  margin: 0 0 8px 0 !important;
+}
+
+html.dark .dashboard-feature-card h4 {
+  color: #ffffff !important;
+}
+
+.dashboard-feature-card p {
+  font-size: 13px !important;
+  color: #687d70 !important;
+  line-height: 1.5 !important;
+  margin: 0 0 16px 0 !important;
+  flex-grow: 1 !important;
+}
+
+html.dark .dashboard-feature-card p {
+  color: #9ab4a5 !important;
+}
+
+.dashboard-feature-card-link {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #1e6b51 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-top: auto !important;
+}
+
+html.dark .dashboard-feature-card-link {
+  color: #5ccfa0 !important;
 }
 
 /* Settings & Profile Tab Styling */

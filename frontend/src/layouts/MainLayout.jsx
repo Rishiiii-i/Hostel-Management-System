@@ -2,13 +2,13 @@ import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Icon from '../components/Icon'
 
-export default function MainLayout({ children, activeTab, setActiveTab }) {
+export default function MainLayout({ children, activeTab, setActiveTab, profile }) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications] = useState([])
 
   return (
     <div className="dashboard-container">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} />
       
       <div className="dashboard-main">
         <header className="dashboard-header">
@@ -24,10 +24,7 @@ export default function MainLayout({ children, activeTab, setActiveTab }) {
 
           <div className="header-right">
             <div className="header-search">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#64748b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
+              <Icon name="search" width="15" height="15" />
               <input type="text" placeholder="Search dashboard..." />
             </div>
 
@@ -39,10 +36,7 @@ export default function MainLayout({ children, activeTab, setActiveTab }) {
                 title="Notifications"
                 aria-label="Notifications"
               >
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
+                <Icon name="bell" width="18" height="18" />
                 {notifications.length > 0 && <span className="badge">{notifications.length}</span>}
               </button>
 
@@ -71,20 +65,10 @@ export default function MainLayout({ children, activeTab, setActiveTab }) {
 
             <div className="user-profile-header-card">
               <div className="header-avatar-circle">
-                <svg viewBox="0 0 36 36" width="34" height="34" className="header-photo-avatar">
-                  <rect width="36" height="36" rx="18" fill="url(#hdr-avatar-grad)" />
-                  <defs>
-                    <linearGradient id="hdr-avatar-grad" x1="0" y1="0" x2="36" y2="36">
-                      <stop offset="0%" stopColor="#1e6b51" />
-                      <stop offset="100%" stopColor="#0f3d2e" />
-                    </linearGradient>
-                  </defs>
-                  <circle cx="18" cy="13" r="6" fill="#ffffff" opacity="0.95" />
-                  <path d="M6 31c0-6 5-11 12-11s12 5 12 11" fill="#ffffff" opacity="0.95" />
-                </svg>
+                <Icon name="user" width="18" height="18" />
               </div>
               <div className="user-profile-text">
-                <span className="user-profile-name">Rahul Sharma</span>
+                <span className="user-profile-name">{profile.fullName}</span>
                 <span className="user-profile-role">Student</span>
               </div>
             </div>
