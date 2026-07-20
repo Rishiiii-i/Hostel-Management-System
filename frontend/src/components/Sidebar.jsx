@@ -59,12 +59,17 @@ export default function Sidebar({ activeTab, setActiveTab, profile }) {
   return (
     <aside className="dashboard-sidebar">
       <div className="sidebar-brand">
-        <a className="brand" href="#home">
+        <button 
+          type="button" 
+          className="brand" 
+          onClick={() => setActiveTab('overview')}
+          style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+        >
           <span>
             <Icon name="building" />
           </span>
           Smart Hostel
-        </a>
+        </button>
       </div>
 
 
