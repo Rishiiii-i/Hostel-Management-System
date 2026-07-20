@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
           email: fbUser.email,
           photoURL: fbUser.photoURL || '',
           rollNo: rollNo || '',
-          password: password, // Pass plaintext password to sync endpoint
+          password: password, // pass plaintext password to sync endpoint
         }),
       });
 
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Error syncing user with backend, falling back to client-side session:', error);
       
-      // Resilient Fallback: Construct user metadata from client session
+      // resilient fallback construct user metadata from client session
       const token = await fbUser.getIdToken();
       const fallbackUser = {
         id: fbUser.uid,
@@ -112,9 +112,9 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // Update profile display name immediately
+      // update profile display name immediately
       await updateProfile(userCredential.user, { displayName: name });
-      // Sync user profile to backend MongoDB with plaintext password
+      // sync user profile to backend mongodb with plaintext password
       const syncedUser = await syncUserWithBackend(userCredential.user, name, rollNo, password);
       setFirebaseUser(userCredential.user);
       setLoading(false);
@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Sync user profile to backend MongoDB with plaintext password
+      // sync user profile to backend mongodb with plaintext password
       const syncedUser = await syncUserWithBackend(userCredential.user, null, null, password);
       setFirebaseUser(userCredential.user);
       setLoading(false);
@@ -146,7 +146,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      // Configure popup provider
+      // configure popup provider
       const userCredential = await signInWithPopup(auth, provider);
       const syncedUser = await syncUserWithBackend(userCredential.user);
       setFirebaseUser(userCredential.user);
