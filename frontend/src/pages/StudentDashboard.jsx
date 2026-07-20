@@ -27,10 +27,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
 
   const handleSaveProfile = (e) => {
     e.preventDefault()
-    setSavedSuccessMsg('Profile updated successfully!')
-    setTimeout(() => {
-      setSavedSuccessMsg('')
-    }, 4000)
+    setSavedSuccessMsg('Profile details updated successfully!')
+    setTimeout(() => setSavedSuccessMsg(''), 4000)
   }
 
   const handleAddComplaint = (e) => {
@@ -55,8 +53,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     const item = {
       id: `GP-${Math.floor(100 + Math.random() * 900)}`,
       reason: newGatePass.reason,
-      departure: newGatePass.departure || new Date().toISOString().slice(0, 16),
-      returnDate: newGatePass.returnDate || new Date().toISOString().slice(0, 16),
+      departure: newGatePass.departure || new Date().toISOString().slice(0, 16).replace('T', ' '),
+      returnDate: newGatePass.returnDate || new Date().toISOString().slice(0, 16).replace('T', ' '),
       status: 'Pending'
     }
     setGatePasses([item, ...gatePasses])
@@ -79,72 +77,81 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
 
   return (
     <div className="student-dashboard">
-      {/*
 
-home / overview tab
-
- */}
+      {/* OVERVIEW TAB */}
       {activeTab === 'overview' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="welcome-banner">
             <div className="banner-content">
-              <h1>Welcome to Smart Hostel</h1>
-              <p>Manage your room, fees, and requests easily in one place.</p>
+              <h1>Welcome back, {profile.fullName}</h1>
+              <p>Manage your room details, fee receipts, gate passes, and maintenance requests in one dashboard.</p>
             </div>
             <div className="banner-quick-stats">
               <div className="stat-box">
-                <span className="stat-label">My Room</span>
+                <span className="stat-label">Assigned Room</span>
                 <strong className="stat-value">{profile.room}</strong>
                 <small className="stat-sub">{profile.block}</small>
               </div>
               <div className="stat-box">
-                <span className="stat-label">Pending Fees</span>
+                <span className="stat-label">Fee Status</span>
                 <strong className={`stat-value ${feePaid ? 'text-success' : 'text-warning'}`}>
-                  {feePaid ? 'Paid' : '$0.00'}
+                  {feePaid ? 'Cleared' : '$450.00 Dues'}
                 </strong>
-                <small className="stat-sub">{feePaid ? 'Fee paid in full' : 'No dues pending'}</small>
+                <small className="stat-sub">{feePaid ? 'Receipt Available' : 'Payment Due'}</small>
               </div>
             </div>
           </div>
 
           <div className="dashboard-feature-grid">
             <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('room')}>
-              <img src={roomIcon} alt="Room" width="32" height="32" />
-              <h4>Rooms and Allocation</h4>
-              <p>Check your assigned room, bed number, room status, and view roommates.</p>
-              <span className="dashboard-feature-card-link">Go to Room Details &rarr;</span>
+              <div className="feature-card-header">
+                <div className="feature-icon-box"><img src={roomIcon} alt="Room" width="24" height="24" /></div>
+                <span className="feature-badge">Active</span>
+              </div>
+              <h4>Room Details</h4>
+              <p>View room number, block, bed allocation, and roommate details.</p>
+              <span className="dashboard-feature-card-link">View Details &rarr;</span>
             </div>
 
             <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('fees')}>
-              <img src={feeIcon} alt="Fees" width="32" height="32" />
+              <div className="feature-card-header">
+                <div className="feature-icon-box"><img src={feeIcon} alt="Fees" width="24" height="24" /></div>
+                <span className="feature-badge">Finance</span>
+              </div>
               <h4>Fees & Payments</h4>
-              <p>View your pending dues, payment history, and download official receipts.</p>
-              <span className="dashboard-feature-card-link">Go to Fees &rarr;</span>
+              <p>Check pending dues, transaction receipts, and online fee portal.</p>
+              <span className="dashboard-feature-card-link">View Payments &rarr;</span>
             </div>
 
             <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('complaints')}>
-              <img src={complaintIcon} alt="Complaints" width="32" height="32" />
-              <h4>Requests & Complaints</h4>
-              <p>Report maintenance problems, register complaints, and track repair status.</p>
-              <span className="dashboard-feature-card-link">Go to Complaints &rarr;</span>
+              <div className="feature-card-header">
+                <div className="feature-icon-box"><img src={complaintIcon} alt="Complaints" width="24" height="24" /></div>
+                <span className="feature-badge">Support</span>
+              </div>
+              <h4>Complaints & Repairs</h4>
+              <p>Log maintenance issues and track resolution status in real-time.</p>
+              <span className="dashboard-feature-card-link">Log Issue &rarr;</span>
             </div>
 
             <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('gatepass')}>
-              <img src={attendanceIcon} alt="Attendance" width="32" height="32" />
+              <div className="feature-card-header">
+                <div className="feature-icon-box"><img src={attendanceIcon} alt="Attendance" width="24" height="24" /></div>
+                <span className="feature-badge">Outing</span>
+              </div>
               <h4>Gate Pass & Attendance</h4>
-              <p>Submit gate pass outing requests and check your monthly attendance records.</p>
-              <span className="dashboard-feature-card-link">Go to Gate Pass &rarr;</span>
+              <p>Request outing permissions and view monthly attendance logs.</p>
+              <span className="dashboard-feature-card-link">Request Pass &rarr;</span>
             </div>
           </div>
 
           <div className="dashboard-grid-2col">
             <div className="dash-card">
               <div className="card-header">
-                <h3>Mess Menu</h3>
-                <span className="badge-tag">Today</span>
+                <h3>Today&apos;s Mess Menu</h3>
+                <span className="badge-tag info">Live Menu</span>
               </div>
               <div className="mess-menu-grid">
-                <p className="empty-state-text">No menu added for today.</p>
+                <p className="empty-state-text">No mess menu added for today.</p>
               </div>
             </div>
 
@@ -154,26 +161,26 @@ home / overview tab
               </div>
               <div className="quick-actions-btns">
                 <button type="button" className="btn-pay-fee" onClick={() => setShowPayModal(true)}>
-                  Pay Fee
+                  Pay Fee Dues
                 </button>
                 <button type="button" className="btn-report-problem" onClick={() => setShowComplaintModal(true)}>
-                  Report a Problem
+                  Report Problem
                 </button>
                 <button type="button" className="btn-ask-gatepass" onClick={() => setShowGatePassModal(true)}>
-                  Ask for Gate Pass
+                  Request Gate Pass
                 </button>
               </div>
 
-              <div className="card-header" style={{ marginTop: '24px' }}>
-                <h3>Hostel Notices</h3>
+              <div className="card-header" style={{ marginTop: '28px' }}>
+                <h3>Recent Announcements</h3>
               </div>
               <div className="notice-mini-list">
                 {notices.length === 0 ? (
-                  <p className="empty-state-text">No notices right now.</p>
+                  <p className="empty-state-text">No announcements right now.</p>
                 ) : (
-                  notices.map((n, i) => (
-                    <div key={i} className="notice-item">
-                      <span className="notice-tag info">Notice</span>
+                  notices.map((n) => (
+                    <div key={n.id} className="notice-item">
+                      <span className="notice-tag info">{n.category}</span>
                       <div>
                         <strong>{n.title}</strong>
                         <small>{n.date}</small>
@@ -187,210 +194,294 @@ home / overview tab
         </div>
       )}
 
-      {/*
-
-my room tab
-
- */}
+      {/* MY ROOM TAB */}
       {activeTab === 'room' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
-                <img src={roomIcon} alt="Room" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div className="tab-icon-wrapper">
+                  <img src={roomIcon} alt="Room" width="22" height="22" />
+                </div>
                 <div>
                   <h2 className="tab-title">My Room Details</h2>
-                  <p className="tab-subtitle">Check details about your assigned hostel room and bed.</p>
+                  <p className="tab-subtitle">Check details about your assigned hostel room and bed allocation.</p>
                 </div>
               </div>
             </div>
-            <div className="tab-divider"></div>
           </div>
 
-          <div className="dash-card">
-            <h3>Assigned Room Information</h3>
-            <div className="room-info-grid">
-              <p><strong>Room Number:</strong> {profile.room}</p>
-              <p><strong>Block:</strong> {profile.block}</p>
-              <p><strong>Occupants:</strong> 2 Students</p>
-              <p><strong>Status:</strong> Active Resident</p>
+          <div className="dashboard-grid-3col">
+            <div className="dash-card">
+              <div className="card-title-badge">
+                <h3>Assigned Room Info</h3>
+                <span className="status-badge paid">Occupied</span>
+              </div>
+              <div className="room-info-grid">
+                <div className="info-row">
+                  <span className="info-label">Room Number</span>
+                  <strong className="info-val">{profile.room || '0'}</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Hostel Block</span>
+                  <strong className="info-val">{profile.block || 'None'}</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Bed Position</span>
+                  <strong className="info-val">0</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Floor Level</span>
+                  <strong className="info-val">0</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="dash-card">
+              <div className="card-title-badge">
+                <h3>Occupancy & Support</h3>
+                <span className="status-badge info">0 Students</span>
+              </div>
+              <div className="room-info-grid">
+                <div className="info-row">
+                  <span className="info-label">Resident Status</span>
+                  <strong className="info-val">Not Assigned</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Warden In-Charge</span>
+                  <strong className="info-val">Not Assigned</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Warden Contact</span>
+                  <strong className="info-val">0</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Emergency Desk</span>
+                  <strong className="info-val">0</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="dash-card">
+              <div className="card-title-badge">
+                <h3>Room Amenities</h3>
+                <span className="status-badge paid">Verified</span>
+              </div>
+              <ul className="amenities-list">
+                <li><Icon name="checkmark" width={16} height={16} /> High-Speed Hostel Wi-Fi</li>
+                <li><Icon name="checkmark" width={16} height={16} /> Individual Study Desk &amp; Chair</li>
+                <li><Icon name="checkmark" width={16} height={16} /> Attached Bathroom with Geyser</li>
+                <li><Icon name="checkmark" width={16} height={16} /> 24/7 Security &amp; Power Backup</li>
+              </ul>
             </div>
           </div>
         </div>
       )}
 
-      {/*
-
-fees & payments tab
-
- */}
+      {/* FEES & PAYMENTS TAB */}
       {activeTab === 'fees' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
-                <img src={feeIcon} alt="Fees" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div className="tab-icon-wrapper">
+                  <img src={feeIcon} alt="Fees" width="22" height="22" />
+                </div>
                 <div>
-                  <h2 className="tab-title">Fees & Payments</h2>
-                  <p className="tab-subtitle">Check your hostel fees and download official payment receipts.</p>
+                  <h2 className="tab-title">Fees &amp; Payments</h2>
+                  <p className="tab-subtitle">Check your hostel fee breakdown and download official payment receipts.</p>
                 </div>
               </div>
               <button type="button" className="btn-pay-fee" onClick={() => setShowPayModal(true)}>
-                Pay Fee
+                Pay Fee Dues
               </button>
             </div>
-            <div className="tab-divider"></div>
           </div>
 
-          <div className="dash-card">
-            <h3>Payment History</h3>
-            {transactions.length === 0 ? (
-              <p className="empty-state-text">No payments yet.</p>
-            ) : (
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Payment ID</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Receipt</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map((t) => (
-                    <tr key={t.id}>
-                      <td><strong>{t.id}</strong></td>
-                      <td>{t.period}</td>
-                      <td>{t.amount}</td>
-                      <td>{t.date}</td>
-                      <td><span className="status-badge paid">{t.status}</span></td>
-                      <td><button type="button" className="btn-sm" onClick={() => alert('Downloading receipt...')}>Download</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+          <div className="dashboard-grid-2col">
+            <div className="dash-card">
+              <h3>Current Dues Summary</h3>
+              <div className="fee-summary-box">
+                <div className="fee-amount-display">
+                  <small>Total Dues Payable</small>
+                  <b>$0.00</b>
+                  <span className="fee-due-date">No pending dues</span>
+                </div>
+                <div className="fee-breakdown-list">
+                  <div className="fee-item">
+                    <span>Hostel Room Rent</span>
+                    <strong>$0.00</strong>
+                  </div>
+                  <div className="fee-item">
+                    <span>Mess Charges</span>
+                    <strong>$0.00</strong>
+                  </div>
+                  <div className="fee-item">
+                    <span>Maintenance &amp; Security</span>
+                    <strong>$0.00</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="dash-card">
+              <h3>Payment History</h3>
+              {transactions.length === 0 ? (
+                <p className="empty-state-text">No payment records found.</p>
+              ) : (
+                <div className="table-responsive">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Payment ID</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Receipt</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map((t) => (
+                        <tr key={t.id}>
+                          <td><strong>{t.id}</strong></td>
+                          <td>{t.period}</td>
+                          <td><strong>{t.amount}</strong></td>
+                          <td>{t.date}</td>
+                          <td><span className="status-badge paid">{t.status}</span></td>
+                          <td>
+                            <button type="button" className="btn-table-action" onClick={() => alert('Downloading official receipt PDF...')}>
+                              Receipt PDF
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/*
-
-complaints tab
-
- */}
+      {/* COMPLAINTS TAB */}
       {activeTab === 'complaints' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
-                <img src={complaintIcon} alt="Complaints" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div className="tab-icon-wrapper">
+                  <img src={complaintIcon} alt="Complaints" width="22" height="22" />
+                </div>
                 <div>
-                  <h2 className="tab-title">Complaints & Repairs</h2>
-                  <p className="tab-subtitle">Report a maintenance problem and track repair progress.</p>
+                  <h2 className="tab-title">Requests &amp; Complaints</h2>
+                  <p className="tab-subtitle">Report maintenance issues and track resolution progress by hostel staff.</p>
                 </div>
               </div>
               <button type="button" className="btn-report-problem" onClick={() => setShowComplaintModal(true)}>
-                Report a Problem
+                Report Problem
               </button>
             </div>
-            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
+            <h3>Registered Maintenance Requests</h3>
             {complaints.length === 0 ? (
-              <p className="empty-state-text">No complaints reported yet.</p>
+              <p className="empty-state-text">No maintenance complaints reported yet.</p>
             ) : (
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Category</th>
-                    <th>Problem Description</th>
-                    <th>Date</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {complaints.map((c) => (
-                    <tr key={c.id}>
-                      <td><strong>{c.id}</strong></td>
-                      <td><span className="category-tag">{c.category}</span></td>
-                      <td>{c.title}</td>
-                      <td>{c.date}</td>
-                      <td><span className={`priority-tag ${c.priority.toLowerCase()}`}>{c.priority}</span></td>
-                      <td>
-                        <span className={`status-badge ${c.status.toLowerCase().replace(' ', '-')}`}>
-                          {c.status}
-                        </span>
-                      </td>
+              <div className="table-responsive">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Ticket ID</th>
+                      <th>Category</th>
+                      <th>Problem Description</th>
+                      <th>Reported Date</th>
+                      <th>Priority</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {complaints.map((c) => (
+                      <tr key={c.id}>
+                        <td><strong>{c.id}</strong></td>
+                        <td><span className="category-tag">{c.category}</span></td>
+                        <td>{c.title}</td>
+                        <td>{c.date}</td>
+                        <td><span className={`priority-tag ${c.priority.toLowerCase()}`}>{c.priority}</span></td>
+                        <td>
+                          <span className={`status-badge ${c.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                            {c.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/*
-
-gate pass & attendance tab
-
- */}
+      {/* GATE PASS & ATTENDANCE TAB */}
       {activeTab === 'gatepass' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
-                <img src={attendanceIcon} alt="Attendance" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div className="tab-icon-wrapper">
+                  <img src={attendanceIcon} alt="Attendance" width="22" height="22" />
+                </div>
                 <div>
-                  <h2 className="tab-title">Gate Pass & Attendance</h2>
-                  <p className="tab-subtitle">Apply for outing gate pass or view your monthly attendance record.</p>
+                  <h2 className="tab-title">Gate Pass &amp; Attendance</h2>
+                  <p className="tab-subtitle">Apply for outing gate pass permissions and track your monthly attendance logs.</p>
                 </div>
               </div>
               <button type="button" className="btn-ask-gatepass" onClick={() => setShowGatePassModal(true)}>
-                Ask for Gate Pass
+                Request Gate Pass
               </button>
             </div>
-            <div className="tab-divider"></div>
           </div>
 
-          <div className="dashboard-grid-2col" style={{ marginTop: '24px' }}>
+          <div className="dashboard-grid-2col">
             <div className="dash-card">
-              <h3>Monthly Attendance</h3>
-              <div className="attendance-summary">
-                <div className="att-stat">
+              <h3>Monthly Attendance Record</h3>
+              <div className="attendance-summary-box">
+                <div className="att-stat-card green">
                   <strong>0 Days</strong>
                   <span>Present</span>
                 </div>
-                <div className="att-stat">
+                <div className="att-stat-card amber">
                   <strong>0 Days</strong>
-                  <span>Leave</span>
+                  <span>Approved Outing</span>
                 </div>
-                <div className="att-stat">
+                <div className="att-stat-card emerald">
                   <strong>0%</strong>
-                  <span>Total</span>
+                  <span>Attendance Rate</span>
                 </div>
               </div>
             </div>
 
             <div className="dash-card">
-              <h3>Gate Pass Requests</h3>
+              <h3>Gate Pass Requests History</h3>
               {gatePasses.length === 0 ? (
-                <p className="empty-state-text">No gate pass requests yet.</p>
+                <p className="empty-state-text">No gate pass requests submitted yet.</p>
               ) : (
                 <div className="gatepass-list">
                   {gatePasses.map((gp) => (
                     <div key={gp.id} className="gatepass-card">
                       <div className="gp-header">
-                        <strong>{gp.id} &bull; {gp.reason}</strong>
-                        <span className={`status-badge ${gp.status.toLowerCase().replace(' ', '-')}`}>{gp.status}</span>
+                        <div>
+                          <strong>{gp.id} &bull; {gp.reason}</strong>
+                        </div>
+                        <span className={`status-badge ${gp.status.toLowerCase().replace(/\s+/g, '-')}`}>{gp.status}</span>
                       </div>
-                      <p>Departure: {gp.departure} &bull; Return: {gp.returnDate}</p>
+                      <div className="gp-times">
+                        <span><strong>Departure:</strong> {gp.departure}</span>
+                        <span><strong>Return:</strong> {gp.returnDate}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -400,73 +491,82 @@ gate pass & attendance tab
         </div>
       )}
 
-      {/*
-
-notices tab
-
- */}
+      {/* NOTICES TAB */}
       {activeTab === 'notices' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
-                <img src={bellIcon} alt="Notices" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div className="tab-icon-wrapper">
+                  <img src={bellIcon} alt="Notices" width="22" height="22" />
+                </div>
                 <div>
-                  <h2 className="tab-title">Hostel Notices</h2>
-                  <p className="tab-subtitle">Important announcements and official updates from hostel management.</p>
+                  <h2 className="tab-title">Hostel Notice Board</h2>
+                  <p className="tab-subtitle">Official announcements, emergency alerts, and updates from warden office.</p>
                 </div>
               </div>
             </div>
-            <div className="tab-divider"></div>
           </div>
 
           <div className="dash-card">
-            <p className="empty-state-text">No notices right now.</p>
+            {notices.length === 0 ? (
+              <p className="empty-state-text">No notices right now.</p>
+            ) : (
+              <div className="notices-feed-grid">
+                {notices.map((n) => (
+                  <div key={n.id} className="notice-feed-card">
+                    <div className="notice-top-bar">
+                      <span className="notice-tag info">{n.category}</span>
+                      <span className="notice-date">{n.date}</span>
+                    </div>
+                    <h3>{n.title}</h3>
+                    <p>{n.body}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/*
-
-settings / profile tab
-
- */}
+      {/* SETTINGS TAB */}
       {activeTab === 'settings' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
-                <img src={settingsIcon} alt="Settings" width="28" height="28" style={{ marginRight: '8px' }} />
+                <div className="tab-icon-wrapper">
+                  <img src={settingsIcon} alt="Settings" width="22" height="22" />
+                </div>
                 <div>
-                  <h2 className="tab-title">Account & Profile Settings</h2>
-                  <p className="tab-subtitle">View and update your personal information and contact details.</p>
+                  <h2 className="tab-title">Account &amp; Profile Settings</h2>
+                  <p className="tab-subtitle">Manage your personal information, emergency contact details, and hostel profile.</p>
                 </div>
               </div>
             </div>
-            <div className="tab-divider"></div>
           </div>
 
           {savedSuccessMsg && (
             <div className="alert-success-box animate-fade-in">
-              <Icon name="checkmark" width="20" height="20" />
+              <Icon name="checkmark" width="18" height="18" />
               <span>{savedSuccessMsg}</span>
             </div>
           )}
 
-          <div className="settings-grid">
+          <div className="settings-container-grid">
             <div className="dash-card profile-card-header">
               <div className="profile-avatar-big">
-                <Icon name="user" width="30" height="30" />
+                <Icon name="user" width="28" height="28" />
               </div>
               <div className="profile-card-details">
                 <h3>{profile.fullName}</h3>
                 <span className="profile-roll">{profile.rollNo} &bull; Computer Science</span>
-                <span className="profile-badge-active">Active Student</span>
+                <span className="profile-badge-active">Active Student Resident</span>
               </div>
             </div>
 
-            <div className="dash-card">
-              <h3>Personal & Contact Details</h3>
+            <div className="dash-card settings-form-card">
+              <h3>Personal &amp; Contact Details</h3>
               <form onSubmit={handleSaveProfile} className="settings-form">
                 <div className="form-grid-2col">
                   <label className="form-label">
@@ -541,17 +641,13 @@ settings / profile tab
         </div>
       )}
 
-      {/*
-
-fee payment modal
-
- */}
+      {/* MODALS */}
       {showPayModal && (
         <div className="modal-backdrop modal-pay-fee animate-fade-in">
           <div className="modal-box animate-scale-in">
-            <h3>Pay Fee</h3>
+            <h3>Pay Fee Dues</h3>
             <label className="form-label">
-              Enter Amount ($)
+              Amount ($)
               <input
                 type="number"
                 value={payAmount}
@@ -561,7 +657,7 @@ fee payment modal
             </label>
             <div className="payment-options">
               <label><input type="radio" name="pay" defaultChecked /> Credit / Debit Card</label>
-              <label><input type="radio" name="pay" /> Bank Transfer</label>
+              <label><input type="radio" name="pay" /> UPI / Net Banking</label>
             </div>
             <div className="modal-actions">
               <button type="button" className="btn-secondary" onClick={() => setShowPayModal(false)}>Cancel</button>
@@ -571,15 +667,10 @@ fee payment modal
         </div>
       )}
 
-      {/*
-
-report a problem modal
-
- */}
       {showComplaintModal && (
         <div className="modal-backdrop modal-report-problem animate-fade-in">
           <div className="modal-box animate-scale-in">
-            <h3>Report a Problem</h3>
+            <h3>Report a Maintenance Problem</h3>
             <form onSubmit={handleAddComplaint}>
               <label className="form-label">
                 Category
@@ -599,7 +690,7 @@ report a problem modal
                 Problem Description
                 <input
                   type="text"
-                  placeholder="Describe your problem"
+                  placeholder="e.g. Bathroom light flickering"
                   value={newComplaint.title}
                   onChange={(e) => setNewComplaint({ ...newComplaint, title: e.target.value })}
                   required
@@ -607,7 +698,7 @@ report a problem modal
               </label>
 
               <label className="form-label">
-                Priority
+                Priority Level
                 <select
                   value={newComplaint.priority}
                   onChange={(e) => setNewComplaint({ ...newComplaint, priority: e.target.value })}
@@ -620,28 +711,23 @@ report a problem modal
 
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={() => setShowComplaintModal(false)}>Cancel</button>
-                <button type="submit" className="btn-report-problem">Submit Complaint</button>
+                <button type="submit" className="btn-report-problem">Submit Ticket</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/*
-
-gate pass modal
-
- */}
       {showGatePassModal && (
         <div className="modal-backdrop modal-ask-gatepass animate-fade-in">
           <div className="modal-box animate-scale-in">
-            <h3>Ask for Gate Pass</h3>
+            <h3>Request Gate Outing Pass</h3>
             <form onSubmit={handleAddGatePass}>
               <label className="form-label">
-                Reason
+                Reason for Outing
                 <input
                   type="text"
-                  placeholder="Reason for going out"
+                  placeholder="e.g. Medical appointment / Home Visit"
                   value={newGatePass.reason}
                   onChange={(e) => setNewGatePass({ ...newGatePass, reason: e.target.value })}
                   required
@@ -659,7 +745,7 @@ gate pass modal
               </label>
 
               <label className="form-label">
-                Return Time
+                Expected Return Time
                 <input
                   type="datetime-local"
                   value={newGatePass.returnDate}
