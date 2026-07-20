@@ -18,7 +18,7 @@ function getRole(email) {
 // Sync Firebase Auth details to MongoDB User Schema
 router.post('/sync', async (req, res) => {
   try {
-    const { uid, name, email, role, photoURL } = req.body;
+    const { uid, name, email, role, photoURL, rollNo } = req.body;
 
     if (!uid || !email) {
       return res.status(400).json({ message: 'Firebase UID and email are required to sync' });
@@ -30,7 +30,7 @@ router.post('/sync', async (req, res) => {
     });
 
     if (user) {
-      // User exists, update firebaseUid and photoURL if needed
+      // User exists, update firebaseUid, photoURL, and rollNo if needed
       let updated = false;
       if (!user.firebaseUid) {
         user.firebaseUid = uid;
@@ -38,6 +38,10 @@ router.post('/sync', async (req, res) => {
       }
       if (photoURL && user.photoURL !== photoURL) {
         user.photoURL = photoURL;
+        updated = true;
+      }
+      if (rollNo && user.rollNo !== rollNo) {
+        user.rollNo = rollNo;
         updated = true;
       }
       if (updated) {
@@ -52,6 +56,7 @@ router.post('/sync', async (req, res) => {
         email: email.toLowerCase(),
         role: role || getRole(email),
         photoURL: photoURL || '',
+        rollNo: rollNo || '',
         createdAt: new Date()
       });
       await user.save();

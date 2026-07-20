@@ -11,6 +11,7 @@ export default function Login({ mode = 'login' }) {
   const [loading, setLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rollNo, setRollNo] = useState('')
 
   const { logInWithEmail, signUpWithEmail, logInWithGoogle, sendPasswordReset } = useAuth()
 
@@ -38,7 +39,7 @@ export default function Login({ mode = 'login' }) {
     setLoading(true)
     try {
       if (isSignup) {
-        await signUpWithEmail(name, email, password)
+        await signUpWithEmail(name, email, password, rollNo)
       } else {
         await logInWithEmail(email, password)
       }
@@ -137,6 +138,8 @@ export default function Login({ mode = 'login' }) {
             REGISTERED ROLL NUMBER
             <input 
               type="text" 
+              value={rollNo}
+              onChange={(e) => setRollNo(e.target.value)}
               placeholder="Enter your roll number" 
               required 
               disabled={loading}
