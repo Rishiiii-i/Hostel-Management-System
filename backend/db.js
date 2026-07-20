@@ -7,9 +7,6 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 dotenv.config();
 
-// Disable buffering so queries fail immediately when not connected instead of waiting 30 seconds
-mongoose.set('bufferCommands', false);
-
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
 // Check if URI contains placeholder symbols
