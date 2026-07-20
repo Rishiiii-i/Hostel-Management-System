@@ -17,7 +17,9 @@ if (!MONGODB_URI) {
 } else if (hasPlaceholders) {
   console.warn('⚠️ MONGODB_URI contains placeholder values (<db_username> / <db_password>). Please edit your backend/.env file and enter your actual database credentials.');
 } else {
-  mongoose.connect(MONGODB_URI)
+  mongoose.connect(MONGODB_URI, {
+    family: 4 // Force Mongoose to connect using IPv4 to match the 0.0.0.0/0 Atlas whitelist
+  })
     .then(() => console.log('✅ Connected to MongoDB successfully.'))
     .catch((error) => {
       console.error('❌ MongoDB connection error:', error.message);
