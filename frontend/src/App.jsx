@@ -119,6 +119,10 @@ function App() {
     return () => window.removeEventListener('hashchange', updateRoute)
   }, [user, loading])
 
+  useEffect(() => {
+    setActiveTab('overview')
+  }, [route, user?.email])
+
   if (loading) {
     return <LoadingSpinner />
   }
