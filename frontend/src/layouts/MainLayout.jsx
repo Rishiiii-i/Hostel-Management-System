@@ -73,8 +73,8 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile 
 
             <div className="user-profile-header-card">
               <div className="header-avatar-circle" style={{ overflow: 'hidden', borderRadius: '50%', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {profile?.photo || user?.photoURL ? (
+                  <img src={profile?.photo || user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <Icon name="user" width="18" height="18" />
                 )}
