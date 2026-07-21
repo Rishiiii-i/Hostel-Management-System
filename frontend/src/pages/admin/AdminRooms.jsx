@@ -5,9 +5,23 @@ export default function AdminRooms() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
+      {/* Header Bar */}
+      <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h3 style={{ margin: 0, font: '800 18px "Manrope", sans-serif', color: '#0f172a' }}>Hostel Room Management</h3>
+            <span style={{ fontSize: '13px', color: '#64748b' }}>{rooms.length} total rooms configured</span>
+          </div>
+          <button type="button" className="btn-purple-primary" onClick={() => alert('Add Room Modal')}>
+            + Add Room
+          </button>
+        </div>
+      </div>
+
+      {/* Table Container */}
       <div className="owner-table-wrapper">
         {rooms.length === 0 ? (
-          <p className="empty-state-text" style={{ padding: '30px 0', textAlign: 'center' }}>No hostel rooms configured.</p>
+          <p className="empty-state-text" style={{ padding: '36px 0', textAlign: 'center', margin: 0 }}>No hostel rooms configured.</p>
         ) : (
           <table className="owner-table">
             <thead>
