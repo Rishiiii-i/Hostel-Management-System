@@ -7,13 +7,16 @@ import WardenNotices from './WardenNotices'
 import WardenProfile from './WardenProfile'
 
 export default function WardenDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
+  const validTabs = ['overview', 'attendance', 'complaints', 'notices', 'profile']
+  const currentTab = validTabs.includes(activeTab) ? activeTab : 'overview'
+
   return (
     <div className="warden-dashboard-page">
-      {activeTab === 'overview' && <WardenOverview setActiveTab={setActiveTab} />}
-      {activeTab === 'attendance' && <WardenAttendance />}
-      {activeTab === 'complaints' && <WardenComplaints />}
-      {activeTab === 'notices' && <WardenNotices />}
-      {activeTab === 'profile' && <WardenProfile profile={profile} setProfile={setProfile} />}
+      {currentTab === 'overview' && <WardenOverview setActiveTab={setActiveTab} />}
+      {currentTab === 'attendance' && <WardenAttendance />}
+      {currentTab === 'complaints' && <WardenComplaints />}
+      {currentTab === 'notices' && <WardenNotices />}
+      {currentTab === 'profile' && <WardenProfile profile={profile} setProfile={setProfile} />}
     </div>
   )
 }
