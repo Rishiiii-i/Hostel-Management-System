@@ -1,11 +1,5 @@
 import './StudentDashboard.css'
 import { useState } from 'react'
-import roomIcon from '../assets/icons/room.png'
-import feeIcon from '../assets/icons/fee.png'
-import complaintIcon from '../assets/icons/complaint.png'
-import attendanceIcon from '../assets/icons/attendance.png'
-import bellIcon from '../assets/icons/bell.png'
-import settingsIcon from '../assets/icons/settings.png'
 import Icon from '../components/Icon'
 
 export default function StudentDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
@@ -76,21 +70,20 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   }
 
   return (
-    <div className="student-dashboard">
-
+    <div className="student-dashboard-page">
       {/* OVERVIEW TAB */}
       {activeTab === 'overview' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="welcome-banner">
             <div className="banner-content">
-              <h1>Welcome back, {profile.fullName}</h1>
+              <h1>Welcome back, {profile?.fullName || 'Student'}</h1>
               <p>Manage your room details, fee receipts, gate passes, and maintenance requests in one dashboard.</p>
             </div>
             <div className="banner-quick-stats">
               <div className="stat-box">
                 <span className="stat-label">Assigned Room</span>
-                <strong className="stat-value">{profile.room}</strong>
-                <small className="stat-sub">{profile.block}</small>
+                <strong className="stat-value">{profile?.room || 'N/A'}</strong>
+                <small className="stat-sub">{profile?.block || 'Unassigned'}</small>
               </div>
               <div className="stat-box">
                 <span className="stat-label">Fee Status</span>
@@ -103,9 +96,9 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           </div>
 
           <div className="dashboard-feature-grid">
-            <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('room')}>
+            <div className="dash-card dashboard-feature-card room-theme" onClick={() => setActiveTab('room')}>
               <div className="feature-card-header">
-                <div className="feature-icon-box"><img src={roomIcon} alt="Room" width="24" height="24" /></div>
+                <div className="feature-icon-box"><Icon name="room" width="22" height="22" style={{ filter: 'brightness(0) invert(1)' }} /></div>
                 <span className="feature-badge">Active</span>
               </div>
               <h4>Room Details</h4>
@@ -113,9 +106,9 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <span className="dashboard-feature-card-link">View Details &rarr;</span>
             </div>
 
-            <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('fees')}>
+            <div className="dash-card dashboard-feature-card fees-theme" onClick={() => setActiveTab('fees')}>
               <div className="feature-card-header">
-                <div className="feature-icon-box"><img src={feeIcon} alt="Fees" width="24" height="24" /></div>
+                <div className="feature-icon-box"><Icon name="fee" width="22" height="22" style={{ filter: 'brightness(0) invert(1)' }} /></div>
                 <span className="feature-badge">Finance</span>
               </div>
               <h4>Fees & Payments</h4>
@@ -123,9 +116,9 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <span className="dashboard-feature-card-link">View Payments &rarr;</span>
             </div>
 
-            <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('complaints')}>
+            <div className="dash-card dashboard-feature-card complaints-theme" onClick={() => setActiveTab('complaints')}>
               <div className="feature-card-header">
-                <div className="feature-icon-box"><img src={complaintIcon} alt="Complaints" width="24" height="24" /></div>
+                <div className="feature-icon-box"><Icon name="complaint" width="22" height="22" style={{ filter: 'brightness(0) invert(1)' }} /></div>
                 <span className="feature-badge">Support</span>
               </div>
               <h4>Complaints & Repairs</h4>
@@ -133,9 +126,9 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <span className="dashboard-feature-card-link">Log Issue &rarr;</span>
             </div>
 
-            <div className="dash-card dashboard-feature-card" onClick={() => setActiveTab('gatepass')}>
+            <div className="dash-card dashboard-feature-card gatepass-theme" onClick={() => setActiveTab('gatepass')}>
               <div className="feature-card-header">
-                <div className="feature-icon-box"><img src={attendanceIcon} alt="Attendance" width="24" height="24" /></div>
+                <div className="feature-icon-box"><Icon name="attendance" width="22" height="22" style={{ filter: 'brightness(0) invert(1)' }} /></div>
                 <span className="feature-badge">Outing</span>
               </div>
               <h4>Gate Pass & Attendance</h4>
@@ -201,7 +194,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
                 <div className="tab-icon-wrapper">
-                  <img src={roomIcon} alt="Room" width="22" height="22" />
+                  <Icon name="room" width="22" height="22" />
                 </div>
                 <div>
                   <h2 className="tab-title">My Room Details</h2>
@@ -220,11 +213,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <div className="room-info-grid">
                 <div className="info-row">
                   <span className="info-label">Room Number</span>
-                  <strong className="info-val">{profile.room || '0'}</strong>
+                  <strong className="info-val">{profile?.room || 'N/A'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Hostel Block</span>
-                  <strong className="info-val">{profile.block || 'None'}</strong>
+                  <strong className="info-val">{profile?.block || 'Unassigned'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Bed Position</span>
@@ -285,7 +278,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
                 <div className="tab-icon-wrapper">
-                  <img src={feeIcon} alt="Fees" width="22" height="22" />
+                  <Icon name="fee" width="22" height="22" />
                 </div>
                 <div>
                   <h2 className="tab-title">Fees &amp; Payments</h2>
@@ -372,7 +365,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
                 <div className="tab-icon-wrapper">
-                  <img src={complaintIcon} alt="Complaints" width="22" height="22" />
+                  <Icon name="complaint" width="22" height="22" />
                 </div>
                 <div>
                   <h2 className="tab-title">Requests &amp; Complaints</h2>
@@ -432,7 +425,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
                 <div className="tab-icon-wrapper">
-                  <img src={attendanceIcon} alt="Attendance" width="22" height="22" />
+                  <Icon name="attendance" width="22" height="22" />
                 </div>
                 <div>
                   <h2 className="tab-title">Gate Pass &amp; Attendance</h2>
@@ -498,7 +491,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
                 <div className="tab-icon-wrapper">
-                  <img src={bellIcon} alt="Notices" width="22" height="22" />
+                  <Icon name="bell" width="22" height="22" />
                 </div>
                 <div>
                   <h2 className="tab-title">Hostel Notice Board</h2>
@@ -529,6 +522,92 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
+      {/* WARDEN DESK TAB */}
+      {activeTab === 'warden' && (
+        <div className="tab-pane animate-fade-in-slide-up">
+          <div className="tab-header-box">
+            <div className="tab-title-row">
+              <div className="tab-title-with-icon">
+                <div className="tab-icon-wrapper">
+                  <Icon name="user" width="22" height="22" />
+                </div>
+                <div>
+                  <h2 className="tab-title">Hostel Warden Desk</h2>
+                  <p className="tab-subtitle">Contact your chief warden, view official desk hours, and request emergency assistance.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="dashboard-grid-3col">
+            <div className="dash-card">
+              <div className="card-title-badge">
+                <h3>Chief Warden Details</h3>
+                <span className="status-badge paid">On Duty</span>
+              </div>
+              <div className="room-info-grid">
+                <div className="info-row">
+                  <span className="info-label">Full Name</span>
+                  <strong className="info-val">Macha Rishi</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Official Email</span>
+                  <strong className="info-val">warden@smarthostel.com</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Contact Number</span>
+                  <strong className="info-val">+91 98765 43210</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Office Location</span>
+                  <strong className="info-val">Shnoor Hills, Block A (Ground Floor)</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="dash-card">
+              <div className="card-title-badge">
+                <h3>Desk Hours &amp; Support</h3>
+                <span className="status-badge info">Active</span>
+              </div>
+              <div className="room-info-grid">
+                <div className="info-row">
+                  <span className="info-label">Morning Hours</span>
+                  <strong className="info-val">09:00 AM – 12:30 PM</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Evening Hours</span>
+                  <strong className="info-val">04:30 PM – 07:30 PM</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Night Curfew</span>
+                  <strong className="info-val">10:00 PM Sharp</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Emergency Helpline</span>
+                  <strong className="info-val">+91 12345 67890</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="dash-card">
+              <div className="card-title-badge">
+                <h3>Quick Actions</h3>
+                <span className="status-badge paid">Instant</span>
+              </div>
+              <div className="warden-quick-actions-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
+                <button type="button" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }} onClick={() => setActiveTab('complaints')}>
+                  <Icon name="complaint" width="16" height="16" /> Log Maintenance Ticket
+                </button>
+                <button type="button" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }} onClick={() => setActiveTab('gatepass')}>
+                  <Icon name="attendance" width="16" height="16" /> Apply Outing Gate Pass
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SETTINGS TAB */}
       {activeTab === 'settings' && (
         <div className="tab-pane animate-fade-in-slide-up">
@@ -536,7 +615,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="tab-title-row">
               <div className="tab-title-with-icon">
                 <div className="tab-icon-wrapper">
-                  <img src={settingsIcon} alt="Settings" width="22" height="22" />
+                  <Icon name="settings" width="22" height="22" />
                 </div>
                 <div>
                   <h2 className="tab-title">Account &amp; Profile Settings</h2>
@@ -559,8 +638,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 <Icon name="user" width="28" height="28" />
               </div>
               <div className="profile-card-details">
-                <h3>{profile.fullName}</h3>
-                <span className="profile-roll">{profile.rollNo} &bull; Computer Science</span>
+                <h3>{profile?.fullName || 'Student'}</h3>
+                <span className="profile-roll">{profile?.rollNo || 'Resident'} &bull; Computer Science</span>
                 <span className="profile-badge-active">Active Student Resident</span>
               </div>
             </div>
@@ -573,8 +652,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Full Name
                     <input
                       type="text"
-                      value={profile.fullName}
-                      onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                      value={profile?.fullName || ''}
+                      onChange={(e) => setProfile({ ...(profile || {}), fullName: e.target.value })}
                       required
                     />
                   </label>
@@ -583,8 +662,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Email Address
                     <input
                       type="email"
-                      value={profile.email}
-                      onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                      value={profile?.email || ''}
+                      onChange={(e) => setProfile({ ...(profile || {}), email: e.target.value })}
                       required
                     />
                   </label>
@@ -593,8 +672,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Phone Number
                     <input
                       type="tel"
-                      value={profile.phone}
-                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                      value={profile?.phone || ''}
+                      onChange={(e) => setProfile({ ...(profile || {}), phone: e.target.value })}
                       required
                     />
                   </label>
@@ -603,8 +682,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Emergency Contact
                     <input
                       type="tel"
-                      value={profile.emergencyContact}
-                      onChange={(e) => setProfile({ ...profile, emergencyContact: e.target.value })}
+                      value={profile?.emergencyContact || ''}
+                      onChange={(e) => setProfile({ ...(profile || {}), emergencyContact: e.target.value })}
                       required
                     />
                   </label>
@@ -613,8 +692,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Room Number
                     <input
                       type="text"
-                      value={profile.room}
-                      onChange={(e) => setProfile({ ...profile, room: e.target.value })}
+                      value={profile?.room || ''}
+                      onChange={(e) => setProfile({ ...(profile || {}), room: e.target.value })}
                       required
                     />
                   </label>
@@ -623,8 +702,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Hostel Block
                     <input
                       type="text"
-                      value={profile.block}
-                      onChange={(e) => setProfile({ ...profile, block: e.target.value })}
+                      value={profile?.block || ''}
+                      onChange={(e) => setProfile({ ...(profile || {}), block: e.target.value })}
                       required
                     />
                   </label>

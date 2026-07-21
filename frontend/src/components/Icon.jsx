@@ -12,19 +12,28 @@ import userIcon from '../assets/icons/user.png'
 import eyeIcon from '../assets/icons/eye.png'
 import eyeOffIcon from '../assets/icons/eye-off.png'
 import checkmarkIcon from '../assets/icons/checkmark.png'
+import googleIcon from '../assets/icons/google.png'
+import sunIcon from '../assets/icons/sun.png'
+import moonIcon from '../assets/icons/moon.png'
 
-export default function Icon({ name, width = 20, height = 20, className = "" }) {
+export default function Icon({ name, width = 20, height = 20, className = "", style = {} }) {
   const iconMap = {
     room: roomIcon,
+    bed: roomIcon,
     fee: feeIcon,
-    note: complaintIcon,
+    payment: feeIcon,
     complaint: complaintIcon,
-    check: attendanceIcon,
+    maintenance: complaintIcon,
+    note: complaintIcon,
     attendance: attendanceIcon,
+    gatepass: attendanceIcon,
+    pass: attendanceIcon,
+    check: attendanceIcon,
     users: attendanceIcon,
     chart: attendanceIcon,
     bell: bellIcon,
     notice: bellIcon,
+    broadcast: bellIcon,
     search: searchIcon,
     building: logoIcon,
     logo: logoIcon,
@@ -32,11 +41,15 @@ export default function Icon({ name, width = 20, height = 20, className = "" }) 
     settings: settingsIcon,
     logout: logoutIcon,
     user: userIcon,
+    profile: userIcon,
     eye: eyeIcon,
     'eye-off': eyeOffIcon,
-    checkmark: checkmarkIcon
+    checkmark: checkmarkIcon,
+    google: googleIcon,
+    sun: sunIcon,
+    moon: moonIcon
   }
 
   const src = iconMap[name] || roomIcon
-  return <img src={src} alt={name || "icon"} width={width} height={height} className={className} />
+  return <img src={src} alt={name || "icon"} width={width} height={height} className={className} style={style} />
 }

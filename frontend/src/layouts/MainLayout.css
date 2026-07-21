@@ -84,7 +84,7 @@ html.dark .header-left h2 {
 }
 
 .header-search img,
-.header-search svg {
+.header-search img {
   position: absolute;
   left: 12px;
   pointer-events: none;
