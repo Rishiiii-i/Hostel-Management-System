@@ -1,8 +1,9 @@
 import './StudentDashboard.css'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Icon from '../components/Icon'
 
 export default function StudentDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
+  const fileInputRef = useRef(null)
   const [complaints, setComplaints] = useState([])
   const [gatePasses, setGatePasses] = useState([])
   const [transactions, setTransactions] = useState([])
@@ -18,6 +19,37 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const [payAmount, setPayAmount] = useState('450.00')
 
   const [savedSuccessMsg, setSavedSuccessMsg] = useState('')
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size should be less than 5MB.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const updated = { ...(profile || {}), photo: reader.result }
+      if (setProfile) setProfile(updated)
+      try {
+        localStorage.setItem('shm_user_profile', JSON.stringify(updated))
+      } catch (err) {}
+      setSavedSuccessMsg('Profile photo updated successfully!')
+      setTimeout(() => setSavedSuccessMsg(''), 4000)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemovePhoto = () => {
+    const updated = { ...(profile || {}), photo: '' }
+    if (setProfile) setProfile(updated)
+    try {
+      localStorage.setItem('shm_user_profile', JSON.stringify(updated))
+    } catch (err) {}
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    setSavedSuccessMsg('Profile photo removed.')
+    setTimeout(() => setSavedSuccessMsg(''), 4000)
+  }
 
   const handleSaveProfile = (e) => {
     e.preventDefault()
@@ -633,14 +665,76 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           )}
 
           <div className="settings-container-grid">
-            <div className="dash-card profile-card-header">
-              <div className="profile-avatar-big">
-                <Icon name="user" width="28" height="28" />
+            <div className="dash-card profile-card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div className="profile-avatar-big" style={{ overflow: 'hidden', position: 'relative', width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, #1e6b51 0%, #10b981 100%)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  {profile?.photo ? (
+                    <img src={profile.photo} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <Icon name="user" width="32" height="32" />
+                  )}
+                </div>
+                <div className="profile-card-details">
+                  <h3>{profile?.fullName || 'Student'}</h3>
+                  <span className="profile-roll">{profile?.rollNo || 'Resident'} &bull; Computer Science</span>
+                  <span className="profile-badge-active">Active Student Resident</span>
+                </div>
               </div>
-              <div className="profile-card-details">
-                <h3>{profile?.fullName || 'Student'}</h3>
-                <span className="profile-roll">{profile?.rollNo || 'Resident'} &bull; Computer Science</span>
-                <span className="profile-badge-active">Active Student Resident</span>
+
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handlePhotoUpload}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '9px 16px',
+                    borderRadius: '10px',
+                    fontWeight: 600,
+                    fontSize: '13.5px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  {profile?.photo ? 'Change Photo' : 'Add Photo'}
+                </button>
+
+                {profile?.photo && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    style={{
+                      background: '#fee2e2',
+                      color: '#dc2626',
+                      border: '1px solid #fecaca',
+                      padding: '9px 16px',
+                      borderRadius: '10px',
+                      fontWeight: 600,
+                      fontSize: '13.5px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    Remove Photo
+                  </button>
+                )}
               </div>
             </div>
 

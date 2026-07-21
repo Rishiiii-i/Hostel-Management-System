@@ -46,24 +46,38 @@ function App() {
   const [activeTab, setActiveTab] = useState('overview')
   const { user, loading } = useAuth()
   
-  const [profile, setProfile] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    emergencyContact: '',
-    room: '',
-    block: '',
-    rollNo: ''
+  const [profile, setProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem('shm_user_profile')
+      if (saved) return JSON.parse(saved)
+    } catch (e) {}
+    return {
+      fullName: '',
+      email: '',
+      phone: '',
+      emergencyContact: '',
+      room: '',
+      block: '',
+      rollNo: '',
+      photo: ''
+    }
   })
 
   // Synchronize local editable profile state when authenticated user changes
   useEffect(() => {
     if (user) {
-      setProfile(prev => ({
-        ...prev,
-        fullName: user.name || prev.fullName,
-        email: user.email || prev.email
-      }))
+      setProfile(prev => {
+        const updated = {
+          ...prev,
+          fullName: prev.fullName || user.name || '',
+          email: prev.email || user.email || '',
+          photo: prev.photo || user.photoURL || ''
+        }
+        try {
+          localStorage.setItem('shm_user_profile', JSON.stringify(updated))
+        } catch (e) {}
+        return updated
+      })
     }
   }, [user])
 
@@ -142,7 +156,7 @@ function App() {
       <ProtectedRoute>
         <Suspense fallback={<LoadingSpinner />}>
           <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
-            <WardenDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
+            <WardenDashboard activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
           </MainLayout>
         </Suspense>
       </ProtectedRoute>
