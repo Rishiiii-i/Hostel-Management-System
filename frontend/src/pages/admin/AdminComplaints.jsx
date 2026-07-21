@@ -9,18 +9,23 @@ export default function AdminComplaints() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      <div className="tab-header-box" style={{ background: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '20px', padding: '16px 20px', marginBottom: '20px' }}>
+      {/* Header Bar */}
+      <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '14px', fontWeight: 600, color: '#64748b' }}>{complaints.length} total complaints</span>
+          <div>
+            <h3 style={{ margin: 0, font: '800 18px "Manrope", sans-serif', color: '#0f172a' }}>Student Complaints &amp; Issues</h3>
+            <span style={{ fontSize: '13px', color: '#64748b' }}>{complaints.length} total complaints logged</span>
+          </div>
           <button type="button" className="owner-refresh-btn" onClick={handleRefresh}>
-            Refresh
+            Refresh List
           </button>
         </div>
       </div>
 
+      {/* Table Container */}
       <div className="owner-table-wrapper">
         {complaints.length === 0 ? (
-          <p className="empty-state-text" style={{ padding: '30px 0', textAlign: 'center' }}>No complaints logged.</p>
+          <p className="empty-state-text" style={{ padding: '36px 0', textAlign: 'center', margin: 0 }}>No complaints logged by students yet.</p>
         ) : (
           <table className="owner-table">
             <thead>

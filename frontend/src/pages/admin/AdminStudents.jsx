@@ -17,7 +17,8 @@ export default function AdminStudents() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      <div className="tab-header-box" style={{ background: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '20px', padding: '16px 20px', marginBottom: '20px' }}>
+      {/* Search & Action Header Bar */}
+      <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px' }}>
             <div style={{ position: 'relative', flex: 1 }}>
@@ -36,11 +37,11 @@ export default function AdminStudents() {
                   background: '#f8fafc'
                 }}
               />
-              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, display: 'flex' }}>
                 <Icon name="search" width="16" height="16" />
               </span>
             </div>
-            <button type="button" className="btn-purple-primary" style={{ padding: '10px 18px', background: '#f1f5f9', color: '#0f172a', border: '1px solid #e2e8f0', boxShadow: 'none' }}>
+            <button type="button" className="owner-refresh-btn" style={{ padding: '10px 18px' }}>
               Search
             </button>
           </div>
@@ -54,9 +55,10 @@ export default function AdminStudents() {
         </div>
       </div>
 
+      {/* Table Container */}
       <div className="owner-table-wrapper">
         {filtered.length === 0 ? (
-          <p className="empty-state-text" style={{ padding: '30px 0', textAlign: 'center' }}>No enrolled students found.</p>
+          <p className="empty-state-text" style={{ padding: '36px 0', textAlign: 'center', margin: 0 }}>No enrolled students found.</p>
         ) : (
           <table className="owner-table">
             <thead>
