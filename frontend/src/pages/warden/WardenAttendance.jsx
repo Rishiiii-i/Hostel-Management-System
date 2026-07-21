@@ -27,7 +27,7 @@ export default function WardenAttendance() {
   return (
     <div className="tab-pane animate-fade-in-slide-up">
       {/* Top Filter Bar */}
-      <div className="dash-card" style={{ padding: '20px 24px' }}>
+      <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             <input
@@ -53,16 +53,16 @@ export default function WardenAttendance() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button
               type="button"
-              className="btn-pay-fee"
-              style={{ padding: '7px 16px', fontSize: '13px' }}
+              className="btn-purple-primary"
+              style={{ padding: '8px 16px', fontSize: '13px' }}
               onClick={() => handleMarkAll('Present')}
             >
               All Present
             </button>
             <button
               type="button"
-              className="btn-report-problem"
-              style={{ padding: '7px 16px', fontSize: '13px' }}
+              className="owner-refresh-btn"
+              style={{ padding: '8px 16px', fontSize: '13px', color: '#dc2626', borderColor: '#fecaca', background: '#fee2e2' }}
               onClick={() => handleMarkAll('Absent')}
             >
               All Absent
@@ -72,26 +72,26 @@ export default function WardenAttendance() {
       </div>
 
       {/* 4 Summary Cards Grid */}
-      <div className="dashboard-feature-grid">
-        <div className="dash-card">
+      <div className="owner-stat-grid" style={{ marginBottom: '24px' }}>
+        <div className="owner-card-box">
           <small style={{ color: '#059669', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Present</small>
           <div style={{ font: '800 32px "Manrope", sans-serif', color: '#10b981', marginTop: '6px' }}>{presentCount}</div>
           <small style={{ color: '#64748b' }}>{students.length ? Math.round((presentCount / students.length) * 100) : 0}%</small>
         </div>
 
-        <div className="dash-card">
+        <div className="owner-card-box">
           <small style={{ color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Absent</small>
           <div style={{ font: '800 32px "Manrope", sans-serif', color: '#f43f5e', marginTop: '6px' }}>{absentCount}</div>
           <small style={{ color: '#64748b' }}>{students.length ? Math.round((absentCount / students.length) * 100) : 0}%</small>
         </div>
 
-        <div className="dash-card">
+        <div className="owner-card-box">
           <small style={{ color: '#d97706', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Late</small>
           <div style={{ font: '800 32px "Manrope", sans-serif', color: '#f59e0b', marginTop: '6px' }}>{lateCount}</div>
           <small style={{ color: '#64748b' }}>{students.length ? Math.round((lateCount / students.length) * 100) : 0}%</small>
         </div>
 
-        <div className="dash-card">
+        <div className="owner-card-box">
           <small style={{ color: '#0284c7', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>On Leave</small>
           <div style={{ font: '800 32px "Manrope", sans-serif', color: '#0284c7', marginTop: '6px' }}>{leaveCount}</div>
           <small style={{ color: '#64748b' }}>{students.length ? Math.round((leaveCount / students.length) * 100) : 0}%</small>
@@ -103,8 +103,8 @@ export default function WardenAttendance() {
         <span>Attendance not marked yet for today. Mark and save below.</span>
       </div>
 
-      {/* Student List */}
-      <div className="dash-card">
+      {/* Student List Container */}
+      <div className="owner-card-box">
         <div style={{ fontSize: '14px', fontWeight: 700, color: '#64748b', marginBottom: '16px' }}>{filtered.length} students</div>
         {filtered.length === 0 ? (
           <p className="empty-state-text" style={{ padding: '30px 0', textAlign: 'center', margin: 0 }}>No students found.</p>

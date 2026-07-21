@@ -10,7 +10,7 @@ export default function WardenComplaints() {
   return (
     <div className="tab-pane animate-fade-in-slide-up">
       {/* Header Bar */}
-      <div className="dash-card" style={{ padding: '20px 24px' }}>
+      <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h3 style={{ margin: 0, font: '800 18px "Manrope", sans-serif', color: '#0f172a' }}>Student Complaints &amp; Requests</h3>

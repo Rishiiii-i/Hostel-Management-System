@@ -3,7 +3,7 @@ import Icon from '../../components/Icon'
 
 export default function WardenProfile({ profile, setProfile }) {
   const [formData, setFormData] = useState({
-    fullName: profile?.fullName || 'Macha Rishi',
+    fullName: profile?.fullName || 'Warden',
     email: profile?.email || 'warden@smarthostel.com',
     phone: profile?.phone || '+91 9876543210',
     assignedBlocks: profile?.assignedBlocks || 'All Hostel Blocks (A, B, C, F)',
@@ -79,7 +79,7 @@ export default function WardenProfile({ profile, setProfile }) {
           placeItems: 'center',
           boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
         }}>
-          MR
+          W
         </div>
         <div>
           <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>{formData.fullName}</h2>
@@ -177,12 +177,12 @@ export default function WardenProfile({ profile, setProfile }) {
 
       {/* Password Security Form */}
       <div className="owner-card-box">
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
           <h3 style={{ margin: 0, font: '800 18px "Manrope", sans-serif', color: '#0f172a' }}>Security &amp; Password</h3>
           <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '13.5px' }}>Update your portal access password.</p>
         </div>
 
-        <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '420px' }}>
+        <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '460px', margin: '0 auto' }}>
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Current Password</label>
             <div style={{ position: 'relative' }}>
@@ -249,10 +249,11 @@ export default function WardenProfile({ profile, setProfile }) {
             </div>
           </div>
 
-          <div style={{ marginTop: '6px' }}>
+          <div style={{ marginTop: '6px', textAlign: 'center' }}>
             <button
               type="submit"
               className="btn-purple-primary"
+              style={{ width: '100%', justifyContent: 'center' }}
             >
               Update Password
             </button>

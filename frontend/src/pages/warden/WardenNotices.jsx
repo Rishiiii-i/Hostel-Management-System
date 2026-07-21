@@ -1,16 +1,7 @@
 import { useState } from 'react'
 
 export default function WardenNotices() {
-  const [notices, setNotices] = useState([
-    {
-      id: 'N-101',
-      title: 'Hostel Maintenance Inspection',
-      category: 'Maintenance',
-      body: 'Quarterly room & electrical safety inspection will take place tomorrow across Blocks A & B.',
-      date: 'July 20, 2026',
-      author: 'Macha Rishi (Warden)'
-    }
-  ])
+  const [notices, setNotices] = useState([])
 
   const [showModal, setShowModal] = useState(false)
   const [newNotice, setNewNotice] = useState({
@@ -33,7 +24,7 @@ export default function WardenNotices() {
       category: newNotice.category,
       body: newNotice.body,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      author: 'Macha Rishi (Warden)'
+      author: 'Warden'
     }
 
     setNotices([item, ...notices])
@@ -44,7 +35,7 @@ export default function WardenNotices() {
   return (
     <div className="tab-pane animate-fade-in-slide-up">
       {/* Header Bar */}
-      <div className="owner-card-box" style={{ padding: '20px 24px' }}>
+      <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h3 style={{ margin: 0, font: '800 18px "Manrope", sans-serif', color: '#0f172a' }}>Hostel Notice Board</h3>

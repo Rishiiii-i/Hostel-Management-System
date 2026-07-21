@@ -1,4 +1,5 @@
 import './WardenDashboard.css'
+import '../admin/AdminDashboard.css'
 import WardenOverview from './WardenOverview'
 import WardenAttendance from './WardenAttendance'
 import WardenComplaints from './WardenComplaints'
