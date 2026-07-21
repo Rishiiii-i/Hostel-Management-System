@@ -8,7 +8,9 @@ import {
   sendPasswordResetEmail, 
   signOut, 
   updateProfile,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  confirmPasswordReset,
+  verifyPasswordResetCode
 } from 'firebase/auth';
 
 const AuthContext = createContext(null);
@@ -250,6 +252,14 @@ export const AuthProvider = ({ children }) => {
     await sendPasswordResetEmail(auth, email);
   };
 
+  const verifyResetCode = async (code) => {
+    return await verifyPasswordResetCode(auth, code);
+  };
+
+  const confirmReset = async (code, newPassword) => {
+    await confirmPasswordReset(auth, code, newPassword);
+  };
+
   const logOut = async () => {
     const confirmed = window.confirm('Are you sure you want to logout?')
     if (!confirmed) return
@@ -276,6 +286,8 @@ export const AuthProvider = ({ children }) => {
     logInWithEmail,
     logInWithGoogle,
     sendPasswordReset,
+    verifyResetCode,
+    confirmReset,
     logOut
   };
 
