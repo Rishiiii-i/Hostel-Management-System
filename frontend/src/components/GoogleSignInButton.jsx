@@ -1,5 +1,5 @@
 import './GoogleSignInButton.css'
-import googleIcon from '../assets/icons/google.png'
+import Icon from './Icon'
 
 export default function GoogleSignInButton({ text = 'Sign in with Google', onClick, type = 'button' }) {
   return (
@@ -8,7 +8,7 @@ export default function GoogleSignInButton({ text = 'Sign in with Google', onCli
       className="auth-google-btn" 
       onClick={onClick}
     >
-      <img src={googleIcon} alt="Google" width="20" height="20" className="auth-google-icon" />
+      <Icon name="google" width="20" height="20" className="auth-google-icon" />
       <span>{text}</span>
     </button>
   )

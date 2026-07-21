@@ -904,7 +904,8 @@ html {
   margin: 4px 0 2px;
 }
 
-.stat-sub {
+.dashboard-header .stat-sub,
+.hero-header .stat-sub {
   font-size: 11px;
   color: #d8efe3;
 }

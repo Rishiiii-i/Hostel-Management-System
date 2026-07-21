@@ -1,0 +1,233 @@
+/* Rector / Warden Dashboard Styling - Exact Match to Reference Screenshots */
+.warden-dashboard-page {
+  padding: 36px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  box-sizing: border-box;
+  font-family: 'DM Sans', 'Outfit', system-ui, sans-serif;
+  color: #1e293b;
+}
+
+/* 4 Top Stat Cards */
+.rector-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1100px) {
+  .rector-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .rector-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rector-stat-card {
+  border-radius: 20px;
+  padding: 22px 24px;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+}
+
+.rector-stat-card.teal {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.22);
+}
+
+.rector-stat-card.red {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  box-shadow: 0 8px 20px rgba(244, 63, 94, 0.22);
+}
+
+.rector-stat-card.amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.22);
+}
+
+.rector-stat-card.purple {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.22);
+}
+
+.rector-stat-card .card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rector-stat-card .card-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rector-stat-card .card-icon-box img {
+  width: 22px !important;
+  height: 22px !important;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  filter: brightness(0) invert(1) !important;
+}
+
+.rector-stat-card .card-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  opacity: 0.92;
+}
+
+.rector-stat-card .card-value {
+  font: 800 34px 'Manrope', sans-serif;
+  line-height: 1.1;
+  margin: 12px 0 4px 0;
+}
+
+.rector-stat-card .card-sub {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+/* Mark Now Button inside Attendance Card */
+.rector-mark-btn {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  width: auto;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.rector-mark-btn:hover {
+  background: rgba(255, 255, 255, 0.38);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Attendance Option Pills */
+.att-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.att-pill-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.att-pill-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.att-pill-btn.present.active {
+  background: #d1fae5;
+  border-color: #10b981;
+  color: #059669;
+  font-weight: 700;
+}
+
+.att-pill-btn.absent.active {
+  background: #fee2e2;
+  border-color: #f43f5e;
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.att-pill-btn.late.active {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #d97706;
+  font-weight: 700;
+}
+
+.att-pill-btn.leave.active {
+  background: #e0f2fe;
+  border-color: #0284c7;
+  color: #0369a1;
+  font-weight: 700;
+}
+
+/* Refresh Button */
+.owner-refresh-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.owner-refresh-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* Emerald Green Primary Action Button - Matching Admin */
+.btn-purple-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-purple-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+}
