@@ -1,7 +1,6 @@
 import './ThemeToggle.css'
 import { useState, useEffect } from 'react'
-import sunIcon from '../assets/icons/sun.png'
-import moonIcon from '../assets/icons/moon.png'
+import Icon from './Icon'
 
 export default function ThemeToggle() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -31,9 +30,9 @@ export default function ThemeToggle() {
       <span className="toggle-track">
         <span className="toggle-thumb">
           {darkMode ? (
-            <img src={moonIcon} alt="Dark Mode" width="13" height="13" />
+            <Icon name="moon" width="13" height="13" />
           ) : (
-            <img src={sunIcon} alt="Light Mode" width="13" height="13" />
+            <Icon name="sun" width="13" height="13" />
           )}
         </span>
       </span>

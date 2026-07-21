@@ -8,6 +8,8 @@ import { useAuth } from './context/AuthContext'
 const Login = lazy(() => import('./pages/Login'))
 const LandingPage = lazy(() => import('./pages/LandingPage'))
 const StudentDashboard = lazy(() => import('./pages/StudentDashboard'))
+const WardenDashboard = lazy(() => import('./pages/warden/WardenDashboard'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 
 function LoadingSpinner() {
   return (
@@ -71,13 +73,13 @@ function App() {
       const searchParams = new URLSearchParams(window.location.search)
       const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
 
-      const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
+      const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash === '#warden-dashboard' || hash === '#admin-dashboard' || hash.startsWith('#dashboard')
       const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password' || hash === '#reset-password' || isResetAction
 
       if (isDashboardRoute && !user && !loading) {
         window.location.hash = '#login'
       } else if (isAuthRoute && user) {
-        window.location.hash = '#dashboard'
+        window.location.hash = (user.role === 'administrator' || user.role === 'admin') ? '#admin-dashboard' : user.role === 'warden' ? '#warden-dashboard' : '#dashboard'
       } else {
         setRoute(hash)
       }
@@ -87,13 +89,13 @@ function App() {
     const searchParams = new URLSearchParams(window.location.search)
     const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
 
-    const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash.startsWith('#dashboard')
+    const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash === '#warden-dashboard' || hash === '#admin-dashboard' || hash.startsWith('#dashboard')
     const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password' || hash === '#reset-password' || isResetAction
 
     if (isDashboardRoute && !user && !loading) {
       window.location.hash = '#login'
     } else if (isAuthRoute && user) {
-      window.location.hash = '#dashboard'
+      window.location.hash = (user.role === 'administrator' || user.role === 'admin') ? '#admin-dashboard' : user.role === 'warden' ? '#warden-dashboard' : '#dashboard'
     } else {
       setRoute(hash)
     }
@@ -120,6 +122,30 @@ function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <AuthLayout><Login mode={mode} oobCode={oobCode} /></AuthLayout>
       </Suspense>
+    )
+  }
+
+  if (route === '#admin-dashboard' || ((user?.role === 'administrator' || user?.role === 'admin') && (route === '#dashboard' || route.startsWith('#dashboard')))) {
+    return (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
+            <AdminDashboard activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
+          </MainLayout>
+        </Suspense>
+      </ProtectedRoute>
+    )
+  }
+
+  if (route === '#warden-dashboard' || (user?.role === 'warden' && (route === '#dashboard' || route.startsWith('#dashboard')))) {
+    return (
+      <ProtectedRoute>
+        <Suspense fallback={<LoadingSpinner />}>
+          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
+            <WardenDashboard activeTab={activeTab} setActiveTab={setActiveTab} />
+          </MainLayout>
+        </Suspense>
+      </ProtectedRoute>
     )
   }
 

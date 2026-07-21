@@ -456,9 +456,9 @@ export default function Login({ mode = 'login', oobCode = '' }) {
             disabled={loading}
           >
             {showPassword ? (
-              <Icon name="eye-off" width="18" height="18" />
+              <Icon name="eye-off" width={20} height={20} />
             ) : (
-              <Icon name="eye" width="18" height="18" />
+              <Icon name="eye" width={20} height={20} />
             )}
           </button>
         </div>
