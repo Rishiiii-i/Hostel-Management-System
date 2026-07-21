@@ -185,12 +185,21 @@ export default function Login({ mode = 'login', oobCode = '' }) {
     setError('')
     setLoading(true)
     try {
+      let res;
       if (isSignup) {
-        await signUpWithEmail(name, email, password, rollNo)
+        res = await signUpWithEmail(name, email, password, rollNo)
       } else {
-        await logInWithEmail(email, password)
+        res = await logInWithEmail(email, password)
       }
-      window.location.hash = '#dashboard'
+
+      const role = res?.user?.role || ''
+      if (role === 'administrator' || role === 'admin') {
+        window.location.hash = '#admin-dashboard'
+      } else if (role === 'warden') {
+        window.location.hash = '#warden-dashboard'
+      } else {
+        window.location.hash = '#dashboard'
+      }
     } catch (err) {
       console.error('Auth error:', err?.code, err?.message)
       if (err.code === 'auth/operation-not-allowed') {
@@ -213,8 +222,15 @@ export default function Login({ mode = 'login', oobCode = '' }) {
     setError('')
     setLoading(true)
     try {
-      await logInWithGoogle()
-      window.location.hash = '#dashboard'
+      const res = await logInWithGoogle()
+      const role = res?.user?.role || ''
+      if (role === 'administrator' || role === 'admin') {
+        window.location.hash = '#admin-dashboard'
+      } else if (role === 'warden') {
+        window.location.hash = '#warden-dashboard'
+      } else {
+        window.location.hash = '#dashboard'
+      }
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Google sign-in popup was closed before completion.')
