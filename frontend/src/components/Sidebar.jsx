@@ -1,52 +1,110 @@
 import './Sidebar.css'
 import Icon from './Icon'
 import { useAuth } from '../context/AuthContext'
-import roomIcon from '../assets/icons/room.png'
-import feeIcon from '../assets/icons/fee.png'
-import complaintIcon from '../assets/icons/complaint.png'
-import attendanceIcon from '../assets/icons/attendance.png'
-import bellIcon from '../assets/icons/bell.png'
-import homeIcon from '../assets/icons/home.png'
-import settingsIcon from '../assets/icons/settings.png'
 
 export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
   const { user, logOut } = useAuth()
 
-  const navItems = [
+  const isAdmin = user?.role === 'administrator' || user?.role === 'admin' || window.location.hash === '#admin-dashboard'
+  const isWarden = user?.role === 'warden' || window.location.hash === '#warden-dashboard'
+
+  const navItems = isAdmin ? [
     {
       id: 'overview',
-      label: 'Home',
-      icon: <img src={homeIcon} alt="Home" width="18" height="18" />
+      label: 'Dashboard',
+      icon: <Icon name="home" width="18" height="18" />
     },
     {
-      id: 'room',
-      label: 'My Room',
-      icon: <img src={roomIcon} alt="Room" width="18" height="18" />
+      id: 'students',
+      label: 'Students',
+      icon: <Icon name="user" width="18" height="18" />
+    },
+    {
+      id: 'rooms',
+      label: 'Rooms',
+      icon: <Icon name="room" width="18" height="18" />
     },
     {
       id: 'fees',
-      label: 'Fees & Payments',
-      icon: <img src={feeIcon} alt="Fees" width="18" height="18" />
+      label: 'Fees',
+      icon: <Icon name="fee" width="18" height="18" />
     },
     {
       id: 'complaints',
       label: 'Complaints',
-      icon: <img src={complaintIcon} alt="Complaints" width="18" height="18" />
-    },
-    {
-      id: 'gatepass',
-      label: 'Gate Pass',
-      icon: <img src={attendanceIcon} alt="Attendance" width="18" height="18" />
+      icon: <Icon name="complaint" width="18" height="18" />
     },
     {
       id: 'notices',
       label: 'Notices',
-      icon: <img src={bellIcon} alt="Notices" width="18" height="18" />
+      icon: <Icon name="bell" width="18" height="18" />
+    },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: <Icon name="user" width="18" height="18" />
+    }
+  ] : isWarden ? [
+    {
+      id: 'overview',
+      label: 'Dashboard',
+      icon: <Icon name="home" width="18" height="18" />
+    },
+    {
+      id: 'attendance',
+      label: 'Attendance',
+      icon: <Icon name="attendance" width="18" height="18" />
+    },
+    {
+      id: 'complaints',
+      label: 'Complaints',
+      icon: <Icon name="complaint" width="18" height="18" />
+    },
+    {
+      id: 'notices',
+      label: 'Notices',
+      icon: <Icon name="bell" width="18" height="18" />
+    },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: <Icon name="user" width="18" height="18" />
+    }
+  ] : [
+    {
+      id: 'overview',
+      label: 'Home',
+      icon: <Icon name="home" width="18" height="18" />
+    },
+    {
+      id: 'room',
+      label: 'My Room',
+      icon: <Icon name="room" width="18" height="18" />
+    },
+    {
+      id: 'fees',
+      label: 'Fees & Payments',
+      icon: <Icon name="fee" width="18" height="18" />
+    },
+    {
+      id: 'complaints',
+      label: 'Complaints',
+      icon: <Icon name="complaint" width="18" height="18" />
+    },
+    {
+      id: 'gatepass',
+      label: 'Gate Pass',
+      icon: <Icon name="attendance" width="18" height="18" />
+    },
+    {
+      id: 'notices',
+      label: 'Notices',
+      icon: <Icon name="bell" width="18" height="18" />
     },
     {
       id: 'settings',
       label: 'Profile',
-      icon: <img src={settingsIcon} alt="Settings" width="18" height="18" />
+      icon: <Icon name="settings" width="18" height="18" />
     }
   ]
 
@@ -58,6 +116,10 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
     }
   }
 
+  const userInitials = profile?.fullName
+    ? profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+    : isAdmin ? 'SA' : isWarden ? 'MR' : 'ST'
+
   return (
     <aside className="dashboard-sidebar">
       <div className="sidebar-brand">
@@ -67,7 +129,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
           onClick={() => setActiveTab('overview')}
           style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
         >
-          <span>
+          <span className="brand-logo-icon">
             <Icon name="building" />
           </span>
           Smart Hostel
@@ -91,16 +153,16 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
       <div className="sidebar-footer">
         <div className="user-profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', minWidth: 0, flex: 1 }}>
-            <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'grid', placeItems: 'center', background: '#1e6b51', color: '#ffffff', flexShrink: 0 }}>
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <Icon name="user" width="20" height="20" />
-              )}
+            <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'grid', placeItems: 'center', background: '#1e6b51', color: '#ffffff', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>
+              {userInitials}
             </div>
             <div className="user-info" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-              <span className="user-name" style={{ fontWeight: 600, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.fullName || user?.name || 'Rishi Macha'}</span>
-              <span className="user-role" style={{ fontSize: '0.75rem', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.room || 'Room 204'} &bull; {profile.block || 'Block A'}</span>
+              <span className="user-name" style={{ fontWeight: 700, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {profile?.fullName || user?.name || (isAdmin ? 'System Administrator' : isWarden ? 'Macha Rishi' : 'Student')}
+              </span>
+              <span className="user-role" style={{ fontSize: '0.75rem', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {isAdmin ? 'System Administrator' : isWarden ? 'Hostel Warden' : (profile?.room ? `Room ${profile.room}` : 'Student')}
+              </span>
             </div>
           </div>
           <button 

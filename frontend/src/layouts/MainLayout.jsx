@@ -25,7 +25,7 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile 
               <span className="header-logo-badge">
                 <Icon name="building" />
               </span>
-              <h2>Student Dashboard</h2>
+              <h2>{user?.role === 'administrator' || user?.role === 'admin' || window.location.hash === '#admin-dashboard' ? 'Admin Dashboard' : user?.role === 'warden' || window.location.hash === '#warden-dashboard' ? 'Warden Dashboard' : 'Student Dashboard'}</h2>
             </div>
             <p className="header-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
@@ -80,7 +80,7 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile 
                 )}
               </div>
               <div className="user-profile-text">
-                <span className="user-profile-name">{profile?.fullName || user?.name || 'Rahul Sharma'}</span>
+                <span className="user-profile-name">{profile?.fullName || user?.name || 'User'}</span>
                 <span className="user-profile-role" style={{ textTransform: 'capitalize' }}>{user?.role || 'Student'}</span>
               </div>
             </div>

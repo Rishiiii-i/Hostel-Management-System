@@ -110,6 +110,11 @@ html.dark .auth-form input {
   margin: 0;
 }
 
+.auth-password-input-wrapper input::-ms-reveal,
+.auth-password-input-wrapper input::-ms-clear {
+  display: none !important;
+}
+
 .auth-password-input-wrapper {
   position: relative;
   display: flex;
@@ -117,15 +122,43 @@ html.dark .auth-form input {
   width: 100%;
 }
 
+.auth-password-input-wrapper input {
+  padding-right: 48px;
+}
+
 .auth-password-toggle {
   position: absolute;
-  right: 14px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   background: transparent;
   border: 0;
-  color: #687d70;
+  outline: none;
   cursor: pointer;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  z-index: 5;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0.85;
+}
+
+.auth-password-toggle:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.auth-password-toggle img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  filter: brightness(0.4);
+}
+
+html.dark .auth-password-toggle img {
+  filter: brightness(0) invert(0.9);
 }
 
 .auth-forgot {
