@@ -28,3 +28,8 @@ Thumbs.db
 
 # Database files
 backend/data/
+
+# Firebase Service Account Credentials & Logs
+serviceAccountKey.json
+*.log
+

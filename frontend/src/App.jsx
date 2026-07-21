@@ -70,8 +70,11 @@ function App() {
   useEffect(() => {
     const updateRoute = () => {
       const hash = window.location.hash || '#home'
+      const searchParams = new URLSearchParams(window.location.search)
+      const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
+
       const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash === '#warden-dashboard' || hash === '#admin-dashboard' || hash.startsWith('#dashboard')
-      const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'
+      const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password' || hash === '#reset-password' || isResetAction
 
       if (isDashboardRoute && !user && !loading) {
         window.location.hash = '#login'
@@ -83,8 +86,11 @@ function App() {
     }
 
     const hash = window.location.hash || '#home'
+    const searchParams = new URLSearchParams(window.location.search)
+    const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
+
     const isDashboardRoute = hash === '#dashboard' || hash === '#student-dashboard' || hash === '#warden-dashboard' || hash === '#admin-dashboard' || hash.startsWith('#dashboard')
-    const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password'
+    const isAuthRoute = hash === '#login' || hash === '#signup' || hash === '#forgot-password' || hash === '#reset-password' || isResetAction
 
     if (isDashboardRoute && !user && !loading) {
       window.location.hash = '#login'
@@ -102,11 +108,19 @@ function App() {
     return <LoadingSpinner />
   }
 
-  if (route === '#login' || route === '#signup' || route === '#forgot-password') {
-    const mode = route === '#signup' ? 'signup' : route === '#forgot-password' ? 'forgot' : 'login'
+  const searchParams = new URLSearchParams(window.location.search)
+  const isResetAction = searchParams.get('mode') === 'resetPassword' && searchParams.get('oobCode')
+
+  if (route === '#login' || route === '#signup' || route === '#forgot-password' || route === '#reset-password' || isResetAction) {
+    let mode = 'login'
+    if (route === '#signup') mode = 'signup'
+    else if (route === '#forgot-password') mode = 'forgot'
+    else if (route === '#reset-password' || isResetAction) mode = 'reset'
+
+    const oobCode = searchParams.get('oobCode') || ''
     return (
       <Suspense fallback={<LoadingSpinner />}>
-        <AuthLayout><Login mode={mode} /></AuthLayout>
+        <AuthLayout><Login mode={mode} oobCode={oobCode} /></AuthLayout>
       </Suspense>
     )
   }
