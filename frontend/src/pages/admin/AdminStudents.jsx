@@ -11,7 +11,6 @@ export default function AdminStudents() {
 
   const filtered = students.filter(s =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.room.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
@@ -24,7 +23,7 @@ export default function AdminStudents() {
             <div style={{ position: 'relative', flex: 1 }}>
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Search by name or room..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -64,7 +63,6 @@ export default function AdminStudents() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Email</th>
                 <th>Room</th>
                 <th>Branch</th>
                 <th>Year</th>
@@ -76,7 +74,6 @@ export default function AdminStudents() {
               {filtered.map((s) => (
                 <tr key={s.id}>
                   <td><strong>{s.name}</strong></td>
-                  <td style={{ color: '#64748b' }}>{s.email}</td>
                   <td><strong>{s.room}</strong></td>
                   <td>{s.branch}</td>
                   <td>{s.year}</td>

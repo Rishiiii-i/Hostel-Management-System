@@ -67,11 +67,12 @@ function App() {
   useEffect(() => {
     if (user) {
       setProfile(prev => {
+        const isDifferentUser = prev.email && user.email && prev.email.toLowerCase() !== user.email.toLowerCase()
         const updated = {
           ...prev,
-          fullName: prev.fullName || user.name || '',
-          email: prev.email || user.email || '',
-          photo: prev.photo || user.photoURL || ''
+          fullName: isDifferentUser || !prev.fullName ? (user.name || '') : prev.fullName,
+          email: user.email || prev.email || '',
+          photo: isDifferentUser ? (user.photoURL || '') : (prev.photo || user.photoURL || '')
         }
         try {
           localStorage.setItem('shm_user_profile', JSON.stringify(updated))
