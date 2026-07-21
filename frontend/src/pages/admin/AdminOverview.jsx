@@ -1,6 +1,8 @@
 import Icon from '../../components/Icon'
+import { useAuth } from '../../context/AuthContext'
 
 export default function AdminOverview({ setActiveTab }) {
+  const { user } = useAuth()
   return (
     <div className="tab-pane animate-fade-in-slide-up">
       {/* Welcome Banner */}
@@ -15,7 +17,7 @@ export default function AdminOverview({ setActiveTab }) {
       }}>
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800 }}>Welcome back, Admin</h2>
+            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800 }}>Welcome back, {user?.name || 'Admin'}</h2>
             <p style={{ margin: '6px 0 0 0', opacity: 0.85, fontSize: '14px' }}>Here is what's happening across your hostel facility today.</p>
           </div>
           <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(8px)', padding: '8px 16px', borderRadius: '12px', fontSize: '13px', fontWeight: 700 }}>

@@ -1,17 +1,35 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Icon from '../../components/Icon'
+import { useAuth } from '../../context/AuthContext'
 
 export default function WardenProfile({ profile, setProfile }) {
+  const { user } = useAuth()
   const fileInputRef = useRef(null)
+
   const [formData, setFormData] = useState({
-    fullName: profile?.fullName || 'Warden',
-    email: profile?.email || 'warden@smarthostel.com',
-    phone: profile?.phone || '+91 9876543210',
+    fullName: profile?.fullName || user?.name || 'Macha Rishi',
+    email: profile?.email || user?.email || 'warden@smarthostel.com',
+    phone: profile?.phone || user?.phone || '+91 9876543210',
     assignedBlocks: profile?.assignedBlocks || 'All Hostel Blocks (A, B, C, F)',
     office: profile?.office || 'Warden Office, Block A Ground Floor',
     emergencyContact: profile?.emergencyContact || '+91 9123456789',
-    photo: profile?.photo || ''
+    photo: profile?.photo || user?.photoURL || ''
   })
+
+  useEffect(() => {
+    if (user || profile) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: profile?.fullName || user?.name || prev.fullName || 'Macha Rishi',
+        email: profile?.email || user?.email || prev.email || 'warden@smarthostel.com',
+        phone: profile?.phone || user?.phone || prev.phone || '+91 9876543210',
+        photo: profile?.photo || user?.photoURL || prev.photo || '',
+        assignedBlocks: profile?.assignedBlocks || prev.assignedBlocks || 'All Hostel Blocks (A, B, C, F)',
+        office: profile?.office || prev.office || 'Warden Office, Block A Ground Floor',
+        emergencyContact: profile?.emergencyContact || prev.emergencyContact || '+91 9123456789'
+      }))
+    }
+  }, [user, profile])
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -88,6 +106,10 @@ export default function WardenProfile({ profile, setProfile }) {
     setTimeout(() => setMsg({ type: '', text: '' }), 4000)
   }
 
+  const userInitials = formData.fullName
+    ? formData.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+    : 'MR'
+
   return (
     <div className="tab-pane animate-fade-in-slide-up" style={{ maxWidth: '900px' }}>
       {msg.text && (
@@ -125,7 +147,7 @@ export default function WardenProfile({ profile, setProfile }) {
             {profile?.photo || formData.photo ? (
               <img src={profile?.photo || formData.photo} alt="Warden" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
             ) : (
-              'W'
+              userInitials
             )}
           </div>
           <div>
