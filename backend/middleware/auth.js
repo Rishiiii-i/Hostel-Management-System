@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'smart-hostel-secret-key-12345';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -10,8 +10,10 @@ export function authenticateToken(req, res, next) {
     return res.status(401).json({ message: 'Access token is required' });
   }
 
+  const secret = process.env.JWT_SECRET || 'smart-hostel-secret-key-12345';
+
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, secret);
     req.user = decoded;
     next();
   } catch (error) {

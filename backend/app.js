@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.js';
 import wardenRoutes from './routes/warden.js';
 import adminRoutes from './routes/admin.js';
+import studentRoutes from './routes/student.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/warden', wardenRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/student', studentRoutes);
 
 // health check endpoint
 app.get('/health', (req, res) => {
