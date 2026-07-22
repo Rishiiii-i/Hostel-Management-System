@@ -13,7 +13,7 @@ export default function WardenMess() {
     dinner: ''
   })
 
-  // helper for requests with authentication headers
+  // Helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -30,7 +30,7 @@ export default function WardenMess() {
       const res = await fetchWithAuth('http://localhost:5000/api/warden/mess/menu');
       if (res.ok) {
         const data = await res.json();
-        // Sort days of the week in standard order (Monday to Sunday)
+        // Sort days from Monday to Sunday
         const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         const sorted = data.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
         setMessMenu(sorted);

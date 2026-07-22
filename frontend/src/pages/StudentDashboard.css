@@ -898,11 +898,24 @@ html.dark .category-tag {
 .priority-tag.medium { color: #d97706; }
 .priority-tag.low { color: #10b981; }
 
-/* Notice Feed Cards */
 .notices-feed-grid {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.notice-feed-card {
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(215, 228, 216, 0.9);
+}
+
+.notice-feed-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+html.dark .notice-feed-card {
+  border-bottom-color: rgba(35, 62, 48, 0.9);
 }
 
 .notice-feed-card h3 {

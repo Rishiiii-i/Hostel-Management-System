@@ -4,7 +4,7 @@ export default function AdminComplaints() {
   const [complaints] = useState([])
 
   const handleRefresh = () => {
-    // refresh list
+    // Refresh the list
   }
 
   return (

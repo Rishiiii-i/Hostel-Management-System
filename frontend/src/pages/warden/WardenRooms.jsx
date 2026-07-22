@@ -15,7 +15,7 @@ export default function WardenRooms() {
   
   const [occupantEmail, setOccupantEmail] = useState('')
 
-  // helper for requests with authentication headers
+  // Helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -126,6 +126,25 @@ export default function WardenRooms() {
     }
   }
 
+  const handleToggleFee = async (email) => {
+    if (!email) return;
+    try {
+      const res = await fetchWithAuth(`http://localhost:5000/api/warden/students/${email}/toggle-fee`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(data.message);
+        loadRoomsData();
+      } else {
+        const errData = await res.json();
+        alert(errData.message || 'Failed to toggle fee status.');
+      }
+    } catch (err) {
+      console.error('Failed to toggle fee status:', err);
+    }
+  };
+
   return (
     <div className="tab-pane animate-fade-in-slide-up">
       {/* Header Bar */}
@@ -179,6 +198,57 @@ export default function WardenRooms() {
                         <div>
                           <strong>{r.occupantName}</strong>
                           <div style={{ fontSize: '12px', color: '#64748b' }}>{r.occupantEmail}</div>
+                          <div style={{ 
+                            marginTop: '8px', 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            gap: '8px',
+                            background: '#f8fafc',
+                            padding: '4px 8px',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0'
+                          }}>
+                            <span style={{ 
+                              fontSize: '10px', 
+                              fontWeight: 800, 
+                              color: r.occupantFeeStatus === 'Paid' ? '#10b981' : '#d97706',
+                              background: r.occupantFeeStatus === 'Paid' ? '#d1fae5' : '#fef3c7',
+                              padding: '2px 8px',
+                              borderRadius: '5px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px'
+                            }}>
+                              {r.occupantFeeStatus === 'Paid' ? 'Paid' : 'Unpaid'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleFee(r.occupantEmail)}
+                              style={{
+                                background: '#ffffff',
+                                border: '1px solid #cbd5e1',
+                                color: '#475569',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease-in-out',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#f1f5f9';
+                                e.currentTarget.style.borderColor = '#94a3b8';
+                                e.currentTarget.style.color = '#1e293b';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#ffffff';
+                                e.currentTarget.style.borderColor = '#cbd5e1';
+                                e.currentTarget.style.color = '#475569';
+                              }}
+                            >
+                              Update Status
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>None</span>

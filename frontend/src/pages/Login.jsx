@@ -14,7 +14,7 @@ export default function Login({ mode = 'login', oobCode = '' }) {
   const [showPassword, setShowPassword] = useState(false)
   const [rollNo, setRollNo] = useState('')
 
-  // New state variables for password reset flow
+  // State for password reset
   const [emailForReset, setEmailForReset] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [verifyingCode, setVerifyingCode] = useState(false)
@@ -37,16 +37,16 @@ export default function Login({ mode = 'login', oobCode = '' }) {
     setError('')
     setSuccessMessage('')
 
-    // Trim whitespace
+    // Remove spaces
     const trimmedEmail = email.trim()
 
-    // Email validation: Reject empty email
+    // Reject empty email
     if (!trimmedEmail) {
       setError('Email address is required.')
       return
     }
 
-    // Email validation: Reject invalid email formats
+    // Reject bad email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(trimmedEmail)) {
       setError('Please enter a valid email address.')
@@ -55,7 +55,7 @@ export default function Login({ mode = 'login', oobCode = '' }) {
 
     setLoading(true)
     try {
-      // 1. Verify if the user exists in our MongoDB database first
+      // 1. Check if user exists in database
       const verifyResponse = await fetch('http://localhost:5000/api/auth/forgot-password', {
         method: 'POST',
         headers: {
@@ -69,19 +69,19 @@ export default function Login({ mode = 'login', oobCode = '' }) {
         throw { code: 'auth/user-not-found', message: errorData.message || 'User with this email was not found' }
       }
 
-      // 2. Since user exists in our DB, trigger Firebase's password reset email
+      // 2. Send password reset email
       await sendPasswordReset(trimmedEmail)
       setSuccessMessage('Password reset email has been sent successfully. Please check your Inbox and Spam folder.')
-      setEmail('') // Clear the email input
+      setEmail('') // Clear email input
 
-      // Redirect to login page after 3 seconds
+      // Go to login page after 3 seconds
       setTimeout(() => {
         window.location.hash = '#login'
       }, 3000)
     } catch (err) {
       console.error('Password reset error:', err)
       
-      // If it's our thrown custom error/DB verification failure or Firebase error
+      // Handle errors
       if (err.code === 'auth/user-not-found') {
         setError(err.message || 'No account exists with this email address.')
       } else if (err.code === 'auth/invalid-email') {
@@ -102,7 +102,7 @@ export default function Login({ mode = 'login', oobCode = '' }) {
     }
   }
 
-  // Clear error and success messages when changing modes (login/signup/forgot/reset)
+  // Clear messages on mode change
   useEffect(() => {
     setError('')
     setSuccessMessage('')
@@ -158,7 +158,7 @@ export default function Login({ mode = 'login', oobCode = '' }) {
       setPassword('')
       setConfirmPassword('')
 
-      // Clean up the URL search params so they don't reload back into reset-password mode
+      // Clear URL search params
       window.history.replaceState({}, document.title, window.location.pathname)
 
       setTimeout(() => {

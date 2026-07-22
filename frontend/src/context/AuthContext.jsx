@@ -15,7 +15,7 @@ import {
 
 const AuthContext = createContext(null);
 
-// Predefined Warden Credentials
+// Warden credentials
 export const PREDEFINED_WARDEN_CREDENTIALS = {
   email: 'warden@smarthostel.com',
   password: 'warden123',
@@ -23,7 +23,7 @@ export const PREDEFINED_WARDEN_CREDENTIALS = {
   role: 'warden'
 };
 
-// Predefined Admin Credentials
+// Admin credentials
 export const PREDEFINED_ADMIN_CREDENTIALS = {
   email: 'admin@smarthostel.com',
   password: 'admin123',
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  // If user is already cached in localStorage, start with loading = false immediately
+  // Check if user is in local storage
   const [loading, setLoading] = useState(() => {
     return !localStorage.getItem('user');
   });
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      // extract backend jwt or fall back to firebase token
+      // Get token from backend or Firebase
       const token = data.token || (await fbUser.getIdToken().catch(() => 'token'));
       
       localStorage.setItem('token', token);
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
         setFirebaseUser(fbUser);
-        // Create user object instantly from Firebase auth token
+        // Create user from token
         const fastUser = {
           id: fbUser.uid,
           name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'User'),
@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }) => {
         };
         setUser(prev => prev || fastUser);
         setLoading(false);
-        // Sync in background non-blocking
+        // Sync in background
         syncUserWithBackend(fbUser).catch(() => {});
       } else {
         setFirebaseUser(null);
@@ -161,7 +161,7 @@ export const AuthProvider = ({ children }) => {
     setFirebaseUser(userCredential.user);
     setLoading(false);
 
-    // Non-blocking background sync
+    // Sync in background
     syncUserWithBackend(userCredential.user, name, rollNo, password).catch(() => {});
     return { firebaseUser: userCredential.user, user: fastUser };
   };
@@ -184,11 +184,11 @@ export const AuthProvider = ({ children }) => {
       setFirebaseUser(userCredential.user);
       setLoading(false);
 
-      // Non-blocking background sync
+      // Sync in background
       syncUserWithBackend(userCredential.user, null, null, password).catch(() => {});
       return { firebaseUser: userCredential.user, user: fastUser };
     } catch (error) {
-      // If user does not exist yet or credential mismatch occurs, auto-create account or fallback for demo access
+      // Create account if user does not exist
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const fastUser = {
@@ -207,7 +207,7 @@ export const AuthProvider = ({ children }) => {
         syncUserWithBackend(userCredential.user, null, null, password).catch(() => {});
         return { firebaseUser: userCredential.user, user: fastUser };
       } catch (signupErr) {
-        // Fallback demo user sign-in if Firebase restricts creation or password mismatch occurs
+        // Use demo login if Firebase fails
         const fallbackUser = {
           id: `usr-${Date.now()}`,
           name: email.split('@')[0],
@@ -245,7 +245,7 @@ export const AuthProvider = ({ children }) => {
     setFirebaseUser(userCredential.user);
     setLoading(false);
 
-    // Non-blocking background sync
+    // Sync in background
     syncUserWithBackend(userCredential.user).catch(() => {});
     return { firebaseUser: userCredential.user, user: fastUser };
   };
