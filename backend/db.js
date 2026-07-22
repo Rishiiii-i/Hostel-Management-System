@@ -20,14 +20,17 @@ if (!MONGODB_URI) {
   mongoose.connect(MONGODB_URI, {
     family: 4 // Force Mongoose to connect using IPv4 to match the 0.0.0.0/0 Atlas whitelist
   })
-    .then(() => console.log(' Connected to MongoDB successfully.'))
+    .then(() => {
+      console.log(' Connected to MongoDB successfully.');
+      initDefaultMessMenu();
+    })
     .catch((error) => {
       console.error('MongoDB connection error:', error.message);
       console.error('Please verify your connection string and credentials in backend/.env.');
     });
 }
 
-// user schema definition
+// user details schema
 const userSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -57,6 +60,31 @@ const userSchema = new mongoose.Schema({
     required: true,
     enum: ['administrator', 'warden', 'student']
   },
+  phone: {
+    type: String
+  },
+  emergencyContact: {
+    type: String
+  },
+  room: {
+    type: String
+  },
+  block: {
+    type: String
+  },
+  photo: {
+    type: String
+  },
+  notifications: {
+    type: [{
+      id: String,
+      title: String,
+      text: String,
+      time: String,
+      read: { type: Boolean, default: false }
+    }],
+    default: []
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -65,10 +93,11 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// GatePass Schema
+// gate pass request schema
 const gatePassSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   studentName: { type: String, required: true },
+  studentEmail: { type: String },
   rollNo: { type: String },
   room: { type: String },
   reason: { type: String, required: true },
@@ -81,10 +110,11 @@ const gatePassSchema = new mongoose.Schema({
 
 const GatePass = mongoose.model('GatePass', gatePassSchema);
 
-// Complaint Schema
+// complaint request schema
 const complaintSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   studentName: { type: String, required: true },
+  studentEmail: { type: String },
   room: { type: String },
   category: { type: String, required: true },
   title: { type: String, required: true },
@@ -103,7 +133,8 @@ const roomSchema = new mongoose.Schema({
   block: { type: String, required: true },
   capacity: { type: Number, default: 2 },
   status: { type: String, enum: ['Occupied', 'Vacant'], default: 'Vacant' },
-  occupantName: { type: String, default: null }
+  occupantName: { type: String, default: null },
+  occupantEmail: { type: String, default: null }
 });
 
 const Room = mongoose.model('Room', roomSchema);
@@ -115,6 +146,7 @@ const noticeSchema = new mongoose.Schema({
   content: { type: String, required: true },
   author: { type: String, default: 'Chief Warden' },
   targetBlock: { type: String, default: 'All Blocks' },
+  targetStudentEmail: { type: String, default: null },
   isUrgent: { type: Boolean, default: false },
   date: { type: String, default: () => new Date().toISOString().split('T')[0] },
   createdAt: { type: Date, default: Date.now }
@@ -149,6 +181,58 @@ const attendanceSchema = new mongoose.Schema({
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 
+// transaction schema definition
+const transactionSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  studentEmail: { type: String, required: true },
+  period: { type: String, required: true },
+  amount: { type: String, required: true },
+  date: { type: String, required: true },
+  status: { type: String, enum: ['Paid', 'Pending', 'Failed'], default: 'Paid' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Transaction = mongoose.model('Transaction', transactionSchema);
+
+// Mess Menu Schema
+const messMenuSchema = new mongoose.Schema({
+  day: { type: String, required: true, unique: true },
+  breakfast: { type: String, default: 'Tea, Coffee & Idli with Chutney' },
+  lunch: { type: String, default: 'Rice, Dal, Veg Curry & Curd' },
+  snacks: { type: String, default: 'Tea & Samosa / Biscuits' },
+  dinner: { type: String, default: 'Roti, Mixed Veg Sabji & Rice' }
+});
+
+const MessMenu = mongoose.model('MessMenu', messMenuSchema);
+
+// Initialize default mess menu if empty
+async function initDefaultMessMenu() {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+    
+    const defaultMenu = [
+      { day: 'Monday', breakfast: 'Idli, Peanut Chutney, Sambar, Coffee/Tea', lunch: 'Rice, Kandipappu, Bendakaya Fry, Curd', snacks: 'Tea & Punugulu', dinner: 'Roti, Tomato Dal, Rice' },
+      { day: 'Tuesday', breakfast: 'Pesarattu, Ginger Chutney, Coffee/Tea', lunch: 'Rice, Sambar, Potato Fry, Papad', snacks: 'Tea & Mirchi Bajji', dinner: 'Roti, Egg Curry / Egg Bhurji, Rice' },
+      { day: 'Wednesday', breakfast: 'Dosa, Coconut Chutney, Sambar, Coffee/Tea', lunch: 'Rice, Chicken Curry / Mushroom Curry, Beans Fry, Curd', snacks: 'Tea & Mysore Bonda', dinner: 'Roti, Dal Fry, Rice' },
+      { day: 'Thursday', breakfast: 'Upma, Coconut Chutney, Coffee/Tea', lunch: 'Rice, Tomato Pappu, Cabbage Fry, Curd', snacks: 'Tea & Samosa', dinner: 'Roti, Sorakaya Curry, Rice' },
+      { day: 'Friday', breakfast: 'Poori, Potato Kurma, Coffee/Tea', lunch: 'Rice, Rasam, Vankaya Fry, Papad', snacks: 'Tea & Punugulu', dinner: 'Roti, Veg Kurma, Jeera Rice' },
+      { day: 'Saturday', breakfast: 'Pongal, Coconut Chutney, Sambar, Tea', lunch: 'Rice, Palakura Pappu, Dondakaya Fry, Curd', snacks: 'Tea & Onion Pakoda', dinner: 'Roti, Mixed Vegetable Curry, Rice' },
+      { day: 'Sunday', breakfast: 'Aloo Paratha, Curd, Pickle, Tea', lunch: 'Special Meals: Chicken Biryani / Paneer Biryani, Raita', snacks: 'Tea & Veg Puff', dinner: 'Roti, Butter Chicken / Butter Paneer, Rice' }
+    ];
+
+    for (const item of defaultMenu) {
+      await MessMenu.findOneAndUpdate(
+        { day: item.day },
+        { breakfast: item.breakfast, lunch: item.lunch, snacks: item.snacks, dinner: item.dinner },
+        { upsert: true, new: true }
+      );
+    }
+    console.log('Default mess menu initialized/updated successfully!');
+  } catch (err) {
+    console.error('Failed to initialize default mess menu:', err);
+  }
+}
+
 // find user by email
 async function findUserByEmail(email) {
   try {
@@ -180,6 +264,8 @@ export {
   Notice,
   WardenProfile,
   Attendance,
+  Transaction,
+  MessMenu,
   findUserByEmail,
   createUser
 };

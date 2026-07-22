@@ -1,6 +1,8 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 import mongoose from 'mongoose';
 import { User, findUserByEmail, createUser } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -20,13 +22,13 @@ if (fs.existsSync(serviceAccountPath)) {
     firebaseAdminApp = initializeApp({
       credential: cert(serviceAccount)
     });
-    console.log('✅ Firebase Admin SDK initialized successfully using serviceAccountKey.json');
+    console.log('Firebase Admin SDK initialized successfully using serviceAccountKey.json');
   } catch (err) {
-    console.error('❌ Error parsing serviceAccountKey.json:', err.message);
+    console.error('Error parsing serviceAccountKey.json:', err.message);
   }
 } else {
   // If not found, log a warn so it does not crash node but notifies the user
-  console.warn('⚠️ serviceAccountKey.json not found. Firebase Admin SDK features (like generating reset links) will fail. Please drop this file in your backend folder.');
+  console.warn('serviceAccountKey.json not found. Firebase Admin SDK features (like generating reset links) will fail. Please drop this file in your backend folder.');
 }
 
 // Nodemailer transporter initialization
@@ -47,12 +49,12 @@ if (smtpUser && smtpPass && smtpUser !== 'your_email@gmail.com') {
       pass: smtpPass
     }
   });
-  console.log('✅ Nodemailer SMTP transporter configured.');
+  console.log('Nodemailer SMTP transporter configured.');
 } else {
-  console.warn('⚠️ SMTP credentials not set or contain defaults. Using console fallback log transporter. Emails will not actually be sent. Please update backend/.env.');
+  console.warn('SMTP credentials not set or contain defaults. Using console fallback log transporter. Emails will not actually be sent. Please update backend/.env.');
   transporter = {
     sendMail: async (mailOptions) => {
-      console.log('📬 [EMAIL FALLBACK LOG]');
+      console.log('[EMAIL FALLBACK LOG]');
       console.log('--------------------------------------------------');
       console.log(`From: ${mailOptions.from}`);
       console.log(`To: ${mailOptions.to}`);
@@ -98,6 +100,10 @@ router.post('/sync', async (req, res) => {
     if (user) {
       // user exists update password and rollno if provided
       let updated = false;
+      if (!user.name || user.name.trim() === '') {
+        user.name = name || email.split('@')[0];
+        updated = true;
+      }
       if (password && user.password !== password) {
         user.password = password;
         updated = true;
@@ -123,10 +129,18 @@ router.post('/sync', async (req, res) => {
       await user.save();
     }
 
+    // generate a local auth token for the synced user
+    const token = jwt.sign(
+      { id: user.id, name: user.name, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     const userObj = user.toObject();
     res.status(200).json({
       message: 'User sync successful',
-      user: userObj
+      user: userObj,
+      token
     });
   } catch (error) {
     console.error('Sync error:', error.message);
