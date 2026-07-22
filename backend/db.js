@@ -2,14 +2,14 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import dns from 'dns';
 
-// override default dns servers to resolve mongodb srv queries (fixes econnrefused error on windows)
+// Use Google DNS to fix connection errors on Windows
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
-// check if uri contains placeholder symbols
+// Check if the URI has placeholder values
 const hasPlaceholders = MONGODB_URI.includes('<db_username>') || MONGODB_URI.includes('<db_password>');
 
 if (!MONGODB_URI) {
@@ -18,7 +18,7 @@ if (!MONGODB_URI) {
   console.warn('MONGODB_URI contains placeholder values (<db_username> / <db_password>). Please edit your backend/.env file and enter your actual database credentials.');
 } else {
   mongoose.connect(MONGODB_URI, {
-    family: 4 // Force Mongoose to connect using IPv4 to match the 0.0.0.0/0 Atlas whitelist
+    family: 4 // Connect using IPv4
   })
     .then(() => {
       console.log(' Connected to MongoDB successfully.');
@@ -30,7 +30,7 @@ if (!MONGODB_URI) {
     });
 }
 
-// user details schema
+// User Schema
 const userSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -75,6 +75,11 @@ const userSchema = new mongoose.Schema({
   photo: {
     type: String
   },
+  feeStatus: {
+    type: String,
+    enum: ['Paid', 'Unpaid'],
+    default: 'Unpaid'
+  },
   notifications: {
     type: [{
       id: String,
@@ -93,7 +98,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// gate pass request schema
+// Gate Pass Schema
 const gatePassSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   studentName: { type: String, required: true },
@@ -110,7 +115,7 @@ const gatePassSchema = new mongoose.Schema({
 
 const GatePass = mongoose.model('GatePass', gatePassSchema);
 
-// complaint request schema
+// Complaint Schema
 const complaintSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   studentName: { type: String, required: true },
@@ -181,7 +186,7 @@ const attendanceSchema = new mongoose.Schema({
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 
-// transaction schema definition
+// Transaction Schema
 const transactionSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   studentEmail: { type: String, required: true },
@@ -205,7 +210,7 @@ const messMenuSchema = new mongoose.Schema({
 
 const MessMenu = mongoose.model('MessMenu', messMenuSchema);
 
-// Initialize default mess menu if empty
+// Set default mess menu if it is empty
 async function initDefaultMessMenu() {
   try {
     if (mongoose.connection.readyState !== 1) return;
@@ -233,7 +238,7 @@ async function initDefaultMessMenu() {
   }
 }
 
-// find user by email
+// Find user by email
 async function findUserByEmail(email) {
   try {
     if (mongoose.connection.readyState !== 1) return null;
@@ -244,7 +249,7 @@ async function findUserByEmail(email) {
   }
 }
 
-// create user
+// Create new user
 async function createUser(userData) {
   try {
     if (mongoose.connection.readyState !== 1) return null;

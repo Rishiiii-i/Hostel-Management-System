@@ -5,12 +5,12 @@ import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// check if database is active
+// Check if MongoDB is connected
 function isDbConnected() {
   return mongoose.connection.readyState === 1;
 }
 
-// get profile details of the logged in student
+// Get student profile
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -52,7 +52,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// update profile details of the logged in student
+// Update student profile
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const { name, rollNo, phone, emergencyContact, room, block, photo } = req.body;
@@ -81,7 +81,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// get all complaints filed by the logged in student
+// Get all student complaints
 router.get('/complaints', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -94,7 +94,7 @@ router.get('/complaints', authenticateToken, async (req, res) => {
   }
 });
 
-// file a new complaint
+// Add new complaint
 router.post('/complaints', authenticateToken, async (req, res) => {
   try {
     const { category, title, priority } = req.body;
@@ -125,7 +125,7 @@ router.post('/complaints', authenticateToken, async (req, res) => {
   }
 });
 
-// get all outing gate passes for the logged in student
+// Get student gate passes
 router.get('/gatepasses', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -138,7 +138,7 @@ router.get('/gatepasses', authenticateToken, async (req, res) => {
   }
 });
 
-// submit a new outing gate pass request
+// Add new gate pass request
 router.post('/gatepasses', authenticateToken, async (req, res) => {
   try {
     const { reason, departure, returnDate } = req.body;
@@ -169,7 +169,7 @@ router.post('/gatepasses', authenticateToken, async (req, res) => {
   }
 });
 
-// get announcements target to the student block or all blocks
+// Get notices for the student
 router.get('/notices', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -192,7 +192,7 @@ router.get('/notices', authenticateToken, async (req, res) => {
   }
 });
 
-// get all payment transactions for the logged in student
+// Get student transactions
 router.get('/transactions', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -205,7 +205,7 @@ router.get('/transactions', authenticateToken, async (req, res) => {
   }
 });
 
-// submit a new payment transaction
+// Add a payment transaction
 router.post('/transactions', authenticateToken, async (req, res) => {
   try {
     const { amount, period } = req.body;
@@ -225,6 +225,13 @@ router.post('/transactions', authenticateToken, async (req, res) => {
 
     const txn = new Transaction(newTxnData);
     await txn.save();
+
+    const student = await User.findOne({ email: req.user.email.toLowerCase() });
+    if (student) {
+      student.feeStatus = 'Paid';
+      await student.save();
+    }
+
     res.status(201).json(txn);
   } catch (error) {
     console.error('Error in POST /transactions:', error);
@@ -232,7 +239,7 @@ router.post('/transactions', authenticateToken, async (req, res) => {
   }
 });
 
-// mark all or category-specific notifications as read for logged in student
+// Mark notifications as read
 router.post('/notifications/read', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Success' });
@@ -261,7 +268,7 @@ router.post('/notifications/read', authenticateToken, async (req, res) => {
         await user.save();
       }
     } else {
-      // mark all as read
+      // Mark all read
       await User.updateOne(
         { email: req.user.email.toLowerCase() },
         { $set: { "notifications.$[].read": true } }
@@ -275,7 +282,7 @@ router.post('/notifications/read', authenticateToken, async (req, res) => {
   }
 });
 
-// GET student attendance stats
+// Get student attendance stats
 router.get('/attendance/stats', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -315,7 +322,7 @@ router.get('/attendance/stats', authenticateToken, async (req, res) => {
   }
 });
 
-// GET Mess Menu
+// Get mess menu
 router.get('/mess/menu', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);

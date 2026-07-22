@@ -8,7 +8,7 @@ function isDbConnected() {
   return mongoose.connection.readyState === 1;
 }
 
-// GET Admin Overview Metrics
+// Get dashboard data for admin
 router.get('/overview', async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -40,7 +40,7 @@ router.get('/overview', async (req, res) => {
   }
 });
 
-// GET All Students for Admin
+// Get all students
 router.get('/students', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -51,7 +51,7 @@ router.get('/students', async (req, res) => {
   }
 });
 
-// GET All Rooms for Admin
+// Get all rooms
 router.get('/rooms', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);

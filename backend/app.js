@@ -7,17 +7,17 @@ import studentRoutes from './routes/student.js';
 
 const app = express();
 
-// middlewares
+// Enable CORS and JSON parsing
 app.use(cors());
 app.use(express.json());
 
-// routes
+// Define URL paths for the routes
 app.use('/api/auth', authRoutes);
 app.use('/api/warden', wardenRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/student', studentRoutes);
 
-// health check endpoint
+// Check if the backend is running
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Smart Hostel backend server is running' });
 });

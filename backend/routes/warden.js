@@ -1,15 +1,15 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { GatePass, Complaint, Room, Notice, WardenProfile, User, Attendance, MessMenu } from '../db.js';
+import { GatePass, Complaint, Room, Notice, WardenProfile, User, Attendance, MessMenu, Transaction } from '../db.js';
 
 const router = express.Router();
 
-// Helper: check if MongoDB is connected
+// Check if MongoDB is connected
 function isDbConnected() {
   return mongoose.connection.readyState === 1;
 }
 
-// 0. Attendance Routes
+// Attendance API
 router.get('/attendance', async (req, res) => {
   try {
     const { date } = req.query;
@@ -61,7 +61,7 @@ router.post('/attendance/mark', async (req, res) => {
   }
 });
 
-// 1. GET Warden Overview Stats
+// Get overview stats
 router.get('/overview', async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -92,7 +92,7 @@ router.get('/overview', async (req, res) => {
   }
 });
 
-// 2. GET / POST / PUT Gate Passes
+// Gate Pass API
 router.get('/gatepasses', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -137,7 +137,7 @@ router.put('/gatepasses/:id/status', async (req, res) => {
   }
 });
 
-// 3. GET / PUT Complaints
+// Complaints API
 router.get('/complaints', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -182,13 +182,26 @@ router.put('/complaints/:id/status', async (req, res) => {
   }
 });
 
-// 4. GET / POST Rooms & Allocation
+// Rooms API
 router.get('/rooms', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
     const rooms = await Room.find().sort({ roomNo: 1 });
-    res.status(200).json(rooms);
+    
+    const roomsWithFeeStatus = await Promise.all(rooms.map(async (room) => {
+      const roomObj = room.toObject();
+      if (room.occupantEmail) {
+        const student = await User.findOne({ email: room.occupantEmail.toLowerCase() });
+        roomObj.occupantFeeStatus = student ? (student.feeStatus || 'Unpaid') : 'Unpaid';
+      } else {
+        roomObj.occupantFeeStatus = 'N/A';
+      }
+      return roomObj;
+    }));
+    
+    res.status(200).json(roomsWithFeeStatus);
   } catch (error) {
+    console.error('Error fetching rooms:', error);
     res.status(500).json({ message: 'Error fetching rooms' });
   }
 });
@@ -216,7 +229,7 @@ router.post('/rooms/allocate', async (req, res) => {
         return res.status(404).json({ message: 'Student email not found in database' });
       }
 
-      // update student details
+      // Update student details
       student.room = room.roomNo;
       student.block = room.block;
       
@@ -230,7 +243,7 @@ router.post('/rooms/allocate', async (req, res) => {
       student.notifications.unshift(newNotification);
       await student.save();
 
-      // update room details
+      // Update room details
       room.occupantName = student.name;
       room.occupantEmail = student.email;
       room.status = 'Occupied';
@@ -238,7 +251,7 @@ router.post('/rooms/allocate', async (req, res) => {
 
       return res.status(200).json(room);
     } else {
-      // deallocate room
+      // Deallocate room
       if (room.occupantEmail) {
         const student = await User.findOne({ email: room.occupantEmail.toLowerCase() });
         if (student) {
@@ -270,7 +283,7 @@ router.post('/rooms/allocate', async (req, res) => {
   }
 });
 
-// create a new room
+// Create new room
 router.post('/rooms', async (req, res) => {
   try {
     const { roomNo, block, capacity } = req.body;
@@ -302,7 +315,7 @@ router.post('/rooms', async (req, res) => {
   }
 });
 
-// 5. GET / POST Notices
+// Notices API
 router.get('/notices', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -332,7 +345,7 @@ router.post('/notices', async (req, res) => {
     const newNotice = new Notice(newNoticeData);
     await newNotice.save();
 
-    // Push notification alerts to matching students in the background
+    // Send notification alerts to students
     try {
       const studentQuery = { role: 'student' };
       if (targetBlock && targetBlock !== 'All Blocks') {
@@ -363,7 +376,7 @@ router.post('/notices', async (req, res) => {
   }
 });
 
-// 6. GET / PUT Warden Profile
+// Warden Profile API
 router.get('/profile', async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -406,7 +419,7 @@ router.put('/profile', async (req, res) => {
   }
 });
 
-// get list of all students
+// Get all students
 router.get('/students', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -417,7 +430,7 @@ router.get('/students', async (req, res) => {
   }
 });
 
-// send individual notification to a specific student
+// Send message to one student
 router.post('/notifications/individual', async (req, res) => {
   try {
     const { studentEmail, title, content, isUrgent } = req.body;
@@ -445,7 +458,7 @@ router.post('/notifications/individual', async (req, res) => {
     student.notifications.unshift(newNotification);
     await student.save();
 
-    // Create a corresponding Notice document targeted to this specific student
+    // Create a notice card for this student
     const personalNotice = new Notice({
       id: `N-${Math.floor(100 + Math.random() * 900)}`,
       title: isUrgent ? `Urgent Alert: ${title}` : title,
@@ -465,7 +478,7 @@ router.post('/notifications/individual', async (req, res) => {
   }
 });
 
-// GET Mess Menu
+// Get mess menu
 router.get('/mess/menu', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -477,7 +490,7 @@ router.get('/mess/menu', async (req, res) => {
   }
 });
 
-// UPDATE Mess Menu for a specific day
+// Update mess menu for a day
 router.put('/mess/menu/:day', async (req, res) => {
   try {
     const { day } = req.params;
@@ -493,7 +506,7 @@ router.put('/mess/menu/:day', async (req, res) => {
       { new: true, upsert: true }
     );
     
-    // Trigger notification alerts to students
+    // Send notification alerts to students
     try {
       const students = await User.find({ role: 'student' });
       const menuNotification = {
@@ -515,6 +528,44 @@ router.put('/mess/menu/:day', async (req, res) => {
   } catch (error) {
     console.error('Error updating mess menu:', error);
     res.status(500).json({ message: 'Error updating mess menu' });
+  }
+});
+
+// Toggle student fee status
+router.post('/students/:email/toggle-fee', async (req, res) => {
+  try {
+    const { email } = req.params;
+    if (!isDbConnected()) {
+      return res.status(200).json({ message: 'Mock toggle successful' });
+    }
+
+    const student = await User.findOne({ email: email.toLowerCase() });
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const newStatus = student.feeStatus === 'Paid' ? 'Unpaid' : 'Paid';
+    student.feeStatus = newStatus;
+    await student.save();
+
+    if (newStatus === 'Paid') {
+      const newTxn = new Transaction({
+        id: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
+        studentEmail: student.email.toLowerCase(),
+        period: 'July 2026 Room & Mess Fee',
+        amount: '$5000.00',
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        status: 'Paid'
+      });
+      await newTxn.save();
+    } else {
+      await Transaction.deleteMany({ studentEmail: student.email.toLowerCase(), period: 'July 2026 Room & Mess Fee' });
+    }
+
+    res.status(200).json({ message: `Fee status successfully changed to ${newStatus}`, feeStatus: newStatus });
+  } catch (error) {
+    console.error('Error toggling student fee status:', error);
+    res.status(500).json({ message: 'Error toggling student fee status' });
   }
 });
 
