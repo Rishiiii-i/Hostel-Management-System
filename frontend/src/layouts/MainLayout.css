@@ -248,3 +248,120 @@ html.dark .user-profile-role {
   background: #991b1b;
   border-color: #7f1d1d;
 }
+
+/* Notification Dropdown Styling */
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+html.dark .dropdown-header {
+  border-bottom-color: #243c2f;
+}
+
+.dropdown-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+html.dark .dropdown-header h4 {
+  color: #f8fafc;
+}
+
+.dropdown-header .count {
+  font-size: 10.5px;
+  font-weight: 700;
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+html.dark .dropdown-header .count {
+  background: #1e3a8a;
+  color: #60a5fa;
+}
+
+.dropdown-list {
+  max-height: 280px;
+  overflow-y: auto;
+  margin-right: -4px;
+  padding-right: 4px;
+}
+
+/* Custom scrollbar for dropdown list */
+.dropdown-list::-webkit-scrollbar {
+  width: 5px;
+}
+.dropdown-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+html.dark .dropdown-list::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.notification-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+html.dark .notification-item {
+  border-bottom-color: #243c2f;
+}
+
+.notification-item:hover {
+  background: #f8fafc;
+}
+
+html.dark .notification-item:hover {
+  background: #1c2e25;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+html.dark .notification-item strong {
+  color: #f1f5f9;
+}
+
+.notification-item p {
+  margin: 0;
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.4;
+}
+
+html.dark .notification-item p {
+  color: #94a3b8;
+}
+
+.notification-item small {
+  font-size: 10.5px;
+  color: #94a3b8;
+  font-weight: 600;
+  align-self: flex-end;
+  margin-top: 2px;
+}

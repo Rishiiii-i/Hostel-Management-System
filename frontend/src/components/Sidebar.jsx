@@ -1,8 +1,9 @@
+import { useState, useEffect } from 'react'
 import './Sidebar.css'
 import Icon from './Icon'
 import { useAuth } from '../context/AuthContext'
 
-export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
+export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProfile }) {
   const { user, logOut } = useAuth()
 
   const isAdmin = user?.role === 'administrator' || user?.role === 'admin' || window.location.hash === '#admin-dashboard'
@@ -56,6 +57,16 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
       icon: <Icon name="attendance" width="18" height="18" />
     },
     {
+      id: 'rooms',
+      label: 'Room Allocation',
+      icon: <Icon name="room" width="18" height="18" />
+    },
+    {
+      id: 'gatepasses',
+      label: 'Gate Passes',
+      icon: <Icon name="attendance" width="18" height="18" />
+    },
+    {
       id: 'complaints',
       label: 'Complaints',
       icon: <Icon name="complaint" width="18" height="18" />
@@ -64,6 +75,11 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
       id: 'notices',
       label: 'Notices',
       icon: <Icon name="bell" width="18" height="18" />
+    },
+    {
+      id: 'mess',
+      label: 'Mess Menu',
+      icon: <Icon name="fee" width="18" height="18" />
     },
     {
       id: 'profile',
@@ -108,11 +124,176 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
     }
   ]
 
+  const [badges, setBadges] = useState({
+    complaints: 0,
+    gatepasses: 0,
+    attendanceUnmarked: false,
+    feesUnpaid: false,
+    roomNotifications: 0,
+    noticesNotifications: 0
+  });
+
+  useEffect(() => {
+    let active = true;
+    const fetchBadges = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const fetchWithHeaders = async (url) => {
+        try {
+          const res = await fetch(url, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (res.ok) return await res.json();
+        } catch (e) {
+          console.error(e);
+        }
+        return null;
+      };
+
+      try {
+        if (isWarden) {
+          const comps = await fetchWithHeaders('http://localhost:5000/api/warden/complaints');
+          const pendingComps = comps && Array.isArray(comps) ? comps.filter(c => c.status === 'Pending').length : 0;
+
+          const passes = await fetchWithHeaders('http://localhost:5000/api/warden/gatepasses');
+          const pendingPasses = passes && Array.isArray(passes) ? passes.filter(p => p.status === 'Pending').length : 0;
+
+          const today = new Date().toISOString().split('T')[0];
+          const att = await fetchWithHeaders(`http://localhost:5000/api/warden/attendance?date=${today}`);
+          const unmarked = att && Array.isArray(att) ? att.length === 0 : false;
+
+          if (active) {
+            setBadges({
+              complaints: pendingComps,
+              gatepasses: pendingPasses,
+              attendanceUnmarked: unmarked,
+              feesUnpaid: false,
+              roomNotifications: 0,
+              noticesNotifications: 0
+            });
+          }
+        } else if (isAdmin) {
+          const comps = await fetchWithHeaders('http://localhost:5000/api/warden/complaints');
+          const pendingComps = comps && Array.isArray(comps) ? comps.filter(c => c.status === 'Pending').length : 0;
+          
+          const passes = await fetchWithHeaders('http://localhost:5000/api/warden/gatepasses');
+          const pendingPasses = passes && Array.isArray(passes) ? passes.filter(p => p.status === 'Pending').length : 0;
+
+          if (active) {
+            setBadges({
+              complaints: pendingComps,
+              gatepasses: pendingPasses,
+              attendanceUnmarked: false,
+              feesUnpaid: false,
+              roomNotifications: 0,
+              noticesNotifications: 0
+            });
+          }
+        } else {
+          const txns = await fetchWithHeaders('http://localhost:5000/api/student/transactions');
+          const unpaid = txns && Array.isArray(txns) ? txns.length === 0 : false;
+
+          const prof = await fetchWithHeaders('http://localhost:5000/api/student/profile');
+          if (prof && setProfile) {
+            setProfile(prof);
+          }
+
+          const notificationsList = prof && prof.notifications && Array.isArray(prof.notifications)
+            ? prof.notifications.filter(n => !n.read)
+            : [];
+
+          let roomUnread = 0;
+          let gatepassUnread = 0;
+          let complaintsUnread = 0;
+          let noticesUnread = 0;
+
+          notificationsList.forEach(n => {
+            const title = (n.title || '').toLowerCase();
+            if (title.includes('room')) {
+              roomUnread++;
+            } else if (title.includes('gate pass') || title.includes('pass')) {
+              gatepassUnread++;
+            } else if (title.includes('complaint')) {
+              complaintsUnread++;
+            } else {
+              noticesUnread++;
+            }
+          });
+
+          if (active) {
+            setBadges({
+              complaints: complaintsUnread,
+              gatepasses: gatepassUnread,
+              attendanceUnmarked: false,
+              feesUnpaid: unpaid,
+              roomNotifications: roomUnread,
+              noticesNotifications: noticesUnread
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch sidebar badges:', err);
+      }
+    };
+
+    fetchBadges();
+    const interval = setInterval(fetchBadges, 30000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [user, isWarden, isAdmin]);
+
   const handleLogout = async () => {
     try {
       await logOut()
     } catch (err) {
       console.error('Logout failed:', err)
+    }
+  }
+
+  const handleTabClick = async (tabId) => {
+    setActiveTab(tabId);
+    if (isWarden || isAdmin) return;
+
+    let category = null;
+    if (tabId === 'room' && badges.roomNotifications > 0) {
+      category = 'room';
+    } else if (tabId === 'gatepass' && badges.gatepasses > 0) {
+      category = 'gatepass';
+    } else if (tabId === 'complaints' && badges.complaints > 0) {
+      category = 'complaint';
+    } else if (tabId === 'notices' && badges.noticesNotifications > 0) {
+      category = 'notice';
+    }
+
+    if (category) {
+      setBadges(prev => {
+        const updated = { ...prev };
+        if (category === 'room') updated.roomNotifications = 0;
+        else if (category === 'gatepass') updated.gatepasses = 0;
+        else if (category === 'complaint') updated.complaints = 0;
+        else if (category === 'notice') updated.noticesNotifications = 0;
+        return updated;
+      });
+
+      try {
+        const token = localStorage.getItem('token');
+        await fetch('http://localhost:5000/api/student/notifications/read', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ category })
+        });
+      } catch (err) {
+        console.error('Failed to mark category notifications as read:', err);
+      }
     }
   }
 
@@ -137,17 +318,75 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {} }) {
       </div>
 
       <nav className="sidebar-nav">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`sidebar-link ${activeTab === item.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(item.id)}
-          >
-            <span className="sidebar-icon">{item.icon}</span>
-            <span className="sidebar-label">{item.label}</span>
-          </button>
-        ))}
+        {navItems.map((item) => {
+          let badgeText = null;
+          let badgeColor = '#ef4444';
+          
+          if (item.id === 'complaints') {
+            if (isWarden || isAdmin) {
+              if (badges.complaints > 0) badgeText = badges.complaints;
+            } else {
+              if (badges.complaints > 0) {
+                badgeText = badges.complaints;
+                badgeColor = '#3b82f6';
+              }
+            }
+          } else if (item.id === 'gatepasses' || item.id === 'gatepass') {
+            if (isWarden || isAdmin) {
+              if (badges.gatepasses > 0) badgeText = badges.gatepasses;
+            } else {
+              if (badges.gatepasses > 0) {
+                badgeText = badges.gatepasses;
+                badgeColor = '#3b82f6';
+              }
+            }
+          } else if (item.id === 'room') {
+            if (!isWarden && !isAdmin && badges.roomNotifications > 0) {
+              badgeText = badges.roomNotifications;
+              badgeColor = '#3b82f6';
+            }
+          } else if (item.id === 'notices') {
+            if (!isWarden && !isAdmin && badges.noticesNotifications > 0) {
+              badgeText = badges.noticesNotifications;
+              badgeColor = '#3b82f6';
+            }
+          } else if (item.id === 'attendance' && badges.attendanceUnmarked) {
+            badgeText = 'unmarked';
+            badgeColor = '#f59e0b';
+          } else if (item.id === 'fees' && badges.feesUnpaid) {
+            badgeText = 'unpaid';
+            badgeColor = '#ef4444';
+          }
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`sidebar-link ${activeTab === item.id ? 'active' : ''}`}
+              onClick={() => handleTabClick(item.id)}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span className="sidebar-icon">{item.icon}</span>
+                <span className="sidebar-label">{item.label}</span>
+              </div>
+              {badgeText && (
+                <span style={{
+                  background: badgeColor,
+                  color: '#ffffff',
+                  fontSize: '10.5px',
+                  fontWeight: 800,
+                  padding: badgeText === 'unmarked' || badgeText === 'unpaid' ? '3px 8px' : '2px 7px',
+                  borderRadius: '10px',
+                  lineHeight: 1,
+                  marginLeft: 'auto'
+                }}>
+                  {badgeText}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </nav>
 
       <div className="sidebar-footer">

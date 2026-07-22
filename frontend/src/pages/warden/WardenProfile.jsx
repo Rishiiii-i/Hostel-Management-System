@@ -16,20 +16,50 @@ export default function WardenProfile({ profile, setProfile }) {
     photo: profile?.photo || user?.photoURL || ''
   })
 
+  // helper for requests with authentication headers
+  const fetchWithAuth = async (url, options = {}) => {
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers
+    };
+    return fetch(url, { ...options, headers });
+  };
+
   useEffect(() => {
-    if (user || profile) {
-      setFormData(prev => ({
-        ...prev,
-        fullName: profile?.fullName || user?.name || prev.fullName || 'Macha Rishi',
-        email: profile?.email || user?.email || prev.email || 'warden@smarthostel.com',
-        phone: profile?.phone || user?.phone || prev.phone || '+91 9876543210',
-        photo: profile?.photo || user?.photoURL || prev.photo || '',
-        assignedBlocks: profile?.assignedBlocks || prev.assignedBlocks || 'All Hostel Blocks (A, B, C, F)',
-        office: profile?.office || prev.office || 'Warden Office, Block A Ground Floor',
-        emergencyContact: profile?.emergencyContact || prev.emergencyContact || '+91 9123456789'
-      }))
-    }
-  }, [user, profile])
+    const fetchProfile = async () => {
+      try {
+        const res = await fetchWithAuth('http://localhost:5000/api/warden/profile');
+        if (res.ok) {
+          const data = await res.json();
+          setFormData({
+            fullName: data.fullName || 'Macha Rishi',
+            email: data.email || 'warden@smarthostel.com',
+            phone: data.phone || '+91 9876543210',
+            assignedBlocks: data.assignedBlocks || 'All Hostel Blocks (A, B, C, F)',
+            office: data.officeLocation || 'Warden Office, Block A Ground Floor',
+            emergencyContact: data.emergencyContact || '+91 9123456789',
+            photo: data.photo || ''
+          });
+          if (setProfile) {
+            setProfile({
+              fullName: data.fullName,
+              email: data.email,
+              phone: data.phone,
+              assignedBlocks: data.assignedBlocks,
+              office: data.officeLocation,
+              emergencyContact: data.emergencyContact,
+              photo: data.photo
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch warden profile:', err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -48,31 +78,79 @@ export default function WardenProfile({ profile, setProfile }) {
       return
     }
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = async () => {
       const photoUrl = reader.result
       setFormData(prev => ({ ...prev, photo: photoUrl }))
-      const updated = { ...(profile || {}), photo: photoUrl }
-      if (setProfile) {
-        setProfile(updated)
+      const updated = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        assignedBlocks: formData.assignedBlocks,
+        officeLocation: formData.office,
+        emergencyContact: formData.emergencyContact,
+        photo: photoUrl
       }
       try {
-        localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-      } catch (err) {}
+        const res = await fetchWithAuth('http://localhost:5000/api/warden/profile', {
+          method: 'PUT',
+          body: JSON.stringify(updated)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const localUpdated = {
+            fullName: data.fullName,
+            email: data.email,
+            phone: data.phone,
+            assignedBlocks: data.assignedBlocks,
+            office: data.officeLocation,
+            emergencyContact: data.emergencyContact,
+            photo: data.photo
+          };
+          if (setProfile) setProfile(localUpdated);
+          localStorage.setItem('shm_user_profile', JSON.stringify(localUpdated));
+        }
+      } catch (err) {
+        console.error('Failed to save profile photo:', err);
+      }
       setMsg({ type: 'success', text: 'Warden profile photo updated successfully.' })
       setTimeout(() => setMsg({ type: '', text: '' }), 4000)
     }
     reader.readAsDataURL(file)
   }
 
-  const handleRemovePhoto = () => {
+  const handleRemovePhoto = async () => {
     setFormData(prev => ({ ...prev, photo: '' }))
-    const updated = { ...(profile || {}), photo: '' }
-    if (setProfile) {
-      setProfile(updated)
+    const updated = {
+      fullName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      assignedBlocks: formData.assignedBlocks,
+      officeLocation: formData.office,
+      emergencyContact: formData.emergencyContact,
+      photo: ''
     }
     try {
-      localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-    } catch (err) {}
+      const res = await fetchWithAuth('http://localhost:5000/api/warden/profile', {
+        method: 'PUT',
+        body: JSON.stringify(updated)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const localUpdated = {
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          assignedBlocks: data.assignedBlocks,
+          office: data.officeLocation,
+          emergencyContact: data.emergencyContact,
+          photo: ''
+        };
+        if (setProfile) setProfile(localUpdated);
+        localStorage.setItem('shm_user_profile', JSON.stringify(localUpdated));
+      }
+    } catch (err) {
+      console.error('Failed to remove photo:', err);
+    }
     if (fileInputRef.current) fileInputRef.current.value = ''
     setMsg({ type: 'success', text: 'Warden profile photo removed.' })
     setTimeout(() => setMsg({ type: '', text: '' }), 4000)
@@ -86,12 +164,42 @@ export default function WardenProfile({ profile, setProfile }) {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (setProfile) {
-      setProfile({ ...profile, ...formData })
+    try {
+      const res = await fetchWithAuth('http://localhost:5000/api/warden/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          assignedBlocks: formData.assignedBlocks,
+          officeLocation: formData.office,
+          emergencyContact: formData.emergencyContact,
+          photo: formData.photo
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = {
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          assignedBlocks: data.assignedBlocks,
+          office: data.officeLocation,
+          emergencyContact: data.emergencyContact,
+          photo: data.photo
+        };
+        if (setProfile) setProfile(updated);
+        localStorage.setItem('shm_user_profile', JSON.stringify(updated));
+        setMsg({ type: 'success', text: 'Warden profile updated successfully.' });
+      } else {
+        setMsg({ type: 'error', text: 'Failed to save changes to server.' });
+      }
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+      setMsg({ type: 'error', text: 'Failed to update profile.' });
     }
-    setMsg({ type: 'success', text: 'Warden profile updated successfully.' })
     setTimeout(() => setMsg({ type: '', text: '' }), 4000)
   }
 

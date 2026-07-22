@@ -4,14 +4,44 @@ import Sidebar from '../components/Sidebar'
 import Icon from '../components/Icon'
 import { useAuth } from '../context/AuthContext'
 
-export default function MainLayout({ children, activeTab, setActiveTab, profile }) {
+export default function MainLayout({ children, activeTab, setActiveTab, profile, setProfile }) {
   const [showNotifications, setShowNotifications] = useState(false)
-  const [notifications] = useState([])
   const { user } = useAuth()
+
+  const notifications = profile?.notifications || []
+  const unreadCount = notifications.filter(n => !n.read).length
+
+  const toggleNotifications = async () => {
+    const nextShow = !showNotifications;
+    setShowNotifications(nextShow);
+    
+    if (nextShow && unreadCount > 0 && (user?.role === 'student' || !user?.role)) {
+      try {
+        const res = await fetch('http://localhost:5000/api/student/notifications/read', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (res.ok) {
+          if (profile && profile.notifications) {
+            profile.notifications.forEach(n => { n.read = true; });
+          }
+          // trigger local profile state update to clear header alert badges
+          if (setProfile) {
+            setProfile({ ...profile });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to mark notifications as read:', err);
+      }
+    }
+  }
 
   return (
     <div className="dashboard-container">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
       
       <div className="dashboard-main">
         <header className="dashboard-header">
@@ -29,37 +59,37 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile 
             </div>
             <p className="header-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
-
+ 
           <div className="header-right">
             <div className="header-search">
               <Icon name="search" width="15" height="15" />
               <input type="text" placeholder="Search dashboard..." />
             </div>
-
+ 
             <div className="notification-wrapper">
               <button 
                 type="button" 
                 className="notification-btn" 
-                onClick={() => setShowNotifications(!showNotifications)}
+                onClick={toggleNotifications}
                 title="Notifications"
                 aria-label="Notifications"
               >
                 <Icon name="bell" width="18" height="18" />
-                {notifications.length > 0 && <span className="badge">{notifications.length}</span>}
+                {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
               </button>
-
+ 
               {showNotifications && (
                 <div className="notification-dropdown animate-fade-in-slide-up">
                   <div className="dropdown-header">
                     <h4>Notifications</h4>
-                    <span className="count">{notifications.length} new</span>
+                    <span className="count">{unreadCount} new</span>
                   </div>
                   <div className="dropdown-list">
                     {notifications.length === 0 ? (
                       <p className="empty-state-text">No notifications.</p>
                     ) : (
                       notifications.map((n) => (
-                        <div key={n.id} className="notification-item">
+                        <div key={n.id} className="notification-item" style={{ opacity: n.read ? 0.65 : 1 }}>
                           <strong>{n.title}</strong>
                           <p>{n.text}</p>
                           <small>{n.time}</small>
