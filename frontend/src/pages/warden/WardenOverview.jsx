@@ -10,7 +10,7 @@ export default function WardenOverview({ setActiveTab }) {
   const [notices, setNotices] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // helper for requests with authentication headers
+  // Helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -24,14 +24,14 @@ export default function WardenOverview({ setActiveTab }) {
   const loadOverviewData = async () => {
     setLoading(true);
     try {
-      // retrieve warden statistics
+      // Get statistics
       const statsRes = await fetchWithAuth('http://localhost:5000/api/warden/overview');
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData);
       }
 
-      // retrieve today attendance status
+      // Get today attendance status
       const todayStr = new Date().toISOString().split('T')[0];
       const attRes = await fetchWithAuth(`http://localhost:5000/api/warden/attendance?date=${todayStr}`);
       if (attRes.ok) {
@@ -46,7 +46,7 @@ export default function WardenOverview({ setActiveTab }) {
         }
       }
 
-      // retrieve active complaints list
+      // Get complaints list
       const compRes = await fetchWithAuth('http://localhost:5000/api/warden/complaints');
       if (compRes.ok) {
         const compData = await compRes.json();
@@ -55,7 +55,7 @@ export default function WardenOverview({ setActiveTab }) {
         }
       }
 
-      // retrieve notice board feed
+      // Get notices
       const noticesRes = await fetchWithAuth('http://localhost:5000/api/warden/notices');
       if (noticesRes.ok) {
         const noticesData = await noticesRes.json();

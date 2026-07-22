@@ -28,12 +28,12 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const [loadingData, setLoadingData] = useState(true)
   const [isFormEdited, setIsFormEdited] = useState(false)
 
-  // reset form edited status on tab change
+  // Reset edit status when changing tabs
   useEffect(() => {
     setIsFormEdited(false);
   }, [activeTab]);
 
-  // smart sync profileForm without overwriting user edits
+  // Sync profile form without losing edits
   useEffect(() => {
     if (profile) {
       if (!isFormEdited || activeTab !== 'settings') {
@@ -66,7 +66,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const [upiId, setUpiId] = useState('')
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
 
-  // helper for requests with authentication headers
+  // Helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -77,16 +77,19 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     return fetch(url, { ...options, headers });
   };
 
-  // pull dashboard and profile details from server on mount
+  // Get dashboard data from server on startup
   useEffect(() => {
     let active = true;
     const loadDashboardData = async () => {
       setLoadingData(true);
       try {
-        // retrieve student profile
+        // Get student profile
         const profileRes = await fetchWithAuth('http://localhost:5000/api/student/profile');
+        let isPaidProfile = false;
         if (profileRes.ok && active) {
           const profileData = await profileRes.json();
+          isPaidProfile = profileData.feeStatus === 'Paid';
+          setFeePaid(isPaidProfile);
           const mappedProfile = {
             fullName: profileData.name || profile.fullName || 'Student',
             email: profileData.email || '',
@@ -101,37 +104,35 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           localStorage.setItem('shm_user_profile', JSON.stringify(mappedProfile));
         }
 
-        // retrieve student complaints
+        // Get student complaints
         const complaintsRes = await fetchWithAuth('http://localhost:5000/api/student/complaints');
         if (complaintsRes.ok && active) {
           const complaintsData = await complaintsRes.json();
           setComplaints(complaintsData);
         }
 
-        // retrieve student gate passes
+        // Get student gate passes
         const gatePassesRes = await fetchWithAuth('http://localhost:5000/api/student/gatepasses');
         if (gatePassesRes.ok && active) {
           const gatePassesData = await gatePassesRes.json();
           setGatePasses(gatePassesData);
         }
 
-        // retrieve student payment transactions
+        // Get student payment transactions
         const transactionsRes = await fetchWithAuth('http://localhost:5000/api/student/transactions');
         if (transactionsRes.ok && active) {
           const transactionsData = await transactionsRes.json();
           setTransactions(transactionsData);
-          const hasPaid = transactionsData.some(t => t.period.toLowerCase().includes('fee') && t.status === 'Paid');
-          setFeePaid(hasPaid);
         }
 
-        // retrieve weekly mess menu
+        // Get weekly mess menu
         const messMenuRes = await fetchWithAuth('http://localhost:5000/api/student/mess/menu');
         if (messMenuRes.ok && active) {
           const messMenuData = await messMenuRes.json();
           setMessMenu(messMenuData);
         }
 
-        // retrieve targeted announcements
+        // Get notices
         const noticesRes = await fetchWithAuth('http://localhost:5000/api/student/notices');
         if (noticesRes.ok && active) {
           const noticesData = await noticesRes.json();
@@ -145,7 +146,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           setNotices(formattedNotices);
         }
 
-        // retrieve student attendance stats
+        // Get student attendance stats
         const attendanceStatsRes = await fetchWithAuth('http://localhost:5000/api/student/attendance/stats');
         if (attendanceStatsRes.ok && active) {
           const statsData = await attendanceStatsRes.json();
@@ -164,7 +165,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     };
   }, []);
 
-  // upload new student photo
+  // Upload student photo
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -179,7 +180,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
       setProfileForm(prev => ({ ...prev, photo: reader.result }))
       try {
         localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-        // save changes to the server database
+        // Save changes to database
         await fetchWithAuth('http://localhost:5000/api/student/profile', {
           method: 'PUT',
           body: JSON.stringify({
@@ -201,14 +202,14 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     reader.readAsDataURL(file)
   }
 
-  // remove student photo
+  // Remove student photo
   const handleRemovePhoto = async () => {
     const updated = { ...(profile || {}), photo: '' }
     if (setProfile) setProfile(updated)
     setProfileForm(prev => ({ ...prev, photo: '' }))
     try {
       localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-      // save changes to the server database
+      // Save changes to database
       await fetchWithAuth('http://localhost:5000/api/student/profile', {
         method: 'PUT',
         body: JSON.stringify({
@@ -229,7 +230,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     setTimeout(() => setSavedSuccessMsg(''), 4000)
   }
 
-  // save text profile modifications
+  // Save profile details
   const handleSaveProfile = async (e) => {
     e.preventDefault()
     try {
@@ -273,7 +274,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     setTimeout(() => setSavedSuccessMsg(''), 4000)
   }
 
-  // submit new complaint ticket
+  // Submit new complaint
   const handleAddComplaint = async (e) => {
     e.preventDefault()
     if (!newComplaint.title) return
@@ -303,7 +304,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     setShowComplaintModal(false)
   }
 
-  // apply for outing gate pass
+  // Request gate pass
   const handleAddGatePass = async (e) => {
     e.preventDefault()
     if (!newGatePass.reason) return
@@ -333,7 +334,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     setShowGatePassModal(false)
   }
 
-  // download payment receipt dynamically in PDF format
+  // Download payment receipt as PDF
   const handleDownloadReceipt = (txn) => {
     const printWindow = window.open('', '_blank', 'width=800,height=600');
     if (!printWindow) {

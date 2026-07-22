@@ -28,7 +28,7 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile,
           if (profile && profile.notifications) {
             profile.notifications.forEach(n => { n.read = true; });
           }
-          // trigger local profile state update to clear header alert badges
+          // Clear local profile alert badges
           if (setProfile) {
             setProfile({ ...profile });
           }

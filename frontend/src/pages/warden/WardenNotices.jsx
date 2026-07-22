@@ -20,7 +20,7 @@ export default function WardenNotices() {
     isUrgent: false
   })
 
-  // helper for requests with authentication headers
+  // Helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {

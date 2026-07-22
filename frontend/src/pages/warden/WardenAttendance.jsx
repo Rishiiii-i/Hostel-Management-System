@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Icon from '../../components/Icon'
 
 export default function WardenAttendance() {
-  // helper to get date string in local timezone format (YYYY-MM-DD)
+  // Get date as string
   const getLocalDateString = () => {
     const date = new Date();
     const year = date.getFullYear();
@@ -17,7 +17,7 @@ export default function WardenAttendance() {
   const [alreadyMarked, setAlreadyMarked] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // helper for requests with authentication headers
+  // Helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -31,14 +31,14 @@ export default function WardenAttendance() {
   const loadAttendanceData = async () => {
     setLoading(true);
     try {
-      // 1. fetch all registered students
+      // 1. Get all students
       const studentsRes = await fetchWithAuth('http://localhost:5000/api/warden/students');
       let studentList = [];
       if (studentsRes.ok) {
         studentList = await studentsRes.json();
       }
 
-      // 2. fetch attendance records for the selected date
+      // 2. Get attendance for the date
       const res = await fetchWithAuth(`http://localhost:5000/api/warden/attendance?date=${selectedDate}`);
       let attRecords = [];
       if (res.ok) {
@@ -47,7 +47,7 @@ export default function WardenAttendance() {
 
       setAlreadyMarked(attRecords.length > 0);
 
-      // 3. merge registered students with their check-in status
+      // 3. Merge students with their attendance status
       const merged = studentList.map(s => {
         const studentId = s.id || s.email;
         const matchingRecord = attRecords.find(r => r.studentId === studentId);
@@ -74,17 +74,17 @@ export default function WardenAttendance() {
     loadAttendanceData();
   }, [selectedDate]);
 
-  // update status in state locally
+  // Update status in state
   const handleSetStatus = (id, status) => {
     setStudents(students.map(s => s.id === id ? { ...s, status } : s))
   }
 
-  // update all status in state locally
+  // Update all status in state
   const handleMarkAll = (status) => {
     setStudents(students.map(s => ({ ...s, status })))
   }
 
-  // post all records to the backend database
+  // Save records to database
   const handleSaveAttendance = async () => {
     try {
       const recordsToPost = students.map(s => ({

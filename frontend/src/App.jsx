@@ -4,7 +4,7 @@ import MainLayout from './layouts/MainLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/AuthContext'
 
-// Lazy load heavy page components for instant initial load speed
+// Load pages only when they are needed
 const Login = lazy(() => import('./pages/Login'))
 const LandingPage = lazy(() => import('./pages/LandingPage'))
 const StudentDashboard = lazy(() => import('./pages/StudentDashboard'))
@@ -63,7 +63,7 @@ function App() {
     }
   })
 
-  // Synchronize local editable profile state when authenticated user changes
+  // Update local profile when user changes
   useEffect(() => {
     if (user) {
       setProfile(prev => {

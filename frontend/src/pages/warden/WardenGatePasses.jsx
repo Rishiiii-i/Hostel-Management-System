@@ -4,7 +4,7 @@ export default function WardenGatePasses() {
   const [passes, setPasses] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // helper for requests with authentication headers
+  // Helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
