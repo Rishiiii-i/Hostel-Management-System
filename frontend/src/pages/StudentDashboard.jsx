@@ -1,13 +1,54 @@
 import './StudentDashboard.css'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Icon from '../components/Icon'
+import { useAuth } from '../context/AuthContext'
 
 export default function StudentDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
+  const { updateProfileName } = useAuth()
   const fileInputRef = useRef(null)
   const [complaints, setComplaints] = useState([])
   const [gatePasses, setGatePasses] = useState([])
   const [transactions, setTransactions] = useState([])
-  const [notices] = useState([])
+  const [notices, setNotices] = useState([])
+  const [messMenu, setMessMenu] = useState([])
+  const [profileForm, setProfileForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    emergencyContact: '',
+    room: '',
+    block: '',
+    photo: ''
+  })
+  const [attendanceStats, setAttendanceStats] = useState({
+    presentCount: 0,
+    outingCount: 0,
+    attendanceRate: 100
+  })
+  const [loadingData, setLoadingData] = useState(true)
+  const [isFormEdited, setIsFormEdited] = useState(false)
+
+  // reset form edited status on tab change
+  useEffect(() => {
+    setIsFormEdited(false);
+  }, [activeTab]);
+
+  // smart sync profileForm without overwriting user edits
+  useEffect(() => {
+    if (profile) {
+      if (!isFormEdited || activeTab !== 'settings') {
+        setProfileForm({
+          fullName: profile.fullName || '',
+          email: profile.email || '',
+          phone: profile.phone || '',
+          emergencyContact: profile.emergencyContact || '',
+          room: profile.room || '',
+          block: profile.block || '',
+          photo: profile.photo || ''
+        });
+      }
+    }
+  }, [profile, activeTab, isFormEdited]);
 
   const [feePaid, setFeePaid] = useState(false)
   const [showPayModal, setShowPayModal] = useState(false)
@@ -16,10 +57,114 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
 
   const [newComplaint, setNewComplaint] = useState({ category: 'Electrical', title: '', priority: 'Medium' })
   const [newGatePass, setNewGatePass] = useState({ reason: '', departure: '', returnDate: '' })
-  const [payAmount, setPayAmount] = useState('450.00')
+  const [payAmount, setPayAmount] = useState('5000.00')
 
   const [savedSuccessMsg, setSavedSuccessMsg] = useState('')
+  const [customCategory, setCustomCategory] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('card')
+  const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' })
+  const [upiId, setUpiId] = useState('')
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
 
+  // helper for requests with authentication headers
+  const fetchWithAuth = async (url, options = {}) => {
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers
+    };
+    return fetch(url, { ...options, headers });
+  };
+
+  // pull dashboard and profile details from server on mount
+  useEffect(() => {
+    let active = true;
+    const loadDashboardData = async () => {
+      setLoadingData(true);
+      try {
+        // retrieve student profile
+        const profileRes = await fetchWithAuth('http://localhost:5000/api/student/profile');
+        if (profileRes.ok && active) {
+          const profileData = await profileRes.json();
+          const mappedProfile = {
+            fullName: profileData.name || profile.fullName || 'Student',
+            email: profileData.email || '',
+            phone: profileData.phone || '',
+            emergencyContact: profileData.emergencyContact || '',
+            room: profileData.room || '',
+            block: profileData.block || '',
+            rollNo: profileData.rollNo || '',
+            photo: profileData.photo || ''
+          };
+          if (setProfile) setProfile(mappedProfile);
+          localStorage.setItem('shm_user_profile', JSON.stringify(mappedProfile));
+        }
+
+        // retrieve student complaints
+        const complaintsRes = await fetchWithAuth('http://localhost:5000/api/student/complaints');
+        if (complaintsRes.ok && active) {
+          const complaintsData = await complaintsRes.json();
+          setComplaints(complaintsData);
+        }
+
+        // retrieve student gate passes
+        const gatePassesRes = await fetchWithAuth('http://localhost:5000/api/student/gatepasses');
+        if (gatePassesRes.ok && active) {
+          const gatePassesData = await gatePassesRes.json();
+          setGatePasses(gatePassesData);
+        }
+
+        // retrieve student payment transactions
+        const transactionsRes = await fetchWithAuth('http://localhost:5000/api/student/transactions');
+        if (transactionsRes.ok && active) {
+          const transactionsData = await transactionsRes.json();
+          setTransactions(transactionsData);
+          const hasPaid = transactionsData.some(t => t.period.toLowerCase().includes('fee') && t.status === 'Paid');
+          setFeePaid(hasPaid);
+        }
+
+        // retrieve weekly mess menu
+        const messMenuRes = await fetchWithAuth('http://localhost:5000/api/student/mess/menu');
+        if (messMenuRes.ok && active) {
+          const messMenuData = await messMenuRes.json();
+          setMessMenu(messMenuData);
+        }
+
+        // retrieve targeted announcements
+        const noticesRes = await fetchWithAuth('http://localhost:5000/api/student/notices');
+        if (noticesRes.ok && active) {
+          const noticesData = await noticesRes.json();
+          const formattedNotices = noticesData.map(n => ({
+            id: n.id,
+            title: n.title,
+            body: n.content,
+            date: n.date,
+            category: n.targetStudentEmail ? 'Personal Alert' : n.targetBlock
+          }));
+          setNotices(formattedNotices);
+        }
+
+        // retrieve student attendance stats
+        const attendanceStatsRes = await fetchWithAuth('http://localhost:5000/api/student/attendance/stats');
+        if (attendanceStatsRes.ok && active) {
+          const statsData = await attendanceStatsRes.json();
+          setAttendanceStats(statsData);
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      } finally {
+        if (active) setLoadingData(false);
+      }
+    };
+
+    loadDashboardData();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // upload new student photo
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -28,77 +173,368 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
       return
     }
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = async () => {
       const updated = { ...(profile || {}), photo: reader.result }
       if (setProfile) setProfile(updated)
+      setProfileForm(prev => ({ ...prev, photo: reader.result }))
       try {
         localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-      } catch (err) {}
+        // save changes to the server database
+        await fetchWithAuth('http://localhost:5000/api/student/profile', {
+          method: 'PUT',
+          body: JSON.stringify({
+            name: updated.fullName || '',
+            rollNo: updated.rollNo || '',
+            phone: updated.phone || '',
+            emergencyContact: updated.emergencyContact || '',
+            room: updated.room || '',
+            block: updated.block || '',
+            photo: updated.photo || ''
+          })
+        });
+      } catch (err) {
+        console.error('Failed to save profile photo:', err);
+      }
       setSavedSuccessMsg('Profile photo updated successfully!')
       setTimeout(() => setSavedSuccessMsg(''), 4000)
     }
     reader.readAsDataURL(file)
   }
 
-  const handleRemovePhoto = () => {
+  // remove student photo
+  const handleRemovePhoto = async () => {
     const updated = { ...(profile || {}), photo: '' }
     if (setProfile) setProfile(updated)
+    setProfileForm(prev => ({ ...prev, photo: '' }))
     try {
       localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-    } catch (err) {}
+      // save changes to the server database
+      await fetchWithAuth('http://localhost:5000/api/student/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: updated.fullName || '',
+          rollNo: updated.rollNo || '',
+          phone: updated.phone || '',
+          emergencyContact: updated.emergencyContact || '',
+          room: updated.room || '',
+          block: updated.block || '',
+          photo: ''
+        })
+      });
+    } catch (err) {
+      console.error('Failed to remove profile photo:', err);
+    }
     if (fileInputRef.current) fileInputRef.current.value = ''
     setSavedSuccessMsg('Profile photo removed.')
     setTimeout(() => setSavedSuccessMsg(''), 4000)
   }
 
-  const handleSaveProfile = (e) => {
+  // save text profile modifications
+  const handleSaveProfile = async (e) => {
     e.preventDefault()
-    setSavedSuccessMsg('Profile details updated successfully!')
+    try {
+      const res = await fetchWithAuth('http://localhost:5000/api/student/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: profileForm.fullName || '',
+          rollNo: profile?.rollNo || '',
+          phone: profileForm.phone || '',
+          emergencyContact: profileForm.emergencyContact || '',
+          room: profileForm.room || '',
+          block: profileForm.block || '',
+          photo: profileForm.photo || ''
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        const localProfile = {
+          ...profile,
+          fullName: updated.name,
+          rollNo: updated.rollNo,
+          phone: updated.phone,
+          emergencyContact: updated.emergencyContact,
+          room: updated.room,
+          block: updated.block,
+          photo: updated.photo
+        };
+        if (setProfile) setProfile(localProfile);
+        setIsFormEdited(false);
+        localStorage.setItem('shm_user_profile', JSON.stringify(localProfile));
+        if (updateProfileName) {
+          await updateProfileName(updated.name);
+        }
+        setSavedSuccessMsg('Profile details updated successfully!')
+      } else {
+        alert('Failed to save profile changes to server.');
+      }
+    } catch (err) {
+      console.error('Failed to save profile info:', err);
+    }
     setTimeout(() => setSavedSuccessMsg(''), 4000)
   }
 
-  const handleAddComplaint = (e) => {
+  // submit new complaint ticket
+  const handleAddComplaint = async (e) => {
     e.preventDefault()
     if (!newComplaint.title) return
-    const item = {
-      id: `REQ-${Math.floor(100 + Math.random() * 900)}`,
-      category: newComplaint.category,
-      title: newComplaint.title,
-      date: new Date().toISOString().split('T')[0],
-      status: 'Pending',
-      priority: newComplaint.priority
+    try {
+      const finalCategory = newComplaint.category === 'Other' ? customCategory : newComplaint.category;
+      const res = await fetchWithAuth('http://localhost:5000/api/student/complaints', {
+        method: 'POST',
+        body: JSON.stringify({
+          category: finalCategory,
+          title: newComplaint.title,
+          priority: newComplaint.priority
+        })
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setComplaints([saved, ...complaints]);
+        setCustomCategory('');
+        alert('Complaint registration successfully completed');
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(`Failed to submit complaint: ${errData.error || errData.message || 'Server error'}`);
+      }
+    } catch (err) {
+      console.error('Failed to submit complaint:', err);
     }
-    setComplaints([item, ...complaints])
     setNewComplaint({ category: 'Electrical', title: '', priority: 'Medium' })
     setShowComplaintModal(false)
   }
 
-  const handleAddGatePass = (e) => {
+  // apply for outing gate pass
+  const handleAddGatePass = async (e) => {
     e.preventDefault()
     if (!newGatePass.reason) return
-    const item = {
-      id: `GP-${Math.floor(100 + Math.random() * 900)}`,
-      reason: newGatePass.reason,
-      departure: newGatePass.departure || new Date().toISOString().slice(0, 16).replace('T', ' '),
-      returnDate: newGatePass.returnDate || new Date().toISOString().slice(0, 16).replace('T', ' '),
-      status: 'Pending'
+    try {
+      const departureVal = newGatePass.departure || new Date().toISOString().slice(0, 16).replace('T', ' ');
+      const returnDateVal = newGatePass.returnDate || new Date().toISOString().slice(0, 16).replace('T', ' ');
+      const res = await fetchWithAuth('http://localhost:5000/api/student/gatepasses', {
+        method: 'POST',
+        body: JSON.stringify({
+          reason: newGatePass.reason,
+          departure: departureVal,
+          returnDate: returnDateVal
+        })
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setGatePasses([saved, ...gatePasses]);
+        alert('Gate pass request successfully completed');
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(`Failed to request gate pass: ${errData.error || errData.message || 'Server error'}`);
+      }
+    } catch (err) {
+      console.error('Failed to apply for gate pass:', err);
     }
-    setGatePasses([item, ...gatePasses])
     setNewGatePass({ reason: '', departure: '', returnDate: '' })
     setShowGatePassModal(false)
   }
 
-  const handlePayFee = () => {
-    const txn = {
-      id: `TXN-${Math.floor(1000 + Math.random() * 9000)}`,
-      period: 'Hostel Fee',
-      amount: `$${payAmount}`,
-      date: new Date().toISOString().split('T')[0],
-      status: 'Paid'
+  // download payment receipt dynamically in PDF format
+  const handleDownloadReceipt = (txn) => {
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) {
+      alert('Pop-up blocker is enabled. Please allow pop-ups to print the receipt.');
+      return;
     }
-    setTransactions([txn, ...transactions])
-    setFeePaid(true)
-    setShowPayModal(false)
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Receipt-${txn.id}</title>
+          <style>
+            body {
+              font-family: 'Segoe UI', system-ui, sans-serif;
+              color: #1e293b;
+              padding: 30px;
+              background: #ffffff;
+              line-height: 1.5;
+            }
+            .receipt-box {
+              max-width: 600px;
+              margin: 0 auto;
+              border: 1px solid #e2e8f0;
+              border-radius: 16px;
+              padding: 30px;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #f1f5f9;
+              padding-bottom: 20px;
+              margin-bottom: 20px;
+            }
+            .header h1 {
+              font-size: 22px;
+              margin: 0 0 4px 0;
+              color: #0f172a;
+              font-weight: 800;
+            }
+            .header p {
+              margin: 0;
+              color: #64748b;
+              font-size: 13px;
+            }
+            .info-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 14px;
+              margin-bottom: 24px;
+            }
+            .info-item {
+              margin-bottom: 4px;
+            }
+            .info-item label {
+              display: block;
+              font-size: 11px;
+              color: #64748b;
+              text-transform: uppercase;
+              font-weight: 600;
+              margin-bottom: 2px;
+            }
+            .info-item span {
+              display: block;
+              font-size: 14px;
+              color: #0f172a;
+              font-weight: 700;
+            }
+            .details-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 24px;
+            }
+            .details-table th, .details-table td {
+              padding: 10px;
+              text-align: left;
+              border-bottom: 1px solid #f1f5f9;
+            }
+            .details-table th {
+              color: #64748b;
+              font-weight: 600;
+              font-size: 12px;
+            }
+            .details-table td {
+              font-size: 13px;
+              color: #334155;
+            }
+            .total-row td {
+              font-weight: 800;
+              font-size: 14px;
+              color: #10b981;
+              border-top: 2px solid #f1f5f9;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 30px;
+              font-size: 11px;
+              color: #94a3b8;
+              border-top: 1px dashed #e2e8f0;
+              padding-top: 16px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="receipt-box">
+            <div class="header">
+              <h1>SMART HOSTEL</h1>
+              <p>Official Payment Receipt</p>
+            </div>
+            
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Receipt ID</label>
+                <span>${txn.id}</span>
+              </div>
+              <div class="info-item">
+                <label>Payment Date</label>
+                <span>${txn.date}</span>
+              </div>
+              <div class="info-item">
+                <label>Student Name</label>
+                <span>${profile?.fullName || 'N/A'}</span>
+              </div>
+              <div class="info-item">
+                <label>Email Address</label>
+                <span>${profile?.email || 'N/A'}</span>
+              </div>
+              <div class="info-item">
+                <label>Room / Block</label>
+                <span>Room ${profile?.room || 'N/A'} (${profile?.block || 'N/A'})</span>
+              </div>
+              <div class="info-item">
+                <label>Transaction Status</label>
+                <span style="color: #10b981;">${txn.status}</span>
+              </div>
+            </div>
+
+            <table class="details-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th style="text-align: right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>${txn.period} Allocation Fee</td>
+                  <td style="text-align: right; font-weight: 700;">${txn.amount}</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Total Paid</td>
+                  <td style="text-align: right;">${txn.amount}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="footer">
+              <p>This is a computer-generated receipt and does not require a signature.</p>
+              <p>&copy; ${new Date().getFullYear()} Smart Hostel Management System. All rights reserved.</p>
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handlePayFee = async (e) => {
+    if (e) e.preventDefault();
+    setIsProcessingPayment(true);
+    
+    setTimeout(async () => {
+      try {
+        const res = await fetchWithAuth('http://localhost:5000/api/student/transactions', {
+          method: 'POST',
+          body: JSON.stringify({
+            amount: payAmount,
+            period: 'Hostel Fee'
+          })
+        });
+        if (res.ok) {
+          const saved = await res.json();
+          setTransactions([saved, ...transactions]);
+          setFeePaid(true);
+          setShowPayModal(false);
+          setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
+          setUpiId('');
+          alert('Payment successfully completed');
+        } else {
+          const errData = await res.json();
+          alert(errData.message || 'Failed to process payment.');
+        }
+      } catch (err) {
+        console.error('Failed to submit fee payment:', err);
+      } finally {
+        setIsProcessingPayment(false);
+      }
+    }, 1500);
   }
 
   return (
@@ -120,7 +556,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <div className="stat-box">
                 <span className="stat-label">Fee Status</span>
                 <strong className={`stat-value ${feePaid ? 'text-success' : 'text-warning'}`}>
-                  {feePaid ? 'Cleared' : '$450.00 Dues'}
+                  {feePaid ? 'Cleared' : '$5000.00 Dues'}
                 </strong>
                 <small className="stat-sub">{feePaid ? 'Receipt Available' : 'Payment Due'}</small>
               </div>
@@ -172,12 +608,40 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           <div className="dashboard-grid-2col">
             <div className="dash-card">
               <div className="card-header">
-                <h3>Today&apos;s Mess Menu</h3>
+                <h3>Today&apos;s Mess Menu ({new Date().toLocaleDateString('en-US', { weekday: 'long' })})</h3>
                 <span className="badge-tag info">Live Menu</span>
               </div>
-              <div className="mess-menu-grid">
-                <p className="empty-state-text">No mess menu added for today.</p>
-              </div>
+              {(() => {
+                const todayDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+                const menu = Array.isArray(messMenu) ? messMenu.find(m => m.day === todayDay) : null;
+                if (menu) {
+                  return (
+                    <div className="mess-menu-grid">
+                      <div className="mess-item">
+                        <h5>Breakfast</h5>
+                        <p>{menu.breakfast}</p>
+                      </div>
+                      <div className="mess-item">
+                        <h5>Lunch</h5>
+                        <p>{menu.lunch}</p>
+                      </div>
+                      <div className="mess-item">
+                        <h5>Snacks</h5>
+                        <p>{menu.snacks}</p>
+                      </div>
+                      <div className="mess-item">
+                        <h5>Dinner</h5>
+                        <p>{menu.dinner}</p>
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="mess-menu-grid">
+                    <p className="empty-state-text">No mess menu added for today.</p>
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="dash-card">
@@ -265,24 +729,23 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="dash-card">
               <div className="card-title-badge">
                 <h3>Occupancy & Support</h3>
-                <span className="status-badge info">0 Students</span>
               </div>
               <div className="room-info-grid">
                 <div className="info-row">
                   <span className="info-label">Resident Status</span>
-                  <strong className="info-val">Not Assigned</strong>
+                  <strong className="info-val">{profile?.room ? 'Room Allocated' : 'Not Assigned'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Warden In-Charge</span>
-                  <strong className="info-val">Not Assigned</strong>
+                  <strong className="info-val">{profile?.room ? (profile?.wardenInfo?.fullName || 'Macha Rishi') : 'Not Assigned'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Warden Contact</span>
-                  <strong className="info-val">0</strong>
+                  <strong className="info-val">{profile?.room ? (profile?.wardenInfo?.phone || '+91 987654321') : '0'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Emergency Desk</span>
-                  <strong className="info-val">0</strong>
+                  <strong className="info-val">{profile?.room ? (profile?.wardenInfo?.emergencyContact || '+91 123456789') : '0'}</strong>
                 </div>
               </div>
             </div>
@@ -292,12 +755,24 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 <h3>Room Amenities</h3>
                 <span className="status-badge paid">Verified</span>
               </div>
-              <ul className="amenities-list">
-                <li><Icon name="checkmark" width={16} height={16} /> High-Speed Hostel Wi-Fi</li>
-                <li><Icon name="checkmark" width={16} height={16} /> Individual Study Desk &amp; Chair</li>
-                <li><Icon name="checkmark" width={16} height={16} /> Attached Bathroom with Geyser</li>
-                <li><Icon name="checkmark" width={16} height={16} /> 24/7 Security &amp; Power Backup</li>
-              </ul>
+              <div className="room-info-grid">
+                <div className="info-row">
+                  <span className="info-label">Hostel Internet</span>
+                  <strong className="info-val">High-Speed Wi-Fi</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Study Setup</span>
+                  <strong className="info-val">Desk &amp; Chair</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Washroom Type</span>
+                  <strong className="info-val">Attached (Geyser)</strong>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Power &amp; Security</span>
+                  <strong className="info-val">24/7 Backup &amp; Guard</strong>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -329,21 +804,21 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <div className="fee-summary-box">
                 <div className="fee-amount-display">
                   <small>Total Dues Payable</small>
-                  <b>$0.00</b>
-                  <span className="fee-due-date">No pending dues</span>
+                  <b>{feePaid ? '$0.00' : '$5000.00'}</b>
+                  <span className="fee-due-date">{feePaid ? 'No pending dues' : 'Due by July 31, 2026'}</span>
                 </div>
                 <div className="fee-breakdown-list">
                   <div className="fee-item">
                     <span>Hostel Room Rent</span>
-                    <strong>$0.00</strong>
+                    <strong>{feePaid ? '$0.00' : '$3500.00'}</strong>
                   </div>
                   <div className="fee-item">
                     <span>Mess Charges</span>
-                    <strong>$0.00</strong>
+                    <strong>{feePaid ? '$0.00' : '$1200.00'}</strong>
                   </div>
                   <div className="fee-item">
                     <span>Maintenance &amp; Security</span>
-                    <strong>$0.00</strong>
+                    <strong>{feePaid ? '$0.00' : '$300.00'}</strong>
                   </div>
                 </div>
               </div>
@@ -354,35 +829,37 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               {transactions.length === 0 ? (
                 <p className="empty-state-text">No payment records found.</p>
               ) : (
-                <div className="table-responsive">
-                  <table className="custom-table">
-                    <thead>
-                      <tr>
-                        <th>Payment ID</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Receipt</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {transactions.map((t) => (
-                        <tr key={t.id}>
-                          <td><strong>{t.id}</strong></td>
-                          <td>{t.period}</td>
-                          <td><strong>{t.amount}</strong></td>
-                          <td>{t.date}</td>
-                          <td><span className="status-badge paid">{t.status}</span></td>
-                          <td>
-                            <button type="button" className="btn-table-action" onClick={() => alert('Downloading official receipt PDF...')}>
-                              Receipt PDF
-                            </button>
-                          </td>
+                <div className="payment-history-scroll-box">
+                  <div className="table-responsive">
+                    <table className="custom-table">
+                      <thead>
+                        <tr>
+                          <th>Payment ID</th>
+                          <th>Type</th>
+                          <th>Amount</th>
+                          <th>Date</th>
+                          <th>Status</th>
+                          <th>Receipt</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {transactions.map((t) => (
+                          <tr key={t.id}>
+                            <td><strong>{t.id}</strong></td>
+                            <td>{t.period}</td>
+                            <td><strong>{t.amount}</strong></td>
+                            <td>{t.date}</td>
+                            <td><span className="status-badge paid">{t.status}</span></td>
+                            <td>
+                              <button type="button" className="btn-table-action" onClick={() => handleDownloadReceipt(t)}>
+                                Receipt PDF
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
@@ -475,15 +952,15 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <h3>Monthly Attendance Record</h3>
               <div className="attendance-summary-box">
                 <div className="att-stat-card green">
-                  <strong>0 Days</strong>
+                  <strong>{attendanceStats.presentCount} Days</strong>
                   <span>Present</span>
                 </div>
                 <div className="att-stat-card amber">
-                  <strong>0 Days</strong>
+                  <strong>{attendanceStats.outingCount} Days</strong>
                   <span>Approved Outing</span>
                 </div>
                 <div className="att-stat-card emerald">
-                  <strong>0%</strong>
+                  <strong>{attendanceStats.attendanceRate}%</strong>
                   <span>Attendance Rate</span>
                 </div>
               </div>
@@ -746,8 +1223,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Full Name
                     <input
                       type="text"
-                      value={profile?.fullName || ''}
-                      onChange={(e) => setProfile({ ...(profile || {}), fullName: e.target.value })}
+                      value={profileForm.fullName || ''}
+                      onChange={(e) => {
+                        setProfileForm({ ...profileForm, fullName: e.target.value });
+                        setIsFormEdited(true);
+                      }}
                       required
                     />
                   </label>
@@ -756,8 +1236,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Email Address
                     <input
                       type="email"
-                      value={profile?.email || ''}
-                      onChange={(e) => setProfile({ ...(profile || {}), email: e.target.value })}
+                      value={profileForm.email || ''}
+                      onChange={(e) => {
+                        setProfileForm({ ...profileForm, email: e.target.value });
+                        setIsFormEdited(true);
+                      }}
                       required
                     />
                   </label>
@@ -766,8 +1249,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Phone Number
                     <input
                       type="tel"
-                      value={profile?.phone || ''}
-                      onChange={(e) => setProfile({ ...(profile || {}), phone: e.target.value })}
+                      value={profileForm.phone || ''}
+                      onChange={(e) => {
+                        setProfileForm({ ...profileForm, phone: e.target.value });
+                        setIsFormEdited(true);
+                      }}
                       required
                     />
                   </label>
@@ -776,8 +1262,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Emergency Contact
                     <input
                       type="tel"
-                      value={profile?.emergencyContact || ''}
-                      onChange={(e) => setProfile({ ...(profile || {}), emergencyContact: e.target.value })}
+                      value={profileForm.emergencyContact || ''}
+                      onChange={(e) => {
+                        setProfileForm({ ...profileForm, emergencyContact: e.target.value });
+                        setIsFormEdited(true);
+                      }}
                       required
                     />
                   </label>
@@ -786,8 +1275,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Room Number
                     <input
                       type="text"
-                      value={profile?.room || ''}
-                      onChange={(e) => setProfile({ ...(profile || {}), room: e.target.value })}
+                      value={profileForm.room || ''}
+                      onChange={(e) => {
+                        setProfileForm({ ...profileForm, room: e.target.value });
+                        setIsFormEdited(true);
+                      }}
                       required
                     />
                   </label>
@@ -796,8 +1288,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                     Hostel Block
                     <input
                       type="text"
-                      value={profile?.block || ''}
-                      onChange={(e) => setProfile({ ...(profile || {}), block: e.target.value })}
+                      value={profileForm.block || ''}
+                      onChange={(e) => {
+                        setProfileForm({ ...profileForm, block: e.target.value });
+                        setIsFormEdited(true);
+                      }}
                       required
                     />
                   </label>
@@ -819,23 +1314,140 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         <div className="modal-backdrop modal-pay-fee animate-fade-in">
           <div className="modal-box animate-scale-in">
             <h3>Pay Fee Dues</h3>
-            <label className="form-label">
-              Amount ($)
-              <input
-                type="number"
-                value={payAmount}
-                onChange={(e) => setPayAmount(e.target.value)}
-                required
-              />
-            </label>
-            <div className="payment-options">
-              <label><input type="radio" name="pay" defaultChecked /> Credit / Debit Card</label>
-              <label><input type="radio" name="pay" /> UPI / Net Banking</label>
-            </div>
-            <div className="modal-actions">
-              <button type="button" className="btn-secondary" onClick={() => setShowPayModal(false)}>Cancel</button>
-              <button type="button" className="btn-pay-fee" onClick={handlePayFee}>Pay Now</button>
-            </div>
+            {isProcessingPayment ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 0', gap: '16px' }}>
+                <div style={{ width: '40px', height: '40px', border: '4px solid rgba(16, 185, 129, 0.2)', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                <p style={{ fontWeight: 600, color: '#557162', margin: 0 }}>Processing secure payment...</p>
+              </div>
+            ) : (
+              <form onSubmit={handlePayFee}>
+                <label className="form-label">
+                  Amount ($)
+                  <input
+                    type="number"
+                    value={payAmount}
+                    onChange={(e) => setPayAmount(e.target.value)}
+                    required
+                  />
+                </label>
+                
+                <div className="payment-options" style={{ display: 'flex', gap: '20px', margin: '16px 0' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      checked={paymentMethod === 'card'} 
+                      onChange={() => setPaymentMethod('card')} 
+                    /> 
+                    Credit / Debit Card
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      checked={paymentMethod === 'upi'} 
+                      onChange={() => setPaymentMethod('upi')} 
+                    /> 
+                    UPI ID
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
+                    <input 
+                      type="radio" 
+                      name="paymentMethod" 
+                      checked={paymentMethod === 'qr'} 
+                      onChange={() => setPaymentMethod('qr')} 
+                    /> 
+                    QR Code
+                  </label>
+                </div>
+
+                {paymentMethod === 'card' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                    <label className="form-label" style={{ margin: 0 }}>
+                      Cardholder Name
+                      <input
+                        type="text"
+                        placeholder="Enter the cardholder name"
+                        value={cardDetails.name}
+                        onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
+                        required
+                      />
+                    </label>
+                    <label className="form-label" style={{ margin: 0 }}>
+                      Card Number
+                      <input
+                        type="text"
+                        maxLength="19"
+                        placeholder="Enter the 16 digit card number"
+                        value={cardDetails.number}
+                        onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
+                        required
+                      />
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <label className="form-label" style={{ margin: 0 }}>
+                        Expiry Date
+                        <input
+                          type="text"
+                          maxLength="5"
+                          placeholder="Enter the expiry date (MM/YY)"
+                          value={cardDetails.expiry}
+                          onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
+                          required
+                        />
+                      </label>
+                      <label className="form-label" style={{ margin: 0 }}>
+                        CVV
+                        <input
+                          type="password"
+                          maxLength="3"
+                          placeholder="Enter the 3 digit CVV"
+                          value={cardDetails.cvv}
+                          onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
+                          required
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {paymentMethod === 'upi' && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <label className="form-label">
+                      UPI ID
+                      <input
+                        type="text"
+                        placeholder="Enter the UPI ID (username@upi)"
+                        value={upiId}
+                        onChange={(e) => setUpiId(e.target.value)}
+                        required
+                      />
+                    </label>
+                  </div>
+                )}
+
+                {paymentMethod === 'qr' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '16px', padding: '10px', background: '#f9fbf9', borderRadius: '14px', border: '1px solid #e1e9e2' }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#557162', textAlign: 'center' }}>
+                      Scan the QR code with GPay, PhonePe, or any UPI app to pay ${payAmount}.
+                    </p>
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=smarthostel@upi%26pn=SmartHostel%26am=${payAmount}%26cu=USD`}
+                      alt="Payment QR Code" 
+                      style={{ width: '150px', height: '150px', border: '4px solid #ffffff', borderRadius: '8px', boxShadow: '0 4px 12px rgba(18, 55, 38, 0.08)' }} 
+                    />
+                    <p style={{ margin: 0, fontSize: '12px', color: '#8ca295', fontStyle: 'italic' }}>
+                      UPI ID: smarthostel@upi
+                    </p>
+                  </div>
+                )}
+
+                <div className="modal-actions" style={{ marginTop: '24px' }}>
+                  <button type="button" className="btn-secondary" onClick={() => setShowPayModal(false)}>Cancel</button>
+                  <button type="submit" className="btn-pay-fee">Pay Now</button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -856,14 +1468,28 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                   <option value="Furniture">Furniture</option>
                   <option value="Cleaning">Cleaning</option>
                   <option value="Internet">Internet</option>
+                  <option value="Other">Other</option>
                 </select>
               </label>
+
+              {newComplaint.category === 'Other' && (
+                <label className="form-label">
+                  Specify Category
+                  <input
+                    type="text"
+                    placeholder="Enter the custom category"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    required
+                  />
+                </label>
+              )}
 
               <label className="form-label">
                 Problem Description
                 <input
                   type="text"
-                  placeholder="e.g. Bathroom light flickering"
+                  placeholder="Enter the problem details"
                   value={newComplaint.title}
                   onChange={(e) => setNewComplaint({ ...newComplaint, title: e.target.value })}
                   required
@@ -900,7 +1526,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 Reason for Outing
                 <input
                   type="text"
-                  placeholder="e.g. Medical appointment / Home Visit"
+                  placeholder="Enter the reason for outing"
                   value={newGatePass.reason}
                   onChange={(e) => setNewGatePass({ ...newGatePass, reason: e.target.value })}
                   required

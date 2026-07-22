@@ -67,10 +67,16 @@ function App() {
   useEffect(() => {
     if (user) {
       setProfile(prev => {
+        const isGeneric = (n) => !n || ['student', 'warden', 'admin', 'user', 'system administrator'].includes(n.toLowerCase().trim());
         const isDifferentUser = prev.email && user.email && prev.email.toLowerCase() !== user.email.toLowerCase()
+        const shouldUpdateName = 
+          isDifferentUser || 
+          isGeneric(prev.fullName) || 
+          (user.name && !isGeneric(user.name) && user.name !== prev.fullName);
+
         const updated = {
           ...prev,
-          fullName: isDifferentUser || !prev.fullName ? (user.name || '') : prev.fullName,
+          fullName: shouldUpdateName ? (user.name || '') : prev.fullName,
           email: user.email || prev.email || '',
           photo: isDifferentUser ? (user.photoURL || '') : (prev.photo || user.photoURL || '')
         }
@@ -148,7 +154,7 @@ function App() {
     return (
       <ProtectedRoute>
         <Suspense fallback={<LoadingSpinner />}>
-          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
+          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile}>
             <AdminDashboard activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
           </MainLayout>
         </Suspense>
@@ -160,7 +166,7 @@ function App() {
     return (
       <ProtectedRoute>
         <Suspense fallback={<LoadingSpinner />}>
-          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
+          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile}>
             <WardenDashboard activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
           </MainLayout>
         </Suspense>
@@ -172,7 +178,7 @@ function App() {
     return (
       <ProtectedRoute>
         <Suspense fallback={<LoadingSpinner />}>
-          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile}>
+          <MainLayout activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile}>
             <StudentDashboard activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
           </MainLayout>
         </Suspense>

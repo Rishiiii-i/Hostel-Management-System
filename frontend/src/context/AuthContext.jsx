@@ -83,7 +83,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      const token = await fbUser.getIdToken().catch(() => 'token');
+      // extract backend jwt or fall back to firebase token
+      const token = data.token || (await fbUser.getIdToken().catch(() => 'token'));
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -132,6 +133,7 @@ export const AuthProvider = ({ children }) => {
         setFirebaseUser(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('shm_user_profile');
         setUser(null);
         setLoading(false);
       }
@@ -260,6 +262,22 @@ export const AuthProvider = ({ children }) => {
     await confirmPasswordReset(auth, code, newPassword);
   };
 
+  const updateProfileName = async (newName) => {
+    if (auth.currentUser) {
+      try {
+        await updateProfile(auth.currentUser, { displayName: newName });
+      } catch (err) {
+        console.error('Failed to update firebase display name:', err);
+      }
+      setUser(prev => {
+        if (!prev) return null;
+        const updated = { ...prev, name: newName };
+        localStorage.setItem('user', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  };
+
   const logOut = async () => {
     const confirmed = window.confirm('Are you sure you want to logout?')
     if (!confirmed) return
@@ -271,6 +289,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      localStorage.removeItem('shm_user_profile')
       setUser(null)
       setFirebaseUser(null)
       setLoading(false)
@@ -288,7 +307,8 @@ export const AuthProvider = ({ children }) => {
     sendPasswordReset,
     verifyResetCode,
     confirmReset,
-    logOut
+    logOut,
+    updateProfileName
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,18 +1,119 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Icon from '../../components/Icon'
 
 export default function WardenAttendance() {
-  const [selectedDate, setSelectedDate] = useState('2026-07-21')
+  // helper to get date string in local timezone format (YYYY-MM-DD)
+  const getLocalDateString = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString)
   const [searchQuery, setSearchQuery] = useState('')
   const [students, setStudents] = useState([])
+  const [alreadyMarked, setAlreadyMarked] = useState(false)
+  const [loading, setLoading] = useState(true)
 
+  // helper for requests with authentication headers
+  const fetchWithAuth = async (url, options = {}) => {
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers
+    };
+    return fetch(url, { ...options, headers });
+  };
+
+  const loadAttendanceData = async () => {
+    setLoading(true);
+    try {
+      // 1. fetch all registered students
+      const studentsRes = await fetchWithAuth('http://localhost:5000/api/warden/students');
+      let studentList = [];
+      if (studentsRes.ok) {
+        studentList = await studentsRes.json();
+      }
+
+      // 2. fetch attendance records for the selected date
+      const res = await fetchWithAuth(`http://localhost:5000/api/warden/attendance?date=${selectedDate}`);
+      let attRecords = [];
+      if (res.ok) {
+        attRecords = await res.json();
+      }
+
+      setAlreadyMarked(attRecords.length > 0);
+
+      // 3. merge registered students with their check-in status
+      const merged = studentList.map(s => {
+        const studentId = s.id || s.email;
+        const matchingRecord = attRecords.find(r => r.studentId === studentId);
+        return {
+          id: studentId,
+          name: s.name,
+          room: s.room || 'N/A',
+          branch: s.branch || 'Diploma',
+          year: s.year || '3rd Year',
+          status: matchingRecord ? matchingRecord.status : 'Absent',
+          initials: s.name ? s.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'ST'
+        };
+      });
+
+      setStudents(merged);
+    } catch (err) {
+      console.error('Failed to load attendance list:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAttendanceData();
+  }, [selectedDate]);
+
+  // update status in state locally
   const handleSetStatus = (id, status) => {
     setStudents(students.map(s => s.id === id ? { ...s, status } : s))
   }
 
+  // update all status in state locally
   const handleMarkAll = (status) => {
     setStudents(students.map(s => ({ ...s, status })))
   }
+
+  // post all records to the backend database
+  const handleSaveAttendance = async () => {
+    try {
+      const recordsToPost = students.map(s => ({
+        studentId: s.id,
+        studentName: s.name,
+        room: s.room,
+        branch: s.branch,
+        year: s.year,
+        status: s.status
+      }));
+
+      const res = await fetchWithAuth('http://localhost:5000/api/warden/attendance/mark', {
+        method: 'POST',
+        body: JSON.stringify({
+          date: selectedDate,
+          records: recordsToPost
+        })
+      });
+
+      if (res.ok) {
+        alert('Attendance records successfully updated');
+        setAlreadyMarked(true);
+      } else {
+        alert('Failed to save attendance records.');
+      }
+    } catch (err) {
+      console.error('Failed to save attendance records:', err);
+    }
+  };
 
   const filtered = students.filter(s =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -67,72 +168,92 @@ export default function WardenAttendance() {
             >
               All Absent
             </button>
+            <button
+              type="button"
+              className="btn-purple-primary"
+              style={{ padding: '8px 16px', fontSize: '13px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)', border: 'none' }}
+              onClick={handleSaveAttendance}
+            >
+              Save Attendance
+            </button>
           </div>
         </div>
       </div>
 
-      {/* 4 Summary Cards Grid */}
-      <div className="owner-stat-grid" style={{ marginBottom: '24px' }}>
-        <div className="owner-card-box">
-          <small style={{ color: '#059669', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Present</small>
-          <div style={{ font: '800 32px "Manrope", sans-serif', color: '#10b981', marginTop: '6px' }}>{presentCount}</div>
-          <small style={{ color: '#64748b' }}>{students.length ? Math.round((presentCount / students.length) * 100) : 0}%</small>
+      {loading ? (
+        <div style={{ padding: '40px 0', textAlign: 'center', fontWeight: 600, color: '#557162' }}>
+          Loading student attendance list...
         </div>
+      ) : (
+        <>
+          {/* 4 Summary Cards Grid */}
+          <div className="owner-stat-grid" style={{ marginBottom: '24px' }}>
+            <div className="owner-card-box">
+              <small style={{ color: '#059669', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Present</small>
+              <div style={{ font: '800 32px "Manrope", sans-serif', color: '#10b981', marginTop: '6px' }}>{presentCount}</div>
+              <small style={{ color: '#64748b' }}>{students.length ? Math.round((presentCount / students.length) * 100) : 0}%</small>
+            </div>
 
-        <div className="owner-card-box">
-          <small style={{ color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Absent</small>
-          <div style={{ font: '800 32px "Manrope", sans-serif', color: '#f43f5e', marginTop: '6px' }}>{absentCount}</div>
-          <small style={{ color: '#64748b' }}>{students.length ? Math.round((absentCount / students.length) * 100) : 0}%</small>
-        </div>
+            <div className="owner-card-box">
+              <small style={{ color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Absent</small>
+              <div style={{ font: '800 32px "Manrope", sans-serif', color: '#f43f5e', marginTop: '6px' }}>{absentCount}</div>
+              <small style={{ color: '#64748b' }}>{students.length ? Math.round((absentCount / students.length) * 100) : 0}%</small>
+            </div>
 
-        <div className="owner-card-box">
-          <small style={{ color: '#d97706', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Late</small>
-          <div style={{ font: '800 32px "Manrope", sans-serif', color: '#f59e0b', marginTop: '6px' }}>{lateCount}</div>
-          <small style={{ color: '#64748b' }}>{students.length ? Math.round((lateCount / students.length) * 100) : 0}%</small>
-        </div>
+            <div className="owner-card-box">
+              <small style={{ color: '#d97706', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Late</small>
+              <div style={{ font: '800 32px "Manrope", sans-serif', color: '#f59e0b', marginTop: '6px' }}>{lateCount}</div>
+              <small style={{ color: '#64748b' }}>{students.length ? Math.round((lateCount / students.length) * 100) : 0}%</small>
+            </div>
 
-        <div className="owner-card-box">
-          <small style={{ color: '#0284c7', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>On Leave</small>
-          <div style={{ font: '800 32px "Manrope", sans-serif', color: '#0284c7', marginTop: '6px' }}>{leaveCount}</div>
-          <small style={{ color: '#64748b' }}>{students.length ? Math.round((leaveCount / students.length) * 100) : 0}%</small>
-        </div>
-      </div>
+            <div className="owner-card-box">
+              <small style={{ color: '#0284c7', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>On Leave</small>
+              <div style={{ font: '800 32px "Manrope", sans-serif', color: '#0284c7', marginTop: '6px' }}>{leaveCount}</div>
+              <small style={{ color: '#64748b' }}>{students.length ? Math.round((leaveCount / students.length) * 100) : 0}%</small>
+            </div>
+          </div>
 
-      {/* Warning Banner */}
-      <div className="rector-warn-banner">
-        <span>Attendance not marked yet for today. Mark and save below.</span>
-      </div>
+          {/* Warning Banner */}
+          <div className="rector-warn-banner" style={{ background: alreadyMarked ? '#ecfdf5' : '#fffbeb', border: alreadyMarked ? '1px solid #a7f3d0' : '1px solid #fef3c7', color: alreadyMarked ? '#065f46' : '#92400e' }}>
+            <span>
+              {alreadyMarked 
+                ? 'Attendance already marked for this date. Click Save Attendance to commit changes.' 
+                : 'Attendance not marked yet for this date. Click Save Attendance to commit changes.'}
+            </span>
+          </div>
 
-      {/* Student List Container */}
-      <div className="owner-card-box">
-        <div style={{ fontSize: '14px', fontWeight: 700, color: '#64748b', marginBottom: '16px' }}>{filtered.length} students</div>
-        {filtered.length === 0 ? (
-          <p className="empty-state-text" style={{ padding: '30px 0', textAlign: 'center', margin: 0 }}>No students found.</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filtered.map((s) => (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderRadius: '14px', border: '1px solid #f1f5f9', background: '#ffffff', flexWrap: 'wrap', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e0e7ff', color: '#4338ca', fontWeight: 800, fontSize: '14px', display: 'grid', placeItems: 'center' }}>
-                    {s.initials}
+          {/* Student List Container */}
+          <div className="owner-card-box">
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#64748b', marginBottom: '16px' }}>{filtered.length} students</div>
+            {filtered.length === 0 ? (
+              <p className="empty-state-text" style={{ padding: '30px 0', textAlign: 'center', margin: 0 }}>No students found.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {filtered.map((s) => (
+                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderRadius: '14px', border: '1px solid #f1f5f9', background: '#ffffff', flexWrap: 'wrap', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e0e7ff', color: '#4338ca', fontWeight: 800, fontSize: '14px', display: 'grid', placeItems: 'center' }}>
+                        {s.initials}
+                      </div>
+                      <div>
+                        <strong style={{ display: 'block', fontSize: '14.5px', color: '#0f172a' }}>{s.name}</strong>
+                        <small style={{ color: '#64748b', fontSize: '13px' }}>Room {s.room} &bull; {s.branch} &bull; {s.year}</small>
+                      </div>
+                    </div>
+
+                    <div className="att-pill-group">
+                      <button type="button" className={`att-pill-btn present ${s.status === 'Present' ? 'active' : ''}`} onClick={() => handleSetStatus(s.id, 'Present')}>Present</button>
+                      <button type="button" className={`att-pill-btn absent ${s.status === 'Absent' ? 'active' : ''}`} onClick={() => handleSetStatus(s.id, 'Absent')}>Absent</button>
+                      <button type="button" className={`att-pill-btn late ${s.status === 'Late' ? 'active' : ''}`} onClick={() => handleSetStatus(s.id, 'Late')}>Late</button>
+                      <button type="button" className={`att-pill-btn leave ${s.status === 'On Leave' ? 'active' : ''}`} onClick={() => handleSetStatus(s.id, 'On Leave')}>On Leave</button>
+                    </div>
                   </div>
-                  <div>
-                    <strong style={{ display: 'block', fontSize: '14.5px', color: '#0f172a' }}>{s.name}</strong>
-                    <small style={{ color: '#64748b', fontSize: '13px' }}>Room {s.room} &bull; {s.branch} &bull; {s.year}</small>
-                  </div>
-                </div>
-
-                <div className="att-pill-group">
-                  <button type="button" className={`att-pill-btn present ${s.status === 'Present' ? 'active' : ''}`} onClick={() => handleSetStatus(s.id, 'Present')}>Present</button>
-                  <button type="button" className={`att-pill-btn absent ${s.status === 'Absent' ? 'active' : ''}`} onClick={() => handleSetStatus(s.id, 'Absent')}>Absent</button>
-                  <button type="button" className={`att-pill-btn late ${s.status === 'Late' ? 'active' : ''}`} onClick={() => handleSetStatus(s.id, 'Late')}>Late</button>
-                  <button type="button" className={`att-pill-btn leave ${s.status === 'On Leave' ? 'active' : ''}`} onClick={() => handleSetStatus(s.id, 'On Leave')}>On Leave</button>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   )
 }
