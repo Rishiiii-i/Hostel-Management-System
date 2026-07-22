@@ -4,7 +4,7 @@ dotenv.config();
 
 export function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // bearer token
+  const token = authHeader && authHeader.split(' ')[1]; // Get the token from header
 
   if (!token) {
     return res.status(401).json({ message: 'Access token is required' });

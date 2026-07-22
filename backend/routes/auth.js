@@ -12,7 +12,7 @@ import { getAuth } from 'firebase-admin/auth';
 import fs from 'fs';
 import path from 'path';
 
-// Auto-discovery of Firebase Service Account key file
+// Check if Firebase Service Account key file exists
 let firebaseAdminApp = null;
 const serviceAccountPath = path.resolve('serviceAccountKey.json');
 
@@ -27,11 +27,11 @@ if (fs.existsSync(serviceAccountPath)) {
     console.error('Error parsing serviceAccountKey.json:', err.message);
   }
 } else {
-  // If not found, log a warn so it does not crash node but notifies the user
+  // Warn if the Firebase key file is missing
   console.warn('serviceAccountKey.json not found. Firebase Admin SDK features (like generating reset links) will fail. Please drop this file in your backend folder.');
 }
 
-// Nodemailer transporter initialization
+// Setup email sender
 const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
 const smtpPort = parseInt(process.env.SMTP_PORT || '465');
 const smtpUser = process.env.SMTP_USER || '';
@@ -43,7 +43,7 @@ if (smtpUser && smtpPass && smtpUser !== 'your_email@gmail.com') {
   transporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
-    secure: smtpPort === 465, // true for 465, false for other ports
+    secure: smtpPort === 465, // Use SSL for port 465
     auth: {
       user: smtpUser,
       pass: smtpPass
@@ -70,7 +70,7 @@ if (smtpUser && smtpPass && smtpUser !== 'your_email@gmail.com') {
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'smart-hostel-secret-key-12345';
 
-// helper to determine role from email
+// Get user role from email
 function getRole(email) {
   const value = email.toLowerCase();
   if (value.includes('admin')) return 'administrator';
@@ -78,7 +78,7 @@ function getRole(email) {
   return 'student';
 }
 
-// sync firebase auth details to mongodb user schema
+// Sync user from Firebase to MongoDB
 router.post('/sync', async (req, res) => {
   try {
     const { uid, name, email, role, password, rollNo } = req.body;
@@ -94,11 +94,11 @@ router.post('/sync', async (req, res) => {
       });
     }
 
-    // find user strictly by email
+    // Search for user by email
     let user = await User.findOne({ email: email.toLowerCase() });
 
     if (user) {
-      // user exists update password and rollno if provided
+      // Update user details if user exists
       let updated = false;
       if (!user.name || user.name.trim() === '') {
         user.name = name || email.split('@')[0];
@@ -116,20 +116,20 @@ router.post('/sync', async (req, res) => {
         await user.save();
       }
     } else {
-      // user doesn't exist create a new record in mongodb (without firebaseuid/photourl)
+      // Create new user if not found
       user = new User({
         id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
         name: name || email.split('@')[0],
         email: email.toLowerCase(),
         role: role || getRole(email),
-        password: password || '', // save plaintext password directly
-        rollNo: rollNo || '',      // save rollno directly
+        password: password || '', // Save password
+        rollNo: rollNo || '',      // Save roll number
         createdAt: new Date()
       });
       await user.save();
     }
 
-    // generate a local auth token for the synced user
+    // Create a login token
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role },
       JWT_SECRET,
@@ -148,7 +148,7 @@ router.post('/sync', async (req, res) => {
   }
 });
 
-// signup route
+// Signup API
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -162,14 +162,14 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
 
-    // hash the password
+    // Encrypt password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // determine role
+    // Find the role
     const role = getRole(email);
 
-    // create user
+    // Save the new user
     const newUser = {
       id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
       name,
@@ -181,14 +181,14 @@ router.post('/signup', async (req, res) => {
 
     await createUser(newUser);
 
-    // generate token
+    // Create token
     const token = jwt.sign(
       { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // return token and user details (omitting password)
+    // Send back token and user details
     const { password: _, ...userWithoutPassword } = newUser;
     res.status(201).json({
       message: 'User registered successfully',
@@ -201,7 +201,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// login route
+// Login API
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -215,13 +215,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // verify password
+    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // generate token
+    // Create token
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role },
       JWT_SECRET,
@@ -240,7 +240,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// forgot password route
+// Forgot password API
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -254,22 +254,22 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(404).json({ message: 'User with this email was not found' });
     }
 
-    // 1. Generate the Firebase Auth password reset link
+    // 1. Make reset link
     if (!firebaseAdminApp || !getApps().length) {
       return res.status(500).json({ 
         message: 'Firebase Admin SDK is not initialized. Please ensure backend/serviceAccountKey.json is configured.' 
       });
     }
 
-    // Generate link pointing back to our custom client page
-    // Note: client expects mode=resetPassword and oobCode=xxx
+    // Point link to our page
+    // Client needs reset params
     const actionCodeSettings = {
-      url: 'http://localhost:5173/', // This will make Firebase include mode and oobCode query parameters pointing back to our frontend page
+      url: 'http://localhost:5173/', 
     };
 
     const resetLink = await getAuth().generatePasswordResetLink(email.toLowerCase(), actionCodeSettings);
 
-    // 2. Format the email using custom HTML (Nodemailer format)
+    // 2. Make HTML email
     const mailOptions = {
       from: `"Smart Hostel" <${process.env.SMTP_USER || 'noreply@smarthostel.com'}>`,
       to: email.toLowerCase(),
@@ -305,7 +305,7 @@ router.post('/forgot-password', async (req, res) => {
       `
     };
 
-    // 3. Send email using Nodemailer
+    // 3. Send the email
     await transporter.sendMail(mailOptions);
 
     res.status(200).json({
@@ -317,7 +317,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-// get current user profile route
+// Get user profile
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const user = await findUserByEmail(req.user.email);
