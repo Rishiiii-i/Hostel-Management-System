@@ -254,10 +254,11 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(404).json({ message: 'User with this email was not found' });
     }
 
-    // 1. Make reset link
+    // 1. Make reset link (fallback to client-side reset if Admin SDK is not configured)
     if (!firebaseAdminApp || !getApps().length) {
-      return res.status(500).json({ 
-        message: 'Firebase Admin SDK is not initialized. Please ensure backend/serviceAccountKey.json is configured.' 
+      return res.status(200).json({ 
+        message: 'Firebase Admin SDK not initialized. Falling back to client-side email dispatch.',
+        clientFallback: true 
       });
     }
 

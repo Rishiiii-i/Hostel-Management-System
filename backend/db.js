@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import dns from 'dns';
 
-// Use Google DNS to fix connection errors on Windows
+// Google DNS to fix connection errors on Windows
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 dotenv.config();
@@ -191,7 +191,8 @@ const wardenProfileSchema = new mongoose.Schema({
   phone: { type: String, default: '+91 987654321' },
   assignedBlocks: { type: String, default: 'All Blocks' },
   officeLocation: { type: String, default: 'Shnoor Hills' },
-  emergencyContact: { type: String, default: '+91 123456789' }
+  emergencyContact: { type: String, default: '+91 123456789' },
+  photo: { type: String }
 });
 
 const WardenProfile = mongoose.model('WardenProfile', wardenProfileSchema);
@@ -236,7 +237,7 @@ const MessMenu = mongoose.model('MessMenu', messMenuSchema);
 async function initDefaultMessMenu() {
   try {
     if (mongoose.connection.readyState !== 1) return;
-    
+
     const defaultMenu = [
       { day: 'Monday', breakfast: 'Idli, Peanut Chutney, Sambar, Coffee/Tea', lunch: 'Rice, Kandipappu, Bendakaya Fry, Curd', snacks: 'Tea & Punugulu', dinner: 'Roti, Tomato Dal, Rice' },
       { day: 'Tuesday', breakfast: 'Pesarattu, Ginger Chutney, Coffee/Tea', lunch: 'Rice, Sambar, Potato Fry, Papad', snacks: 'Tea & Mirchi Bajji', dinner: 'Roti, Egg Curry / Egg Bhurji, Rice' },
