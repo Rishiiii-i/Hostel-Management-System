@@ -56,27 +56,28 @@ router.get('/profile', authenticateToken, async (req, res) => {
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const { name, rollNo, phone, emergencyContact, room, block, photo } = req.body;
-    if (name !== undefined && name.trim() === '') {
-      return res.status(400).json({ message: 'Full name cannot be empty' });
-    }
+    
     if (!isDbConnected()) {
       return res.status(200).json({ name, rollNo, phone, emergencyContact, room, block, photo });
     }
-    const user = await User.findOneAndUpdate(
-      { email: req.user.email.toLowerCase() },
-      { 
-        name, 
-        rollNo, 
-        phone, 
-        emergencyContact, 
-        room, 
-        block, 
-        photo 
-      },
-      { new: true }
-    );
-    res.status(200).json(user);
+
+    const student = await User.findOne({ email: req.user.email.toLowerCase() });
+    if (!student) {
+      return res.status(404).json({ message: 'Student user not found' });
+    }
+
+    if (name !== undefined && name.trim() !== '') student.name = name;
+    if (rollNo !== undefined) student.rollNo = rollNo;
+    if (phone !== undefined) student.phone = phone;
+    if (emergencyContact !== undefined) student.emergencyContact = emergencyContact;
+    if (room !== undefined) student.room = room;
+    if (block !== undefined) student.block = block;
+    if (photo !== undefined) student.photo = photo;
+
+    await student.save();
+    res.status(200).json(student);
   } catch (error) {
+    console.error('Failed to update student profile:', error);
     res.status(500).json({ message: 'Failed to update student profile' });
   }
 });

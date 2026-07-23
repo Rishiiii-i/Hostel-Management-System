@@ -284,11 +284,11 @@ router.post('/rooms/allocate', async (req, res) => {
 // Create new room
 router.post('/rooms', async (req, res) => {
   try {
-    const { roomNo, block, capacity } = req.body;
+    const { roomNo, block, capacity, type, floor } = req.body;
     const id = `RM-${roomNo}`;
     
     if (!isDbConnected()) {
-      return res.status(201).json({ id, roomNo, block, capacity, status: 'Vacant', occupantName: '' });
+      return res.status(201).json({ id, roomNo, block, capacity, type, floor, status: 'Vacant', occupantName: '' });
     }
 
     const existingRoom = await Room.findOne({ id });
@@ -302,6 +302,8 @@ router.post('/rooms', async (req, res) => {
       block,
       capacity: Number(capacity) || 2,
       status: 'Vacant',
+      type: type || '2-Sharing Non-AC',
+      floor: floor || (roomNo ? (roomNo.substring(0, 1) + 'st Floor') : '1st Floor'),
       occupantName: ''
     });
 
@@ -416,8 +418,22 @@ router.put('/profile', async (req, res) => {
       updates,
       { new: true, upsert: true }
     );
+
+    // Synchronize photo, name, and phone updates with the Warden's User document
+    if (updates.email) {
+      await User.findOneAndUpdate(
+        { email: updates.email.toLowerCase() },
+        {
+          photo: updates.photo,
+          name: updates.fullName,
+          phone: updates.phone
+        }
+      );
+    }
+
     res.status(200).json(profile);
   } catch (error) {
+    console.error('Error updating warden profile:', error);
     res.status(500).json({ message: 'Error updating warden profile' });
   }
 });
