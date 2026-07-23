@@ -23,6 +23,8 @@ if (!MONGODB_URI) {
     .then(() => {
       console.log(' Connected to MongoDB successfully.');
       initDefaultMessMenu();
+      initDefaultRooms();
+      initDefaultWardenProfile();
     })
     .catch((error) => {
       console.error('MongoDB connection error:', error.message);
@@ -75,9 +77,29 @@ const userSchema = new mongoose.Schema({
   photo: {
     type: String
   },
+  branch: {
+    type: String,
+    default: 'N/A'
+  },
+  year: {
+    type: String,
+    default: '1st Year'
+  },
+  totalFee: {
+    type: Number,
+    default: 45000
+  },
+  paidFee: {
+    type: Number,
+    default: 0
+  },
+  dueFee: {
+    type: Number,
+    default: 45000
+  },
   feeStatus: {
     type: String,
-    enum: ['Paid', 'Unpaid'],
+    enum: ['Paid', 'Unpaid', 'Pending', 'Partial'],
     default: 'Unpaid'
   },
   notifications: {
@@ -139,7 +161,9 @@ const roomSchema = new mongoose.Schema({
   capacity: { type: Number, default: 2 },
   status: { type: String, enum: ['Occupied', 'Vacant'], default: 'Vacant' },
   occupantName: { type: String, default: null },
-  occupantEmail: { type: String, default: null }
+  occupantEmail: { type: String, default: null },
+  floor: { type: String, default: '1st Floor' },
+  type: { type: String, default: '2-Sharing' }
 });
 
 const Room = mongoose.model('Room', roomSchema);
@@ -162,7 +186,7 @@ const Notice = mongoose.model('Notice', noticeSchema);
 // Warden Profile Schema
 const wardenProfileSchema = new mongoose.Schema({
   wardenId: { type: String, required: true, unique: true, default: 'WDN-2026-01' },
-  fullName: { type: String, default: 'Macha Rishi' },
+  fullName: { type: String, default: 'Dileep' },
   email: { type: String, default: 'warden@smarthostel.com' },
   phone: { type: String, default: '+91 987654321' },
   assignedBlocks: { type: String, default: 'All Blocks' },
@@ -178,8 +202,6 @@ const attendanceSchema = new mongoose.Schema({
   studentId: { type: String, required: true },
   studentName: { type: String, required: true },
   room: { type: String, default: 'N/A' },
-  branch: { type: String, default: 'Diploma' },
-  year: { type: String, default: '3rd Year' },
   status: { type: String, enum: ['Present', 'Absent', 'Late', 'On Leave'], default: 'Absent' },
   updatedAt: { type: Date, default: Date.now }
 });
@@ -235,6 +257,55 @@ async function initDefaultMessMenu() {
     console.log('Default mess menu initialized/updated successfully!');
   } catch (err) {
     console.error('Failed to initialize default mess menu:', err);
+  }
+}
+
+// Set default rooms if it is empty
+async function initDefaultRooms() {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+    const count = await Room.countDocuments({});
+    if (count === 0) {
+      console.log('Room collection is empty. Seeding default rooms...');
+      const defaultRooms = [
+        { id: 'RM-101', roomNo: '101', block: 'Block A', floor: '1st Floor', type: 'Double Sharing', status: 'Vacant', occupantName: null, occupantEmail: null },
+        { id: 'RM-102', roomNo: '102', block: 'Block A', floor: '1st Floor', type: 'Double Sharing', status: 'Vacant', occupantName: null, occupantEmail: null },
+        { id: 'RM-103', roomNo: '103', block: 'Block B', floor: '1st Floor', type: 'Single Room', status: 'Vacant', occupantName: null, occupantEmail: null },
+        { id: 'RM-104', roomNo: '104', block: 'Block B', floor: '1st Floor', type: 'Single Room', status: 'Vacant', occupantName: null, occupantEmail: null },
+        { id: 'RM-201', roomNo: '201', block: 'Block A', floor: '2nd Floor', type: 'Double Sharing', status: 'Vacant', occupantName: null, occupantEmail: null },
+        { id: 'RM-202', roomNo: '202', block: 'Block A', floor: '2nd Floor', type: 'Double Sharing', status: 'Vacant', occupantName: null, occupantEmail: null },
+        { id: 'RM-203', roomNo: '203', block: 'Block B', floor: '2nd Floor', type: 'Single Room', status: 'Vacant', occupantName: null, occupantEmail: null },
+        { id: 'RM-204', roomNo: '204', block: 'Block B', floor: '2nd Floor', type: 'Single Room', status: 'Vacant', occupantName: null, occupantEmail: null }
+      ];
+      await Room.insertMany(defaultRooms);
+      console.log('Default rooms seeded successfully!');
+    }
+  } catch (err) {
+    console.error('Failed to seed default rooms:', err);
+  }
+}
+
+// Set default warden profile if it is empty
+async function initDefaultWardenProfile() {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+    const count = await WardenProfile.countDocuments({});
+    if (count === 0) {
+      console.log('WardenProfile collection is empty. Seeding default profile...');
+      const defaultWarden = new WardenProfile({
+        wardenId: 'WDN-2026-01',
+        fullName: 'Dileep',
+        email: 'warden@smarthostel.com',
+        phone: '+91 987654321',
+        assignedBlocks: 'All Blocks',
+        officeLocation: 'Shnoor Hills',
+        emergencyContact: '+91 123456789'
+      });
+      await defaultWarden.save();
+      console.log('Default WardenProfile seeded successfully!');
+    }
+  } catch (err) {
+    console.error('Failed to seed default warden profile:', err);
   }
 }
 
