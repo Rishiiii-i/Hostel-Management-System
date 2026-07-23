@@ -609,9 +609,17 @@ html.dark .feature-card {
   transition: transform 0.3s ease;
 }
 
+.feature-icon-wrapper img {
+  filter: brightness(0) saturate(100%) invert(29%) sepia(57%) saturate(952%) hue-rotate(119deg) brightness(93%) contrast(93%);
+}
+
 html.dark .feature-icon-wrapper {
   background: linear-gradient(135deg, #1b382b 0%, #152c22 100%);
   color: #34d399;
+}
+
+html.dark .feature-icon-wrapper img {
+  filter: brightness(0) saturate(100%) invert(72%) sepia(61%) saturate(515%) hue-rotate(107deg) brightness(98%) contrast(95%);
 }
 
 .feature-card:hover .feature-icon-wrapper {
