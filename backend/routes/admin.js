@@ -1,6 +1,5 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 import { User, Room, Complaint, Transaction, Notice } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -672,10 +671,9 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Administrator not found' });
     }
 
-    // Check if the current password is correct (predefined admin checks or password verification)
+    // Check if the current password is correct (plain text check)
     if (admin.password) {
-      const isMatch = await bcrypt.compare(currentPassword, admin.password);
-      if (!isMatch) {
+      if (admin.password !== currentPassword) {
         return res.status(400).json({ message: 'Incorrect current password' });
       }
     } else {
@@ -685,8 +683,7 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
       }
     }
 
-    const salt = await bcrypt.genSalt(10);
-    admin.password = await bcrypt.hash(newPassword, salt);
+    admin.password = newPassword;
     await admin.save();
 
     res.status(200).json({ message: 'Password updated successfully' });
