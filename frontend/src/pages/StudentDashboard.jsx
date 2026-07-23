@@ -51,6 +51,12 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   }, [profile, activeTab, isFormEdited]);
 
   const [feePaid, setFeePaid] = useState(false)
+  const [feeDetails, setFeeDetails] = useState({
+    totalFee: 0,
+    paidFee: 0,
+    dueFee: 0,
+    feeStatus: 'Unpaid'
+  })
   const [showPayModal, setShowPayModal] = useState(false)
   const [showComplaintModal, setShowComplaintModal] = useState(false)
   const [showGatePassModal, setShowGatePassModal] = useState(false)
@@ -85,11 +91,28 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
       try {
         // Get student profile
         const profileRes = await fetchWithAuth('http://localhost:5000/api/student/profile');
+        if (!profileRes.ok) {
+          console.error('Failed to fetch profile:', profileRes.status);
+          return;
+        }
         let isPaidProfile = false;
-        if (profileRes.ok && active) {
+        if (active) {
           const profileData = await profileRes.json();
           isPaidProfile = profileData.feeStatus === 'Paid';
           setFeePaid(isPaidProfile);
+          
+          const totalF = profileData.totalFee !== undefined ? profileData.totalFee : 45000;
+          const paidF = profileData.paidFee !== undefined ? profileData.paidFee : 0;
+          const dueF = profileData.dueFee !== undefined ? profileData.dueFee : (totalF - paidF);
+          
+          setFeeDetails({
+            totalFee: totalF,
+            paidFee: paidF,
+            dueFee: dueF,
+            feeStatus: profileData.feeStatus || 'Unpaid'
+          });
+          setPayAmount(dueF.toString());
+
           const mappedProfile = {
             fullName: profileData.name || profile.fullName || 'Student',
             email: profileData.email || '',
@@ -505,6 +528,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     printWindow.document.close();
   };
 
+  const handleOpenPayModal = () => {
+    setPayAmount(feeDetails.dueFee.toString());
+    setShowPayModal(true);
+  };
+
   const handlePayFee = async (e) => {
     if (e) e.preventDefault();
     setIsProcessingPayment(true);
@@ -521,7 +549,23 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         if (res.ok) {
           const saved = await res.json();
           setTransactions([saved, ...transactions]);
-          setFeePaid(true);
+          
+          const amountPaid = Number(payAmount) || 0;
+          
+          setFeeDetails(prev => {
+            const newPaid = prev.paidFee + amountPaid;
+            const newDue = Math.max(0, prev.totalFee - newPaid);
+            const isCleared = newDue <= 0;
+            
+            setFeePaid(isCleared);
+            return {
+              ...prev,
+              paidFee: newPaid,
+              dueFee: newDue,
+              feeStatus: isCleared ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Unpaid')
+            };
+          });
+
           setShowPayModal(false);
           setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
           setUpiId('');
@@ -557,7 +601,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <div className="stat-box">
                 <span className="stat-label">Fee Status</span>
                 <strong className={`stat-value ${feePaid ? 'text-success' : 'text-warning'}`}>
-                  {feePaid ? 'Cleared' : '$5000.00 Dues'}
+                  {feePaid ? 'Cleared' : `₹${feeDetails.dueFee} Dues`}
                 </strong>
                 <small className="stat-sub">{feePaid ? 'Receipt Available' : 'Payment Due'}</small>
               </div>
@@ -650,7 +694,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 <h3>Quick Actions</h3>
               </div>
               <div className="quick-actions-btns">
-                <button type="button" className="btn-pay-fee" onClick={() => setShowPayModal(true)}>
+                <button type="button" className="btn-pay-fee" onClick={handleOpenPayModal}>
                   Pay Fee Dues
                 </button>
                 <button type="button" className="btn-report-problem" onClick={() => setShowComplaintModal(true)}>
@@ -738,7 +782,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 </div>
                 <div className="info-row">
                   <span className="info-label">Warden In-Charge</span>
-                  <strong className="info-val">{profile?.room ? (profile?.wardenInfo?.fullName || 'Macha Rishi') : 'Not Assigned'}</strong>
+                  <strong className="info-val">{profile?.room ? (profile?.wardenInfo?.fullName || 'Dileep') : 'Not Assigned'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Warden Contact</span>
@@ -793,7 +837,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                   <p className="tab-subtitle">Check your hostel fee breakdown and download official payment receipts.</p>
                 </div>
               </div>
-              <button type="button" className="btn-pay-fee" onClick={() => setShowPayModal(true)}>
+              <button type="button" className="btn-pay-fee" onClick={handleOpenPayModal}>
                 Pay Fee Dues
               </button>
             </div>
@@ -805,21 +849,21 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <div className="fee-summary-box">
                 <div className="fee-amount-display">
                   <small>Total Dues Payable</small>
-                  <b>{feePaid ? '$0.00' : '$5000.00'}</b>
+                  <b>{feePaid ? '₹0.00' : `₹${feeDetails.dueFee}`}</b>
                   <span className="fee-due-date">{feePaid ? 'No pending dues' : 'Due by July 31, 2026'}</span>
                 </div>
                 <div className="fee-breakdown-list">
                   <div className="fee-item">
                     <span>Hostel Room Rent</span>
-                    <strong>{feePaid ? '$0.00' : '$3500.00'}</strong>
+                    <strong>{feePaid ? '₹0.00' : `₹${(feeDetails.dueFee * 0.7).toFixed(2)}`}</strong>
                   </div>
                   <div className="fee-item">
                     <span>Mess Charges</span>
-                    <strong>{feePaid ? '$0.00' : '$1200.00'}</strong>
+                    <strong>{feePaid ? '₹0.00' : `₹${(feeDetails.dueFee * 0.24).toFixed(2)}`}</strong>
                   </div>
                   <div className="fee-item">
                     <span>Maintenance &amp; Security</span>
-                    <strong>{feePaid ? '$0.00' : '$300.00'}</strong>
+                    <strong>{feePaid ? '₹0.00' : `₹${(feeDetails.dueFee * 0.06).toFixed(2)}`}</strong>
                   </div>
                 </div>
               </div>
@@ -1058,7 +1102,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <div className="room-info-grid">
                 <div className="info-row">
                   <span className="info-label">Full Name</span>
-                  <strong className="info-val">Macha Rishi</strong>
+                  <strong className="info-val">{profile?.wardenInfo?.fullName || 'Dileep'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Official Email</span>
@@ -1323,7 +1367,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             ) : (
               <form onSubmit={handlePayFee}>
                 <label className="form-label">
-                  Amount ($)
+                  Amount (₹)
                   <input
                     type="number"
                     value={payAmount}
@@ -1430,10 +1474,10 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 {paymentMethod === 'qr' && (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '16px', padding: '10px', background: '#f9fbf9', borderRadius: '14px', border: '1px solid #e1e9e2' }}>
                     <p style={{ margin: 0, fontSize: '13px', color: '#557162', textAlign: 'center' }}>
-                      Scan the QR code with GPay, PhonePe, or any UPI app to pay ${payAmount}.
+                      Scan the QR code with GPay, PhonePe, or any UPI app to pay ₹{payAmount}.
                     </p>
                     <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=smarthostel@upi%26pn=SmartHostel%26am=${payAmount}%26cu=USD`}
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=smarthostel@upi%26pn=SmartHostel%26am=${payAmount}%26cu=INR`}
                       alt="Payment QR Code" 
                       style={{ width: '150px', height: '150px', border: '4px solid #ffffff', borderRadius: '8px', boxShadow: '0 4px 12px rgba(18, 55, 38, 0.08)' }} 
                     />

@@ -15,19 +15,6 @@ export default function AdminProfile({ profile, setProfile }) {
     photo: profile?.photo || user?.photoURL || ''
   })
 
-  useEffect(() => {
-    if (user || profile) {
-      setFormData(prev => ({
-        ...prev,
-        fullName: profile?.fullName || user?.name || prev.fullName || 'System Administrator',
-        email: profile?.email || user?.email || prev.email || 'admin@smarthostel.com',
-        phone: profile?.phone || user?.phone || prev.phone || '+91 9876543210',
-        photo: profile?.photo || user?.photoURL || prev.photo || '',
-        office: profile?.office || prev.office || 'Central Admin Block, Room 101'
-      }))
-    }
-  }, [user, profile])
-
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -37,6 +24,43 @@ export default function AdminProfile({ profile, setProfile }) {
   const [showPassword, setShowPassword] = useState(false)
   const [msg, setMsg] = useState({ type: '', text: '' })
 
+  // Helper for requests with auth token
+  const fetchWithAuth = async (url, options = {}) => {
+    const token = localStorage.getItem('token');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers
+    };
+    return fetch(url, { ...options, headers });
+  };
+
+  const loadProfile = async () => {
+    try {
+      const res = await fetchWithAuth('http://localhost:5000/api/admin/profile')
+      if (res.ok) {
+        const data = await res.json()
+        setFormData(prev => ({
+          ...prev,
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          office: data.office,
+          photo: data.photo
+        }))
+        if (setProfile) {
+          setProfile(data)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load admin profile details:', err)
+    }
+  }
+
+  useEffect(() => {
+    loadProfile()
+  }, [])
+
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -45,33 +69,54 @@ export default function AdminProfile({ profile, setProfile }) {
       return
     }
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = async () => {
       const photoUrl = reader.result
       setFormData(prev => ({ ...prev, photo: photoUrl }))
-      const updated = { ...(profile || {}), photo: photoUrl }
-      if (setProfile) {
-        setProfile(updated)
-      }
+      
       try {
-        localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-      } catch (err) {}
-      setMsg({ type: 'success', text: 'Admin profile photo updated successfully.' })
+        const res = await fetchWithAuth('http://localhost:5000/api/admin/profile', {
+          method: 'PUT',
+          body: JSON.stringify({ photo: photoUrl })
+        })
+        if (res.ok) {
+          const resData = await res.json()
+          if (setProfile) {
+            setProfile(resData.profile)
+          }
+          setMsg({ type: 'success', text: 'Admin profile photo updated successfully.' })
+        } else {
+          setMsg({ type: 'error', text: 'Failed to save profile photo in database.' })
+        }
+      } catch (err) {
+        console.error('Failed to upload photo:', err)
+        setMsg({ type: 'error', text: 'Error uploading photo.' })
+      }
       setTimeout(() => setMsg({ type: '', text: '' }), 4000)
     }
     reader.readAsDataURL(file)
   }
 
-  const handleRemovePhoto = () => {
+  const handleRemovePhoto = async () => {
     setFormData(prev => ({ ...prev, photo: '' }))
-    const updated = { ...(profile || {}), photo: '' }
-    if (setProfile) {
-      setProfile(updated)
-    }
     try {
-      localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-    } catch (err) {}
+      const res = await fetchWithAuth('http://localhost:5000/api/admin/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ photo: '' })
+      })
+      if (res.ok) {
+        const resData = await res.json()
+        if (setProfile) {
+          setProfile(resData.profile)
+        }
+        setMsg({ type: 'success', text: 'Admin profile photo removed.' })
+      } else {
+        setMsg({ type: 'error', text: 'Failed to remove photo.' })
+      }
+    } catch (err) {
+      console.error('Failed to remove photo:', err)
+      setMsg({ type: 'error', text: 'Error removing photo.' })
+    }
     if (fileInputRef.current) fileInputRef.current.value = ''
-    setMsg({ type: 'success', text: 'Admin profile photo removed.' })
     setTimeout(() => setMsg({ type: '', text: '' }), 4000)
   }
 
@@ -83,23 +128,59 @@ export default function AdminProfile({ profile, setProfile }) {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (setProfile) {
-      setProfile({ ...profile, ...formData })
+    try {
+      const res = await fetchWithAuth('http://localhost:5000/api/admin/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          phone: formData.phone,
+          office: formData.office
+        })
+      })
+      if (res.ok) {
+        const resData = await res.json()
+        if (setProfile) {
+          setProfile(resData.profile)
+        }
+        setMsg({ type: 'success', text: 'Admin profile updated successfully.' })
+      } else {
+        const errData = await res.json()
+        setMsg({ type: 'error', text: errData.message || 'Failed to update admin profile.' })
+      }
+    } catch (err) {
+      console.error('Error saving profile:', err)
+      setMsg({ type: 'error', text: 'Failed to save changes.' })
     }
-    setMsg({ type: 'success', text: 'Admin profile updated successfully.' })
     setTimeout(() => setMsg({ type: '', text: '' }), 4000)
   }
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault()
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setMsg({ type: 'error', text: 'New passwords do not match.' })
       return
     }
-    setMsg({ type: 'success', text: 'Admin password changed successfully.' })
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    try {
+      const res = await fetchWithAuth('http://localhost:5000/api/admin/change-password', {
+        method: 'PUT',
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      })
+      if (res.ok) {
+        setMsg({ type: 'success', text: 'Admin password changed successfully.' })
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      } else {
+        const errData = await res.json()
+        setMsg({ type: 'error', text: errData.message || 'Failed to change password.' })
+      }
+    } catch (err) {
+      console.error('Error changing password:', err)
+      setMsg({ type: 'error', text: 'Error changing password.' })
+    }
     setTimeout(() => setMsg({ type: '', text: '' }), 4000)
   }
 
@@ -141,8 +222,8 @@ export default function AdminProfile({ profile, setProfile }) {
             overflow: 'hidden',
             flexShrink: 0
           }}>
-            {profile?.photo || formData.photo ? (
-              <img src={profile?.photo || formData.photo} alt="Admin" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+            {formData.photo ? (
+              <img src={formData.photo} alt="Admin" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
             ) : (
               userInitials
             )}
@@ -184,10 +265,10 @@ export default function AdminProfile({ profile, setProfile }) {
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            {profile?.photo || formData.photo ? 'Change Photo' : 'Add Photo'}
+            {formData.photo ? 'Change Photo' : 'Add Photo'}
           </button>
 
-          {(profile?.photo || formData.photo) && (
+          {formData.photo && (
             <button
               type="button"
               onClick={handleRemovePhoto}
@@ -228,7 +309,7 @@ export default function AdminProfile({ profile, setProfile }) {
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px' }}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
             />
           </div>
 
@@ -238,8 +319,8 @@ export default function AdminProfile({ profile, setProfile }) {
               type="email"
               name="email"
               value={formData.email}
-              onChange={handleChange}
-              style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px' }}
+              disabled
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#cbd5e1', color: '#64748b', fontSize: '14px', boxSizing: 'border-box', cursor: 'not-allowed' }}
             />
           </div>
 
@@ -250,7 +331,7 @@ export default function AdminProfile({ profile, setProfile }) {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px' }}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
             />
           </div>
 
@@ -261,7 +342,7 @@ export default function AdminProfile({ profile, setProfile }) {
               name="office"
               value={formData.office}
               onChange={handleChange}
-              style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px' }}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
             />
           </div>
 
@@ -291,7 +372,7 @@ export default function AdminProfile({ profile, setProfile }) {
                 onChange={handlePasswordChange}
                 placeholder="••••••••"
                 required
-                style={{ width: '100%', padding: '10px 42px 10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px' }}
+                style={{ width: '100%', padding: '10px 42px 10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
               />
               <button
                 type="button"
@@ -313,7 +394,7 @@ export default function AdminProfile({ profile, setProfile }) {
                 onChange={handlePasswordChange}
                 placeholder="••••••••"
                 required
-                style={{ width: '100%', padding: '10px 42px 10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px' }}
+                style={{ width: '100%', padding: '10px 42px 10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
               />
               <button
                 type="button"
@@ -335,7 +416,7 @@ export default function AdminProfile({ profile, setProfile }) {
                 onChange={handlePasswordChange}
                 placeholder="••••••••"
                 required
-                style={{ width: '100%', padding: '10px 42px 10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px' }}
+                style={{ width: '100%', padding: '10px 42px 10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
               />
               <button
                 type="button"

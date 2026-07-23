@@ -15,7 +15,7 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile,
     const nextShow = !showNotifications;
     setShowNotifications(nextShow);
     
-    if (nextShow && unreadCount > 0 && (user?.role === 'student' || !user?.role)) {
+    if (nextShow && unreadCount > 0) {
       try {
         const res = await fetch('http://localhost:5000/api/student/notifications/read', {
           method: 'POST',
