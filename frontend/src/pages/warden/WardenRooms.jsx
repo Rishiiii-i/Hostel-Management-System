@@ -11,7 +11,9 @@ export default function WardenRooms() {
   const [newRoom, setNewRoom] = useState({
     roomNo: '',
     block: 'Block A',
-    capacity: 2
+    capacity: 2,
+    type: '2-Sharing Non-AC',
+    floor: '1st Floor'
   })
   
   const [occupantEmail, setOccupantEmail] = useState('')
@@ -71,7 +73,7 @@ export default function WardenRooms() {
       })
       if (res.ok) {
         alert('Room successfully added');
-        setNewRoom({ roomNo: '', block: 'Block A', capacity: 2 })
+        setNewRoom({ roomNo: '', block: 'Block A', capacity: 2, type: '2-Sharing Non-AC', floor: '1st Floor' })
         setShowAddModal(false)
         loadRoomsData()
       } else {
@@ -341,7 +343,7 @@ export default function WardenRooms() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Block</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Hostel Block</label>
                 <select
                   value={newRoom.block}
                   onChange={(e) => setNewRoom({ ...newRoom, block: e.target.value })}
@@ -355,7 +357,35 @@ export default function WardenRooms() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Capacity (Beds)</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Floor Location</label>
+                <select
+                  value={newRoom.floor}
+                  onChange={(e) => setNewRoom({ ...newRoom, floor: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
+                >
+                  <option value="Ground Floor">Ground Floor</option>
+                  <option value="1st Floor">1st Floor</option>
+                  <option value="2nd Floor">2nd Floor</option>
+                  <option value="3rd Floor">3rd Floor</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Room Type</label>
+                <select
+                  value={newRoom.type}
+                  onChange={(e) => setNewRoom({ ...newRoom, type: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
+                >
+                  <option value="2-Sharing AC">2-Sharing AC</option>
+                  <option value="2-Sharing Non-AC">2-Sharing Non-AC</option>
+                  <option value="3-Sharing Non-AC">3-Sharing Non-AC</option>
+                  <option value="Single Room AC">Single Room AC</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Beds Capacity</label>
                 <input
                   type="number"
                   min="1"
@@ -367,7 +397,7 @@ export default function WardenRooms() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button
                   type="button"
                   className="owner-refresh-btn"
@@ -379,7 +409,7 @@ export default function WardenRooms() {
                   type="submit"
                   className="btn-purple-primary"
                 >
-                  Create Room
+                  Configure Room
                 </button>
               </div>
             </form>

@@ -93,42 +93,34 @@ export const AuthProvider = ({ children }) => {
       return data.user;
     } catch (error) {
       clearTimeout(timeoutId);
-      
-      const token = await fbUser.getIdToken().catch(() => 'token');
-      const fallbackUser = {
-        id: fbUser.uid,
-        name: customName || fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'User'),
-        email: fbUser.email || 'user@smarthostel.com',
-        role: fbUser.email && fbUser.email.toLowerCase().includes('admin') ? 'administrator' : fbUser.email && fbUser.email.toLowerCase().includes('warden') ? 'warden' : 'student',
-        photoURL: fbUser.photoURL || '',
-        rollNo: rollNo || '',
-        isFallback: true
-      };
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(fallbackUser));
-      setUser(fallbackUser);
-      return fallbackUser;
+      throw error;
     }
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
         setFirebaseUser(fbUser);
-        // Create user from token
-        const fastUser = {
-          id: fbUser.uid,
-          name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'User'),
-          email: fbUser.email,
-          role: fbUser.email && fbUser.email.toLowerCase().includes('admin') ? 'administrator' : fbUser.email && fbUser.email.toLowerCase().includes('warden') ? 'warden' : 'student',
-          photoURL: fbUser.photoURL || '',
-          rollNo: ''
-        };
-        setUser(prev => prev || fastUser);
+        try {
+          await syncUserWithBackend(fbUser);
+        } catch (error) {
+          console.error("Auth state change sync failed:", error);
+          const cachedUser = localStorage.getItem('user');
+          if (cachedUser) {
+            setUser(JSON.parse(cachedUser));
+          } else {
+            const fastUser = {
+              id: fbUser.uid,
+              name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'User'),
+              email: fbUser.email,
+              role: fbUser.email && fbUser.email.toLowerCase().includes('admin') ? 'administrator' : fbUser.email && fbUser.email.toLowerCase().includes('warden') ? 'warden' : 'student',
+              photoURL: fbUser.photoURL || '',
+              rollNo: ''
+            };
+            setUser(fastUser);
+          }
+        }
         setLoading(false);
-        // Sync in background
-        syncUserWithBackend(fbUser).catch(() => {});
       } else {
         setFirebaseUser(null);
         localStorage.removeItem('token');
@@ -148,10 +140,10 @@ export const AuthProvider = ({ children }) => {
       await updateProfile(userCredential.user, { displayName: name }).catch(() => {});
       
       setFirebaseUser(userCredential.user);
-      setLoading(false);
 
       // Sync synchronously to get backend-signed token before redirecting
       const syncedUser = await syncUserWithBackend(userCredential.user, name, rollNo, password);
+      setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (fbErr) {
       // Fallback to backend REST API signup
@@ -182,18 +174,18 @@ export const AuthProvider = ({ children }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setFirebaseUser(userCredential.user);
-      setLoading(false);
 
       // Sync synchronously to get backend-signed token before redirecting
       const syncedUser = await syncUserWithBackend(userCredential.user, null, null, password);
+      setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
       // Create account if user does not exist
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         setFirebaseUser(userCredential.user);
-        setLoading(false);
         const syncedUser = await syncUserWithBackend(userCredential.user, null, null, password);
+        setLoading(false);
         return { firebaseUser: userCredential.user, user: syncedUser };
       } catch (signupErr) {
         // Fall back to backend REST API login instead of a mock session
@@ -217,20 +209,8 @@ export const AuthProvider = ({ children }) => {
           console.error('Backend login fallback failed:', backendErr);
         }
 
-        // Final fallback if both Firebase and Backend API fail
-        const fallbackUser = {
-          id: `usr-${Date.now()}`,
-          name: email.split('@')[0],
-          email: email,
-          role: email.toLowerCase().includes('admin') ? 'administrator' : email.toLowerCase().includes('warden') ? 'warden' : 'student',
-          photoURL: '',
-          rollNo: ''
-        };
-        localStorage.setItem('token', 'demo-token');
-        localStorage.setItem('user', JSON.stringify(fallbackUser));
-        setUser(fallbackUser);
-        setLoading(false);
-        return { firebaseUser: null, user: fallbackUser };
+        // Throw original error if both Firebase and Backend API fail
+        throw error;
       }
     }
   };
@@ -241,10 +221,10 @@ export const AuthProvider = ({ children }) => {
     const userCredential = await signInWithPopup(auth, provider);
     
     setFirebaseUser(userCredential.user);
-    setLoading(false);
 
     // Sync synchronously to get backend-signed token before redirecting
     const syncedUser = await syncUserWithBackend(userCredential.user);
+    setLoading(false);
     return { firebaseUser: userCredential.user, user: syncedUser };
   };
 
