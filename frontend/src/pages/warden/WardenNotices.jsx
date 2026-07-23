@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Icon from '../../components/Icon'
 
 export default function WardenNotices() {
@@ -223,7 +224,7 @@ export default function WardenNotices() {
       </div>
 
       {/* Post Notice Modal */}
-      {showModal && (
+      {showModal && createPortal(
         <div style={{
           position: 'fixed',
           inset: 0,
@@ -314,12 +315,13 @@ export default function WardenNotices() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
 
       {/* Send Individual Notification Modal */}
-      {showIndividualModal && (
+      {showIndividualModal && createPortal(
         <div style={{
           position: 'fixed',
           inset: 0,
@@ -415,7 +417,8 @@ export default function WardenNotices() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

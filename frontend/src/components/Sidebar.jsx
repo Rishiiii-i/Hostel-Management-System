@@ -166,6 +166,12 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
           const att = await fetchWithHeaders(`http://localhost:5000/api/warden/attendance?date=${today}`);
           const unmarked = att && Array.isArray(att) ? att.length === 0 : false;
 
+          // Sync warden profile for notifications
+          const prof = await fetchWithHeaders('http://localhost:5000/api/warden/profile');
+          if (prof && setProfile) {
+            setProfile(prof);
+          }
+
           if (active) {
             setBadges({
               complaints: pendingComps,
@@ -182,6 +188,12 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
           
           const passes = await fetchWithHeaders('http://localhost:5000/api/warden/gatepasses');
           const pendingPasses = passes && Array.isArray(passes) ? passes.filter(p => p.status === 'Pending').length : 0;
+
+          // Sync admin profile for notifications
+          const prof = await fetchWithHeaders('http://localhost:5000/api/admin/profile');
+          if (prof && setProfile) {
+            setProfile(prof);
+          }
 
           if (active) {
             setBadges({
@@ -401,7 +413,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
             </div>
             <div className="user-info" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
               <span className="user-name" style={{ fontWeight: 700, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {profile?.fullName || user?.name || (isAdmin ? 'System Administrator' : isWarden ? 'Macha Rishi' : 'Student')}
+                {profile?.fullName || user?.name || (isAdmin ? 'System Administrator' : isWarden ? 'Dileep' : 'Student')}
               </span>
               <span className="user-role" style={{ fontSize: '0.75rem', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {isAdmin ? 'System Administrator' : isWarden ? 'Hostel Warden' : (profile?.room ? `Room ${profile.room}` : 'Student')}

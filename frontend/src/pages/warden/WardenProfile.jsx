@@ -7,7 +7,7 @@ export default function WardenProfile({ profile, setProfile }) {
   const fileInputRef = useRef(null)
 
   const [formData, setFormData] = useState({
-    fullName: profile?.fullName || user?.name || 'Macha Rishi',
+    fullName: profile?.fullName || user?.name || 'Dileep',
     email: profile?.email || user?.email || 'warden@smarthostel.com',
     phone: profile?.phone || user?.phone || '+91 9876543210',
     assignedBlocks: profile?.assignedBlocks || 'All Hostel Blocks (A, B, C, F)',
@@ -34,7 +34,7 @@ export default function WardenProfile({ profile, setProfile }) {
         if (res.ok) {
           const data = await res.json();
           setFormData({
-            fullName: data.fullName || 'Macha Rishi',
+            fullName: data.fullName || 'Dileep',
             email: data.email || 'warden@smarthostel.com',
             phone: data.phone || '+91 9876543210',
             assignedBlocks: data.assignedBlocks || 'All Hostel Blocks (A, B, C, F)',

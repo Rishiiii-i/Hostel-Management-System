@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 export default function WardenRooms() {
   const [rooms, setRooms] = useState([])
@@ -14,6 +15,7 @@ export default function WardenRooms() {
   })
   
   const [occupantEmail, setOccupantEmail] = useState('')
+  const [students, setStudents] = useState([])
 
   // Helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
@@ -41,8 +43,21 @@ export default function WardenRooms() {
     }
   }
 
+  const loadStudentsData = async () => {
+    try {
+      const res = await fetchWithAuth('http://localhost:5000/api/warden/students')
+      if (res.ok) {
+        const data = await res.json()
+        setStudents(data)
+      }
+    } catch (err) {
+      console.error('Failed to load students:', err)
+    }
+  }
+
   useEffect(() => {
     loadRoomsData()
+    loadStudentsData()
   }, [])
 
   const handleAddRoom = async (e) => {
@@ -289,7 +304,7 @@ export default function WardenRooms() {
       </div>
 
       {/* Add Room Modal */}
-      {showAddModal && (
+      {showAddModal && createPortal(
         <div style={{
           position: 'fixed',
           inset: 0,
@@ -317,7 +332,7 @@ export default function WardenRooms() {
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Room Number</label>
                 <input
                   type="text"
-                  placeholder="Enter the room number"
+                  placeholder="enter room number"
                   value={newRoom.roomNo}
                   onChange={(e) => setNewRoom({ ...newRoom, roomNo: e.target.value })}
                   required
@@ -369,11 +384,12 @@ export default function WardenRooms() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Allocate Occupant Modal */}
-      {showAllocateModal && (
+      {showAllocateModal && createPortal(
         <div style={{
           position: 'fixed',
           inset: 0,
@@ -399,14 +415,19 @@ export default function WardenRooms() {
             <form onSubmit={handleAllocateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Registered Mail ID</label>
-                <input
-                  type="email"
-                  placeholder="Enter the registered mail ID"
+                <select
+                  required
                   value={occupantEmail}
                   onChange={(e) => setOccupantEmail(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
-                />
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box', color: occupantEmail ? '#0f172a' : '#94a3b8' }}
+                >
+                  <option value="" disabled style={{ color: '#94a3b8' }}>select mail</option>
+                  {students.map(s => (
+                    <option key={s._id || s.email} value={s.email} style={{ color: '#0f172a' }}>
+                      {s.email} ({s.name})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
@@ -426,7 +447,8 @@ export default function WardenRooms() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

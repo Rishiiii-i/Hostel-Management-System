@@ -55,8 +55,6 @@ export default function WardenAttendance() {
           id: studentId,
           name: s.name,
           room: s.room || 'N/A',
-          branch: s.branch || 'Diploma',
-          year: s.year || '3rd Year',
           status: matchingRecord ? matchingRecord.status : 'Absent',
           initials: s.name ? s.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'ST'
         };
@@ -91,8 +89,6 @@ export default function WardenAttendance() {
         studentId: s.id,
         studentName: s.name,
         room: s.room,
-        branch: s.branch,
-        year: s.year,
         status: s.status
       }));
 
@@ -237,7 +233,7 @@ export default function WardenAttendance() {
                       </div>
                       <div>
                         <strong style={{ display: 'block', fontSize: '14.5px', color: '#0f172a' }}>{s.name}</strong>
-                        <small style={{ color: '#64748b', fontSize: '13px' }}>Room {s.room} &bull; {s.branch} &bull; {s.year}</small>
+                        <small style={{ color: '#64748b', fontSize: '13px' }}>Room {s.room}</small>
                       </div>
                     </div>
 

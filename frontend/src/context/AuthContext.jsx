@@ -19,7 +19,7 @@ const AuthContext = createContext(null);
 export const PREDEFINED_WARDEN_CREDENTIALS = {
   email: 'warden@smarthostel.com',
   password: 'warden123',
-  name: 'Macha Rishi',
+  name: 'Dileep',
   role: 'warden'
 };
 
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
 
   const syncUserWithBackend = async (fbUser, customName = null, rollNo = null, password = null) => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
       const response = await fetch('http://localhost:5000/api/auth/sync', {
@@ -143,71 +143,81 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signUpWithEmail = async (name, email, password, rollNo) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(userCredential.user, { displayName: name }).catch(() => {});
-    
-    const fastUser = {
-      id: userCredential.user.uid,
-      name: name || email.split('@')[0],
-      email: email,
-      role: email.toLowerCase().includes('admin') ? 'administrator' : email.toLowerCase().includes('warden') ? 'warden' : 'student',
-      photoURL: '',
-      rollNo: rollNo || ''
-    };
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: name }).catch(() => {});
+      
+      setFirebaseUser(userCredential.user);
+      setLoading(false);
 
-    localStorage.setItem('token', 'token');
-    localStorage.setItem('user', JSON.stringify(fastUser));
-    setUser(fastUser);
-    setFirebaseUser(userCredential.user);
-    setLoading(false);
-
-    // Sync in background
-    syncUserWithBackend(userCredential.user, name, rollNo, password).catch(() => {});
-    return { firebaseUser: userCredential.user, user: fastUser };
+      // Sync synchronously to get backend-signed token before redirecting
+      const syncedUser = await syncUserWithBackend(userCredential.user, name, rollNo, password);
+      return { firebaseUser: userCredential.user, user: syncedUser };
+    } catch (fbErr) {
+      // Fallback to backend REST API signup
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, password }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          setUser(data.user);
+          setLoading(false);
+          return { firebaseUser: null, user: data.user };
+        }
+      } catch (backendErr) {
+        console.error('Backend signup fallback failed:', backendErr);
+      }
+      throw fbErr;
+    }
   };
 
   const logInWithEmail = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const fastUser = {
-        id: userCredential.user.uid,
-        name: userCredential.user.displayName || email.split('@')[0],
-        email: email,
-        role: email.toLowerCase().includes('admin') ? 'administrator' : email.toLowerCase().includes('warden') ? 'warden' : 'student',
-        photoURL: userCredential.user.photoURL || '',
-        rollNo: ''
-      };
-
-      localStorage.setItem('token', 'token');
-      localStorage.setItem('user', JSON.stringify(fastUser));
-      setUser(fastUser);
       setFirebaseUser(userCredential.user);
       setLoading(false);
 
-      // Sync in background
-      syncUserWithBackend(userCredential.user, null, null, password).catch(() => {});
-      return { firebaseUser: userCredential.user, user: fastUser };
+      // Sync synchronously to get backend-signed token before redirecting
+      const syncedUser = await syncUserWithBackend(userCredential.user, null, null, password);
+      return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
       // Create account if user does not exist
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const fastUser = {
-          id: userCredential.user.uid,
-          name: email.split('@')[0],
-          email: email,
-          role: email.toLowerCase().includes('admin') ? 'administrator' : email.toLowerCase().includes('warden') ? 'warden' : 'student',
-          photoURL: '',
-          rollNo: ''
-        };
-        localStorage.setItem('token', 'token');
-        localStorage.setItem('user', JSON.stringify(fastUser));
-        setUser(fastUser);
         setFirebaseUser(userCredential.user);
         setLoading(false);
-        syncUserWithBackend(userCredential.user, null, null, password).catch(() => {});
-        return { firebaseUser: userCredential.user, user: fastUser };
+        const syncedUser = await syncUserWithBackend(userCredential.user, null, null, password);
+        return { firebaseUser: userCredential.user, user: syncedUser };
       } catch (signupErr) {
-        // Use demo login if Firebase fails
+        // Fall back to backend REST API login instead of a mock session
+        try {
+          const response = await fetch('http://localhost:5000/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+          });
+          if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            setUser(data.user);
+            setLoading(false);
+            return { firebaseUser: null, user: data.user };
+          }
+        } catch (backendErr) {
+          console.error('Backend login fallback failed:', backendErr);
+        }
+
+        // Final fallback if both Firebase and Backend API fail
         const fallbackUser = {
           id: `usr-${Date.now()}`,
           name: email.split('@')[0],
@@ -230,24 +240,12 @@ export const AuthProvider = ({ children }) => {
     provider.setCustomParameters({ prompt: 'select_account' });
     const userCredential = await signInWithPopup(auth, provider);
     
-    const fastUser = {
-      id: userCredential.user.uid,
-      name: userCredential.user.displayName || userCredential.user.email.split('@')[0],
-      email: userCredential.user.email,
-      role: userCredential.user.email.toLowerCase().includes('admin') ? 'administrator' : userCredential.user.email.toLowerCase().includes('warden') ? 'warden' : 'student',
-      photoURL: userCredential.user.photoURL || '',
-      rollNo: ''
-    };
-
-    localStorage.setItem('token', 'token');
-    localStorage.setItem('user', JSON.stringify(fastUser));
-    setUser(fastUser);
     setFirebaseUser(userCredential.user);
     setLoading(false);
 
-    // Sync in background
-    syncUserWithBackend(userCredential.user).catch(() => {});
-    return { firebaseUser: userCredential.user, user: fastUser };
+    // Sync synchronously to get backend-signed token before redirecting
+    const syncedUser = await syncUserWithBackend(userCredential.user);
+    return { firebaseUser: userCredential.user, user: syncedUser };
   };
 
   const sendPasswordReset = async (email) => {
