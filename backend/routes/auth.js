@@ -1,5 +1,4 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -122,8 +121,8 @@ router.post('/sync', async (req, res) => {
         name: name || email.split('@')[0],
         email: email.toLowerCase(),
         role: role || getRole(email),
-        password: password || '', // Save password
-        rollNo: rollNo || '',      // Save roll number
+        password: password || '',
+        rollNo: rollNo || '',
         createdAt: new Date()
       });
       await user.save();
@@ -162,10 +161,6 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
 
-    // Encrypt password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     // Find the role
     const role = getRole(email);
 
@@ -174,7 +169,7 @@ router.post('/signup', async (req, res) => {
       id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
       name,
       email,
-      password: hashedPassword,
+      password: password,
       role,
       createdAt: new Date().toISOString()
     };
@@ -215,9 +210,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    // Check password (plain text check)
+    if (user.password !== password) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
