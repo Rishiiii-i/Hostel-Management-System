@@ -78,7 +78,7 @@ function App() {
           ...prev,
           fullName: shouldUpdateName ? (user.name || '') : prev.fullName,
           email: user.email || prev.email || '',
-          photo: isDifferentUser ? (user.photoURL || '') : (prev.photo || user.photoURL || '')
+          photo: isDifferentUser ? (user.photo || user.photoURL || '') : (prev.photo || user.photo || user.photoURL || '')
         }
         try {
           localStorage.setItem('shm_user_profile', JSON.stringify(updated))
