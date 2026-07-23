@@ -42,8 +42,6 @@ router.post('/attendance/mark', async (req, res) => {
           $set: {
             studentName: r.studentName,
             room: r.room,
-            branch: r.branch,
-            year: r.year,
             status: r.status,
             updatedAt: new Date()
           }
@@ -382,7 +380,7 @@ router.get('/profile', async (req, res) => {
     if (!isDbConnected()) {
       return res.status(200).json({
         wardenId: 'WDN-2026-01',
-        fullName: 'Macha Rishi',
+        fullName: 'Dileep',
         email: 'warden@smarthostel.com',
         phone: '+91 987654321',
         assignedBlocks: 'All Blocks',
@@ -396,7 +394,12 @@ router.get('/profile', async (req, res) => {
       profile = new WardenProfile();
       await profile.save();
     }
-    res.status(200).json(profile);
+    
+    const wardenUser = await User.findOne({ email: 'warden@smarthostel.com' });
+    const profileObj = profile.toObject();
+    profileObj.notifications = wardenUser ? (wardenUser.notifications || []) : [];
+
+    res.status(200).json(profileObj);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching warden profile' });
   }

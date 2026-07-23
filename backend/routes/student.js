@@ -22,7 +22,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 
     let wardenInfo = {
-      fullName: 'Macha Rishi',
+      fullName: 'Dileep',
       phone: '+91 987654321',
       emergencyContact: '+91 123456789'
     };
@@ -30,7 +30,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     const warden = await WardenProfile.findOne();
     if (warden) {
       wardenInfo = {
-        fullName: warden.fullName || 'Macha Rishi',
+        fullName: warden.fullName || 'Dileep',
         phone: warden.phone || '+91 987654321',
         emergencyContact: warden.emergencyContact || warden.phone || '+91 123456789'
       };
@@ -209,12 +209,13 @@ router.get('/transactions', authenticateToken, async (req, res) => {
 router.post('/transactions', authenticateToken, async (req, res) => {
   try {
     const { amount, period } = req.body;
+    const parsedAmount = Number(amount) || 0;
     
     const newTxnData = {
       id: `TXN-${Math.floor(1000 + Math.random() * 9000)}`,
       studentEmail: req.user.email.toLowerCase(),
       period: period || 'Hostel Fee',
-      amount: `$${amount}`,
+      amount: `₹${parsedAmount}`,
       date: new Date().toISOString().split('T')[0],
       status: 'Paid'
     };
@@ -228,8 +229,40 @@ router.post('/transactions', authenticateToken, async (req, res) => {
 
     const student = await User.findOne({ email: req.user.email.toLowerCase() });
     if (student) {
-      student.feeStatus = 'Paid';
+      const currentPaid = student.paidFee || 0;
+      student.paidFee = currentPaid + parsedAmount;
+      student.dueFee = Math.max(0, (student.totalFee || 45000) - student.paidFee);
+      student.feeStatus = student.dueFee <= 0 ? 'Paid' : (student.paidFee > 0 ? 'Partial' : 'Unpaid');
       await student.save();
+
+      // Dispatch notifications to Warden and Admin
+      try {
+        const payNotification = {
+          id: `NT-${Math.floor(1000 + Math.random() * 9000)}`,
+          title: 'Student Fee Payment Received',
+          text: `Student ${student.name} (${student.email}) has successfully paid ₹${parsedAmount} for ${period || 'Hostel Fee'}.`,
+          time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          read: false
+        };
+
+        // Notify Warden
+        const warden = await User.findOne({ email: 'warden@smarthostel.com' });
+        if (warden) {
+          warden.notifications.unshift(payNotification);
+          warden.markModified('notifications');
+          await warden.save();
+        }
+
+        // Notify Admin
+        const admin = await User.findOne({ email: 'admin@smarthostel.com' });
+        if (admin) {
+          admin.notifications.unshift(payNotification);
+          admin.markModified('notifications');
+          await admin.save();
+        }
+      } catch (notifErr) {
+        console.error('Failed to dispatch fee notifications to admin/warden:', notifErr);
+      }
     }
 
     res.status(201).json(txn);
