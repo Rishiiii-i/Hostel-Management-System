@@ -1,5 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 dotenv.config();
 import mongoose from 'mongoose';
@@ -79,6 +80,7 @@ router.post('/sync', async (req, res) => {
     );
 
     const userObj = user.toObject();
+    delete userObj.password;
     res.status(200).json({
       message: 'User sync successful',
       user: userObj,
@@ -115,7 +117,7 @@ router.post('/signup', async (req, res) => {
     // Find the role
     const role = getRole(email);
 
-    // Save the new user
+    // Save the new user (userSchema pre-save hook automatically hashes password with bcrypt if not already hashed)
     const newUser = {
       id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
       name,
@@ -161,15 +163,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Check password (supports bcrypt and plain text fallback)
+    // Verify password (plain text check with bcrypt fallback for legacy hashes)
     let isMatch = false;
-    if (user.password === password) {
-      isMatch = true;
-    } else {
-      try {
+    if (user.password) {
+      if (/^\$2[aby]\$\d+\$/.test(user.password)) {
         isMatch = await bcrypt.compare(password, user.password);
-      } catch (e) {
-        isMatch = false;
+      } else {
+        isMatch = (user.password === password);
       }
     }
 
@@ -184,11 +184,13 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    const { password: _, ...userWithoutPassword } = user;
+    const userObj = typeof user.toObject === 'function' ? user.toObject() : { ...user };
+    delete userObj.password;
+
     res.status(200).json({
       message: 'Login successful',
       token,
-      user: userWithoutPassword
+      user: userObj
     });
   } catch (error) {
     console.error('Login error:', error);
