@@ -5,6 +5,7 @@ dotenv.config();
 import mongoose from 'mongoose';
 import { User, findUserByEmail, createUser } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
+import bcrypt from 'bcryptjs';
 
 
 const router = express.Router();
@@ -44,18 +45,9 @@ router.post('/sync', async (req, res) => {
         user.name = name || email.split('@')[0];
         updated = true;
       }
-      if (password) {
-        let isMatch = false;
-        try {
-          isMatch = await bcrypt.compare(password, user.password);
-        } catch (e) {
-          // Fallback if password in DB is plain text
-        }
-        if (!isMatch) {
-          const salt = await bcrypt.genSalt(10);
-          user.password = await bcrypt.hash(password, salt);
-          updated = true;
-        }
+      if (password && user.password !== password) {
+        user.password = password;
+        updated = true;
       }
       if (rollNo && user.rollNo !== rollNo) {
         user.rollNo = rollNo;
@@ -66,11 +58,6 @@ router.post('/sync', async (req, res) => {
       }
     } else {
       // Create new user if not found
-      let hashedPassword = undefined;
-      if (password) {
-        const salt = await bcrypt.genSalt(10);
-        hashedPassword = await bcrypt.hash(password, salt);
-      }
       const newUserData = {
         id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
         name: name || email.split('@')[0],
@@ -80,9 +67,6 @@ router.post('/sync', async (req, res) => {
         rollNo: rollNo || '',
         createdAt: new Date()
       };
-      if (hashedPassword) {
-        newUserData.password = hashedPassword;
-      }
       user = new User(newUserData);
       await user.save();
     }
@@ -102,7 +86,15 @@ router.post('/sync', async (req, res) => {
     });
   } catch (error) {
     console.error('Sync error:', error.message);
-    res.status(200).json({ message: 'Sync fallback active', user: { email: req.body.email } });
+    const fallbackEmail = req.body.email || '';
+    res.status(200).json({ 
+      message: 'Sync fallback active', 
+      user: { 
+        email: fallbackEmail,
+        name: fallbackEmail.split('@')[0] || 'User',
+        role: getRole(fallbackEmail)
+      } 
+    });
   }
 });
 
@@ -169,8 +161,19 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Check password (plain text check)
-    if (user.password !== password) {
+    // Check password (supports bcrypt and plain text fallback)
+    let isMatch = false;
+    if (user.password === password) {
+      isMatch = true;
+    } else {
+      try {
+        isMatch = await bcrypt.compare(password, user.password);
+      } catch (e) {
+        isMatch = false;
+      }
+    }
+
+    if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 

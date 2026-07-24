@@ -586,10 +586,24 @@ router.get('/fees', authenticateToken, isAdmin, async (req, res) => {
     let collectedFees = 0;
     let outstandingFees = 0;
 
-    const feeData = students.map(s => {
+    const feeData = await Promise.all(students.map(async (s) => {
       const total = Number(s.totalFee) || 0;
       const paid = Number(s.paidFee) || 0;
       const due = total - paid;
+
+      let expectedStatus = 'Unpaid';
+      if (due <= 0 && total > 0) {
+        expectedStatus = 'Paid';
+      } else if (paid > 0 && due > 0) {
+        expectedStatus = 'Partial';
+      }
+
+      if (s.feeStatus !== expectedStatus || s.dueFee !== due) {
+        s.feeStatus = expectedStatus;
+        s.dueFee = due;
+        await s.save();
+      }
+
       totalFees += total;
       collectedFees += paid;
       outstandingFees += due;
@@ -603,7 +617,7 @@ router.get('/fees', authenticateToken, isAdmin, async (req, res) => {
         due: `₹${due}`,
         status: s.feeStatus || 'Unpaid'
       };
-    });
+    }));
 
     res.status(200).json({
       feeData,
@@ -696,6 +710,34 @@ router.put('/complaints/:id', authenticateToken, isAdmin, async (req, res) => {
 
     complaint.status = status;
     await complaint.save();
+
+    if (complaint.studentEmail) {
+      const student = await User.findOne({ email: complaint.studentEmail.toLowerCase() });
+      if (student) {
+        const newNotification = {
+          id: `NT-${Math.floor(1000 + Math.random() * 9000)}`,
+          title: `Complaint Updated`,
+          text: `Your complaint regarding "${complaint.title}" is now "${status}".`,
+          time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          read: false
+        };
+        student.notifications.unshift(newNotification);
+        await student.save();
+
+        notificationQueue.enqueue({
+          type: 'USERS',
+          target: [student.email],
+          payload: {
+            title: newNotification.title,
+            body: newNotification.text,
+            notificationType: 'COMPLAINT_UPDATE',
+            targetHash: '#dashboard',
+            targetTab: 'complaints',
+            data: { type: 'complaint', id: complaint.id }
+          }
+        });
+      }
+    }
 
     res.status(200).json({ message: 'Complaint status updated successfully', complaint });
   } catch (error) {
