@@ -1,46 +1,69 @@
 import './MainLayout.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
 import Icon from '../components/Icon'
 import { useAuth } from '../context/AuthContext'
+import { NotificationProvider, useNotifications } from '../notifications/NotificationProvider'
+import NotificationPopup from '../notifications/NotificationPopup'
+import { notificationService } from '../notifications/notificationService'
+import { navigateFromNotification } from '../utils/deepLinking'
 
 export default function MainLayout({ children, activeTab, setActiveTab, profile, setProfile }) {
-  const [showNotifications, setShowNotifications] = useState(false)
-  const { user } = useAuth()
+  return (
+    <NotificationProvider>
+      <MainLayoutContent
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        profile={profile}
+        setProfile={setProfile}
+      >
+        {children}
+      </MainLayoutContent>
+    </NotificationProvider>
+  );
+}
 
-  const notifications = profile?.notifications || []
-  const unreadCount = notifications.filter(n => !n.read).length
+function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProfile }) {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { user } = useAuth();
+  const { history, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
-  const toggleNotifications = async () => {
-    const nextShow = !showNotifications;
-    setShowNotifications(nextShow);
-    
-    if (nextShow && unreadCount > 0) {
-      try {
-        const res = await fetch('http://localhost:5000/api/student/notifications/read', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        if (res.ok) {
-          if (profile && profile.notifications) {
-            profile.notifications.forEach(n => { n.read = true; });
-          }
-          // Clear local profile alert badges
-          if (setProfile) {
-            setProfile({ ...profile });
-          }
-        }
-      } catch (err) {
-        console.error('Failed to mark notifications as read:', err);
-      }
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (user && token) {
+      notificationService.initialize(token);
     }
-  }
+  }, [user]);
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  const handleNotificationClick = (item) => {
+    markAsRead(item.id);
+    setShowNotifications(false);
+    navigateFromNotification(item, setActiveTab);
+  };
+
+  const handleMarkAllRead = () => {
+    markAllAsRead();
+  };
+
+  // Combine live store history with any profile notifications
+  const allNotifications = history && history.length > 0
+    ? history
+    : (profile?.notifications || []).map((n, idx) => ({
+        id: n.id || `profile_notif_${idx}`,
+        title: n.title,
+        body: n.text || n.body,
+        read: n.read,
+        timestampText: n.time || 'Recently',
+        type: 'general'
+      }));
 
   return (
     <div className="dashboard-container">
+      <NotificationPopup />
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
       
       <div className="dashboard-main">
@@ -55,17 +78,23 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile,
               <span className="header-logo-badge">
                 <Icon name="building" />
               </span>
-              <h2>{user?.role === 'administrator' || user?.role === 'admin' || window.location.hash === '#admin-dashboard' ? 'Admin Dashboard' : user?.role === 'warden' || window.location.hash === '#warden-dashboard' ? 'Warden Dashboard' : 'Student Dashboard'}</h2>
+              <h2>
+                {user?.role === 'administrator' || user?.role === 'admin' || window.location.hash === '#admin-dashboard'
+                  ? 'Admin Dashboard'
+                  : user?.role === 'warden' || window.location.hash === '#warden-dashboard'
+                  ? 'Warden Dashboard'
+                  : 'Student Dashboard'}
+              </h2>
             </div>
             <p className="header-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
- 
+
           <div className="header-right">
             <div className="header-search">
               <Icon name="search" width="15" height="15" />
               <input type="text" placeholder="Search dashboard..." />
             </div>
- 
+
             <div className="notification-wrapper">
               <button 
                 type="button" 
@@ -77,22 +106,37 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile,
                 <Icon name="bell" width="18" height="18" />
                 {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
               </button>
- 
+
               {showNotifications && (
                 <div className="notification-dropdown animate-fade-in-slide-up">
-                  <div className="dropdown-header">
-                    <h4>Notifications</h4>
-                    <span className="count">{unreadCount} new</span>
+                  <div className="dropdown-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <h4 style={{ margin: 0 }}>Notifications</h4>
+                    {unreadCount > 0 ? (
+                      <button 
+                        type="button"
+                        onClick={handleMarkAllRead}
+                        style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        Mark all read ({unreadCount})
+                      </button>
+                    ) : (
+                      <span className="count">0 new</span>
+                    )}
                   </div>
                   <div className="dropdown-list">
-                    {notifications.length === 0 ? (
+                    {allNotifications.length === 0 ? (
                       <p className="empty-state-text">No notifications.</p>
                     ) : (
-                      notifications.map((n) => (
-                        <div key={n.id} className="notification-item" style={{ opacity: n.read ? 0.65 : 1 }}>
-                          <strong>{n.title}</strong>
-                          <p>{n.text}</p>
-                          <small>{n.time}</small>
+                      allNotifications.map((n) => (
+                        <div 
+                          key={n.id} 
+                          className="notification-item" 
+                          style={{ opacity: n.read ? 0.65 : 1, cursor: 'pointer', padding: '10px 12px' }}
+                          onClick={() => handleNotificationClick(n)}
+                        >
+                          <strong style={{ fontSize: '13px', display: 'block', color: '#0f172a' }}>{n.title}</strong>
+                          <p style={{ margin: '4px 0', fontSize: '12px', color: '#475569' }}>{n.body || n.text}</p>
+                          <small style={{ fontSize: '11px', color: '#94a3b8' }}>{n.timestampText || n.time || 'Just now'}</small>
                         </div>
                       ))
                     )}
@@ -122,5 +166,5 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile,
         </main>
       </div>
     </div>
-  )
+  );
 }

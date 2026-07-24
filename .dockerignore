@@ -1,0 +1,10 @@
+# Root .dockerignore
+**/node_modules
+**/dist
+**/build
+**/.git
+**/.gitignore
+**/*.log
+**/.DS_Store
+**/.env
+**/.env.local

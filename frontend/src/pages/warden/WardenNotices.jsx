@@ -76,7 +76,15 @@ export default function WardenNotices() {
       });
 
       if (res.ok) {
-        alert('Notice successfully published');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Notice Published',
+              body: `Notice "${newNotice.title}" has been published to ${newNotice.category}.`
+            },
+            data: { type: 'notice', targetScreen: 'notices', targetHash: '#warden-dashboard' }
+          }
+        }));
         setNewNotice({ title: '', category: 'All Blocks', body: '', isUrgent: false });
         setShowModal(false);
         loadNoticesData();
@@ -119,7 +127,15 @@ export default function WardenNotices() {
       });
 
       if (res.ok) {
-        alert('Notification successfully sent to student');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Alert Sent to Student',
+              body: `Direct notification sent to ${individualNotice.studentEmail}.`
+            },
+            data: { type: 'notice', targetScreen: 'overview', targetHash: '#warden-dashboard' }
+          }
+        }));
         setIndividualNotice({
           studentEmail: students.length > 0 ? students[0].email : '',
           title: '',

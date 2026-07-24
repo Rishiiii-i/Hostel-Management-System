@@ -83,7 +83,15 @@ export default function AdminRooms() {
         body: JSON.stringify(roomForm)
       })
       if (res.ok) {
-        alert('Room configured successfully')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Room Configured',
+              body: `Room ${roomForm.roomNo} in ${roomForm.block} configured.`
+            },
+            data: { type: 'room', targetScreen: 'profile', targetHash: '#admin-dashboard' }
+          }
+        }));
         setShowAddModal(false)
         resetRoomForm()
         loadRooms()
@@ -116,7 +124,15 @@ export default function AdminRooms() {
         })
       })
       if (res.ok) {
-        alert('Student successfully allocated to room')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Student Allocated',
+              body: `Student ${occupantEmail} allocated to Room ${selectedRoom.roomNo}.`
+            },
+            data: { type: 'room', targetScreen: 'profile', targetHash: '#admin-dashboard' }
+          }
+        }));
         setShowAllocateModal(false)
         setSelectedRoom(null)
         setOccupantEmail('')
@@ -144,7 +160,15 @@ export default function AdminRooms() {
         })
       })
       if (res.ok) {
-        alert('Room deallocated successfully')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Room Deallocated',
+              body: `Occupant deallocated from Room ${room.roomNo}.`
+            },
+            data: { type: 'room', targetScreen: 'profile', targetHash: '#admin-dashboard' }
+          }
+        }));
         loadRooms()
       } else {
         alert('Failed to deallocate room.')

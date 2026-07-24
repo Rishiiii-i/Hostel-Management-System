@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,4 +15,23 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-export { auth };
+
+// Initialize Firebase Cloud Messaging conditionally based on browser support
+let messagingPromise = null;
+const getMessagingInstance = async () => {
+    try {
+        const supported = await isSupported();
+        if (supported) {
+            return getMessaging(app);
+        } else {
+            console.warn('[FCM] Firebase Cloud Messaging is not supported in this browser environment.');
+            return null;
+        }
+    } catch (err) {
+        console.error('[FCM] Error checking FCM support:', err);
+        return null;
+    }
+};
+
+export { app, auth, firebaseConfig, getMessagingInstance };
+

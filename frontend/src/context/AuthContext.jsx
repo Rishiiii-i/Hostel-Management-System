@@ -13,6 +13,8 @@ import {
   verifyPasswordResetCode
 } from 'firebase/auth';
 
+import { notificationService } from '../services/notificationService';
+
 const AuthContext = createContext(null);
 
 // Warden credentials
@@ -204,13 +206,14 @@ export const AuthProvider = ({ children }) => {
             setUser(data.user);
             setLoading(false);
             return { firebaseUser: null, user: data.user };
+          } else {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.message || 'Login failed');
           }
         } catch (backendErr) {
           console.error('Backend login fallback failed:', backendErr);
+          throw error;
         }
-
-        // Throw original error if both Firebase and Backend API fail
-        throw error;
       }
     }
   };
@@ -240,27 +243,35 @@ export const AuthProvider = ({ children }) => {
     await confirmPasswordReset(auth, code, newPassword);
   };
 
-  const updateProfileName = async (newName) => {
-    if (auth.currentUser) {
+  const updateUserData = async (updatedData) => {
+    if (auth.currentUser && updatedData.name) {
       try {
-        await updateProfile(auth.currentUser, { displayName: newName });
+        await updateProfile(auth.currentUser, { displayName: updatedData.name });
       } catch (err) {
         console.error('Failed to update firebase display name:', err);
       }
-      setUser(prev => {
-        if (!prev) return null;
-        const updated = { ...prev, name: newName };
-        localStorage.setItem('user', JSON.stringify(updated));
-        return updated;
-      });
     }
+    setUser(prev => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updatedData };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const updateProfileName = async (newName) => {
+    await updateUserData({ name: newName });
   };
 
   const logOut = async () => {
     const confirmed = window.confirm('Are you sure you want to logout?')
     if (!confirmed) return
 
+    const oldToken = localStorage.getItem('token')
     try {
+      if (oldToken) {
+        await notificationService.teardown(oldToken);
+      }
       await signOut(auth)
     } catch (error) {
       console.error('Signout failed:', error)
@@ -286,7 +297,8 @@ export const AuthProvider = ({ children }) => {
     verifyResetCode,
     confirmReset,
     logOut,
-    updateProfileName
+    updateProfileName,
+    updateUserData
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

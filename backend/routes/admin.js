@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { User, Room, Complaint, Transaction, Notice } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { FCMService } from '../services/fcmService.js';
+import { notificationQueue } from '../services/notificationQueue.js';
 
 const router = express.Router();
 
@@ -241,10 +243,26 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
+// Get all users (students, wardens, admins)
+router.get('/users', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    if (!isDbConnected()) return res.status(503).json({ message: 'Database offline' });
+    const filter = {};
+    if (req.query.role) {
+      filter.role = req.query.role;
+    }
+    const users = await User.find(filter).select('-password').sort({ name: 1 });
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Error fetching user list' });
+  }
+});
+
 // Get all students
 router.get('/students', authenticateToken, isAdmin, async (req, res) => {
   try {
-    if (!isDbConnected()) return res.status(200).json([]);
+    if (!isDbConnected()) return res.status(503).json({ message: 'Database offline' });
     const students = await User.find({ role: 'student' }).select('-password');
     res.status(200).json(students);
   } catch (error) {
@@ -841,6 +859,20 @@ router.post('/notices', authenticateToken, isAdmin, async (req, res) => {
         student.notifications.unshift(noticeNotification);
         await student.save();
       }
+
+      const targetEmails = students.map(s => s.email);
+      notificationQueue.enqueue({
+        type: 'USERS',
+        target: targetEmails,
+        payload: {
+          title: noticeNotification.title,
+          body: noticeNotification.text,
+          notificationType: 'SYSTEM_ANNOUNCEMENT',
+          targetHash: '#dashboard',
+          targetTab: 'notices',
+          data: { type: 'notice' }
+        }
+      });
     } catch (notifErr) {
       console.error('Failed to dispatch notice notifications to students:', notifErr);
     }
@@ -879,6 +911,19 @@ router.post('/notifications/individual', authenticateToken, isAdmin, async (req,
 
     student.notifications.unshift(newNotification);
     await student.save();
+
+    notificationQueue.enqueue({
+      type: 'USERS',
+      target: [student.email],
+      payload: {
+        title: newNotification.title,
+        body: newNotification.text,
+        notificationType: 'INDIVIDUAL_ALERT',
+        targetHash: '#dashboard',
+        targetTab: 'overview',
+        data: { type: 'individual' }
+      }
+    });
 
     // Create a personal notice card
     const personalNotice = new Notice({

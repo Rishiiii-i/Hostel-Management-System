@@ -94,7 +94,15 @@ export default function AdminNotices() {
       })
 
       if (res.ok) {
-        alert('Notice successfully published to boards')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Notice Published',
+              body: `Notice "${newNotice.title}" published to notice board.`
+            },
+            data: { type: 'notice', targetScreen: 'notices', targetHash: '#admin-dashboard' }
+          }
+        }));
         setNewNotice({ title: '', category: 'All Blocks', body: '', isUrgent: false })
         setShowModal(false)
         loadNotices()
@@ -122,7 +130,15 @@ export default function AdminNotices() {
       })
 
       if (res.ok) {
-        alert('Notification successfully sent to student profile')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Individual Alert Sent',
+              body: `Direct notification sent to ${individualNotice.studentEmail}.`
+            },
+            data: { type: 'notice', targetScreen: 'overview', targetHash: '#admin-dashboard' }
+          }
+        }));
         setIndividualNotice({
           studentEmail: students.length > 0 ? students[0].email : '',
           title: '',

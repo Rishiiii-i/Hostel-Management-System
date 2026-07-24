@@ -211,10 +211,17 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
 
           const prof = await fetchWithHeaders('http://localhost:5000/api/student/profile');
           if (prof && setProfile) {
-            setProfile({
-              ...prof,
-              fullName: prof.name || prof.fullName || ''
-            });
+            setProfile(prev => ({
+              ...prev,
+              fullName: prof.name || prev.fullName || '',
+              email: prof.email || prev.email || '',
+              phone: prof.phone !== undefined ? prof.phone : prev.phone,
+              emergencyContact: prof.emergencyContact !== undefined ? prof.emergencyContact : prev.emergencyContact,
+              room: prof.room !== undefined ? prof.room : prev.room,
+              block: prof.block !== undefined ? prof.block : prev.block,
+              rollNo: prof.rollNo !== undefined ? prof.rollNo : prev.rollNo,
+              photo: prof.photo !== undefined ? prof.photo : prev.photo
+            }));
           }
 
           const notificationsList = prof && prof.notifications && Array.isArray(prof.notifications)

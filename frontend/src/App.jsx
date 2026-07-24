@@ -78,13 +78,31 @@ function App() {
           ...prev,
           fullName: shouldUpdateName ? (user.name || '') : prev.fullName,
           email: user.email || prev.email || '',
-          photo: isDifferentUser ? (user.photo || user.photoURL || '') : (prev.photo || user.photo || user.photoURL || '')
+          photo: user.photo !== undefined ? user.photo : (isDifferentUser ? (user.photoURL || '') : (prev.photo || user.photoURL || '')),
+          // Sync database-backed fields from user if available
+          phone: user.phone !== undefined ? user.phone : (isDifferentUser ? '' : prev.phone),
+          emergencyContact: user.emergencyContact !== undefined ? user.emergencyContact : (isDifferentUser ? '' : prev.emergencyContact),
+          room: user.room !== undefined ? user.room : (isDifferentUser ? '' : prev.room),
+          block: user.block !== undefined ? user.block : (isDifferentUser ? '' : prev.block),
+          rollNo: user.rollNo !== undefined ? user.rollNo : (isDifferentUser ? '' : prev.rollNo)
         }
         try {
           localStorage.setItem('shm_user_profile', JSON.stringify(updated))
         } catch (e) {}
         return updated
       })
+    } else {
+      // Clear profile state when user logs out
+      setProfile({
+        fullName: '',
+        email: '',
+        phone: '',
+        emergencyContact: '',
+        room: '',
+        block: '',
+        rollNo: '',
+        photo: ''
+      });
     }
   }, [user])
 

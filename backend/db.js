@@ -1,24 +1,59 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import dns from 'dns';
+
+// Use Google/Cloudflare DNS to fix SRV lookup errors on Windows
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || '';
+mongoose.set('strictQuery', false);
 
-if (!MONGODB_URI) {
-  console.warn('MONGODB_URI is not set in backend/.env.');
+const DEFAULT_ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD?.trim() || 'admin123';
+const DEFAULT_WARDEN_PASSWORD = process.env.DEFAULT_WARDEN_PASSWORD?.trim() || 'warden123';
+
+const MONGODB_URI = process.env.MONGODB_URI?.trim() || '';
+const MONGODB_USERNAME = process.env.MONGODB_USERNAME?.trim() || '';
+const MONGODB_PASSWORD = process.env.MONGODB_PASSWORD?.trim() || '';
+const MONGODB_HOST = process.env.MONGODB_HOST?.trim() || '';
+const MONGODB_DB = process.env.MONGODB_DB?.trim() || 'hostel-management';
+const MONGODB_OPTIONS = process.env.MONGODB_OPTIONS?.trim() || 'ssl=true&authSource=admin&retryWrites=true&w=majority';
+
+function buildConnectionString() {
+  if (MONGODB_URI) return MONGODB_URI;
+  if (!MONGODB_USERNAME || !MONGODB_PASSWORD || !MONGODB_HOST) return '';
+
+  const encodedUsername = encodeURIComponent(MONGODB_USERNAME);
+  const encodedPassword = encodeURIComponent(MONGODB_PASSWORD);
+  const prefix = MONGODB_HOST.startsWith('mongodb+srv://') || MONGODB_HOST.startsWith('mongodb://') ? '' : 'mongodb://';
+  return `${prefix}${encodedUsername}:${encodedPassword}@${MONGODB_HOST}/${MONGODB_DB}?${MONGODB_OPTIONS}`;
+}
+
+const connectionString = buildConnectionString();
+const sanitizedUri = connectionString.replace(/(mongodb(?:\+srv)?:\/\/[^:]+:)[^@]+@/, '$1***@');
+const hasPlaceholders = connectionString.includes('<db_username>') || connectionString.includes('<db_password>');
+
+if (!connectionString) {
+  console.warn('MongoDB connection information is missing. Configure MONGODB_URI or MONGODB_USERNAME/MONGODB_PASSWORD/MONGODB_HOST in backend/.env.');
+} else if (hasPlaceholders) {
+  console.warn('MongoDB connection string contains placeholder values (<db_username> / <db_password>). Please edit backend/.env and enter your actual database credentials.');
 } else {
-  mongoose.connect(MONGODB_URI, {
-    family: 4 // Connect using IPv4
+  mongoose.connect(connectionString, {
+    family: 4, // Connect using IPv4
+    serverSelectionTimeoutMS: 10000,
+    maxPoolSize: 10
   })
     .then(() => {
-      console.log(' Connected to MongoDB successfully.');
+      console.log('Connected to MongoDB successfully.');
       initDefaultMessMenu();
       initDefaultRooms();
       initDefaultWardenProfile();
+      initMissingAdminWardenPasswords();
     })
     .catch((error) => {
       console.error('MongoDB connection error:', error.message);
+      console.error('Sanitized connection string:', sanitizedUri);
       console.error('Please verify your connection string and credentials in backend/.env.');
     });
 }
@@ -100,6 +135,14 @@ const userSchema = new mongoose.Schema({
       text: String,
       time: String,
       read: { type: Boolean, default: false }
+    }],
+    default: []
+  },
+  fcmTokens: {
+    type: [{
+      token: { type: String, required: true },
+      deviceType: { type: String, default: 'web' },
+      updatedAt: { type: Date, default: Date.now }
     }],
     default: []
   },
@@ -243,7 +286,7 @@ async function initDefaultMessMenu() {
       await MessMenu.findOneAndUpdate(
         { day: item.day },
         { breakfast: item.breakfast, lunch: item.lunch, snacks: item.snacks, dinner: item.dinner },
-        { upsert: true, new: true }
+        { returnDocument: 'after', upsert: true }
       );
     }
     console.log('Default mess menu initialized/updated successfully!');
@@ -298,6 +341,29 @@ async function initDefaultWardenProfile() {
     }
   } catch (err) {
     console.error('Failed to seed default warden profile:', err);
+  }
+}
+
+async function initMissingAdminWardenPasswords() {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+
+    const accounts = await User.find({
+      role: { $in: ['administrator', 'warden'] },
+      $or: [{ password: { $exists: false } }, { password: '' }]
+    });
+
+    if (!accounts.length) return;
+
+    for (const account of accounts) {
+      const defaultPassword = account.role === 'administrator' ? DEFAULT_ADMIN_PASSWORD : DEFAULT_WARDEN_PASSWORD;
+      const salt = await bcrypt.genSalt(10);
+      account.password = await bcrypt.hash(defaultPassword, salt);
+      await account.save();
+      console.log(`Seeded default password for ${account.role} account: ${account.email}`);
+    }
+  } catch (err) {
+    console.error('Failed to seed missing admin/warden passwords:', err);
   }
 }
 

@@ -41,7 +41,15 @@ export default function WardenGatePasses() {
         body: JSON.stringify({ status })
       })
       if (res.ok) {
-        alert(`Gate pass request successfully ${status.toLowerCase()}`)
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: `Gate Pass ${status}`,
+              body: `Gate pass request ${id} was ${status.toLowerCase()} successfully.`
+            },
+            data: { type: 'gatepass', targetScreen: 'leave', targetHash: '#warden-dashboard', id }
+          }
+        }));
         loadGatePassesData()
       } else {
         alert('Failed to update gate pass status.')

@@ -79,7 +79,15 @@ export default function AdminStudents() {
         body: JSON.stringify(studentForm)
       })
       if (res.ok) {
-        alert('Student successfully registered')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Student Registered',
+              body: `Student ${studentForm.name} (${studentForm.email}) registered successfully.`
+            },
+            data: { type: 'general', targetScreen: 'overview', targetHash: '#admin-dashboard' }
+          }
+        }));
         setShowAddModal(false)
         resetForm()
         loadStudents()
@@ -117,7 +125,15 @@ export default function AdminStudents() {
         body: JSON.stringify(studentForm)
       })
       if (res.ok) {
-        alert('Student details updated successfully')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Student Details Updated',
+              body: `Record for ${studentForm.name} updated successfully.`
+            },
+            data: { type: 'general', targetScreen: 'overview', targetHash: '#admin-dashboard' }
+          }
+        }));
         setShowEditModal(false)
         setSelectedStudent(null)
         resetForm()

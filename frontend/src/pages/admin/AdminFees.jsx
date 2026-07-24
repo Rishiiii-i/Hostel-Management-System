@@ -67,7 +67,15 @@ export default function AdminFees() {
         body: JSON.stringify({ totalFee, paidFee })
       })
       if (res.ok) {
-        alert('Student fee records updated successfully')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Fee Record Updated',
+              body: `Fee record updated for ${selectedStudent.name}.`
+            },
+            data: { type: 'fee', targetScreen: 'fee', targetHash: '#admin-dashboard' }
+          }
+        }));
         setShowEditModal(false)
         setSelectedStudent(null)
         loadFeesData()
