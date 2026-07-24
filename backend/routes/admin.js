@@ -35,7 +35,24 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
         outstandingTotal: 0,
         totalFees: 0,
         pendingFeesList: [],
-        activeComplaintsList: []
+        activeComplaintsList: [],
+        pendingComplaintsCount: 0,
+        inProgressComplaintsCount: 0,
+        resolvedComplaintsCount: 0,
+        occupancyStats: {
+          totalBeds: 0,
+          occupiedBeds: 0,
+          vacantBeds: 0,
+          blockWise: [],
+          floorWise: []
+        },
+        studentStats: {
+          branchWise: [],
+          yearWise: []
+        },
+        complaintStats: {
+          categoryWise: []
+        }
       });
     }
 
@@ -125,6 +142,67 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
       status: c.status
     }));
 
+    // In-memory calculations for occupancy stats
+    const rooms = await Room.find({});
+    const totalRooms = rooms.length;
+    const totalBeds = rooms.reduce((acc, r) => acc + (r.capacity || 2), 0);
+    const occupiedBeds = students.filter(s => s.room && s.room !== 'N/A').length;
+    const vacantBeds = Math.max(0, totalBeds - occupiedBeds);
+
+    const blockMap = {};
+    const floorMap = {};
+    rooms.forEach(r => {
+      const blk = r.block || 'Unknown';
+      const flr = r.floor || 'Unknown';
+      
+      if (!blockMap[blk]) blockMap[blk] = { name: blk, total: 0, occupied: 0, vacant: 0 };
+      blockMap[blk].total += 1;
+      if (r.status === 'Occupied') blockMap[blk].occupied += 1;
+      else blockMap[blk].vacant += 1;
+
+      if (!floorMap[flr]) floorMap[flr] = { name: flr, total: 0, occupied: 0, vacant: 0 };
+      floorMap[flr].total += 1;
+      if (r.status === 'Occupied') floorMap[flr].occupied += 1;
+      else floorMap[flr].vacant += 1;
+    });
+
+    const blockWise = Object.values(blockMap);
+    const floorWise = Object.values(floorMap);
+
+    // Demographics stats
+    const branchMap = {};
+    const yearMap = {};
+    students.forEach(s => {
+      const branchName = s.branch && s.branch !== 'N/A' ? s.branch : 'CSE';
+      const yearName = s.year || '1st Year';
+      
+      branchMap[branchName] = (branchMap[branchName] || 0) + 1;
+      yearMap[yearName] = (yearMap[yearName] || 0) + 1;
+    });
+
+    const branchWise = Object.entries(branchMap).map(([name, count]) => ({ name, count }));
+    const yearWise = Object.entries(yearMap).map(([name, count]) => ({ name, count }));
+
+    // Complaints breakdown by category
+    const allComplaints = await Complaint.find({});
+    const categoryMap = {
+      'Electrical': 0,
+      'Plumbing': 0,
+      'Furniture': 0,
+      'Cleaning': 0,
+      'Internet': 0,
+      'Other': 0
+    };
+    allComplaints.forEach(c => {
+      const cat = c.category || 'Other';
+      if (categoryMap[cat] !== undefined) {
+        categoryMap[cat] += 1;
+      } else {
+        categoryMap['Other'] += 1;
+      }
+    });
+    const categoryWise = Object.entries(categoryMap).map(([name, count]) => ({ name, count }));
+
     res.status(200).json({
       totalStudents,
       pendingFees: outstandingTotal,
@@ -141,7 +219,21 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
       activeComplaintsList,
       pendingComplaintsCount,
       inProgressComplaintsCount,
-      resolvedComplaintsCount
+      resolvedComplaintsCount,
+      occupancyStats: {
+        totalBeds,
+        occupiedBeds,
+        vacantBeds,
+        blockWise,
+        floorWise
+      },
+      studentStats: {
+        branchWise,
+        yearWise
+      },
+      complaintStats: {
+        categoryWise
+      }
     });
   } catch (error) {
     console.error('Error fetching admin overview metrics:', error);

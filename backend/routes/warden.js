@@ -67,22 +67,156 @@ router.get('/overview', async (req, res) => {
         totalStudents: 0,
         vacantBeds: 0,
         pendingGatePasses: 0,
-        openComplaints: 0
+        openComplaints: 0,
+        paidCount: 0,
+        pendingCount: 0,
+        partialCount: 0,
+        collectedTotal: 0,
+        outstandingTotal: 0,
+        totalFees: 0,
+        occupancyStats: {
+          totalBeds: 0,
+          occupiedBeds: 0,
+          vacantBeds: 0,
+          blockWise: [],
+          floorWise: []
+        },
+        studentStats: {
+          branchWise: [],
+          yearWise: []
+        },
+        complaintStats: {
+          categoryWise: []
+        }
       });
     }
 
-    const [totalStudents, vacantBeds, pendingGatePassesCount, openComplaintsCount] = await Promise.all([
+    const [totalStudents, vacantBedsCount, pendingGatePassesCount, openComplaintsCount] = await Promise.all([
       User.countDocuments({ role: 'student' }),
       Room.countDocuments({ status: 'Vacant' }),
       GatePass.countDocuments({ status: 'Pending' }),
       Complaint.countDocuments({ status: { $ne: 'Resolved' } })
     ]);
 
+    const students = await User.find({ role: 'student' });
+    let totalFees = 0;
+    let collectedTotal = 0;
+    let outstandingTotal = 0;
+    let paidCount = 0;
+    let pendingCount = 0;
+    let partialCount = 0;
+
+    for (const s of students) {
+      const total = Number(s.totalFee) || 0;
+      const paid = Number(s.paidFee) || 0;
+      const due = total - paid;
+
+      let expectedStatus = 'Unpaid';
+      if (due <= 0 && total > 0) {
+        expectedStatus = 'Paid';
+      } else if (paid > 0 && due > 0) {
+        expectedStatus = 'Partial';
+      }
+
+      totalFees += total;
+      collectedTotal += paid;
+      outstandingTotal += due;
+
+      if (expectedStatus === 'Paid') {
+        paidCount++;
+      } else if (expectedStatus === 'Partial') {
+        partialCount++;
+      } else {
+        pendingCount++;
+      }
+    }
+
+    // In-memory calculations for occupancy stats
+    const rooms = await Room.find({});
+    const totalRooms = rooms.length;
+    const totalBeds = rooms.reduce((acc, r) => acc + (r.capacity || 2), 0);
+    const occupiedBeds = students.filter(s => s.room && s.room !== 'N/A').length;
+    const vacantBeds = Math.max(0, totalBeds - occupiedBeds);
+
+    const blockMap = {};
+    const floorMap = {};
+    rooms.forEach(r => {
+      const blk = r.block || 'Unknown';
+      const flr = r.floor || 'Unknown';
+      
+      if (!blockMap[blk]) blockMap[blk] = { name: blk, total: 0, occupied: 0, vacant: 0 };
+      blockMap[blk].total += 1;
+      if (r.status === 'Occupied') blockMap[blk].occupied += 1;
+      else blockMap[blk].vacant += 1;
+
+      if (!floorMap[flr]) floorMap[flr] = { name: flr, total: 0, occupied: 0, vacant: 0 };
+      floorMap[flr].total += 1;
+      if (r.status === 'Occupied') floorMap[flr].occupied += 1;
+      else floorMap[flr].vacant += 1;
+    });
+
+    const blockWise = Object.values(blockMap);
+    const floorWise = Object.values(floorMap);
+
+    // Demographics stats
+    const branchMap = {};
+    const yearMap = {};
+    students.forEach(s => {
+      const branchName = s.branch && s.branch !== 'N/A' ? s.branch : 'CSE';
+      const yearName = s.year || '1st Year';
+      
+      branchMap[branchName] = (branchMap[branchName] || 0) + 1;
+      yearMap[yearName] = (yearMap[yearName] || 0) + 1;
+    });
+
+    const branchWise = Object.entries(branchMap).map(([name, count]) => ({ name, count }));
+    const yearWise = Object.entries(yearMap).map(([name, count]) => ({ name, count }));
+
+    // Complaints breakdown by category
+    const allComplaints = await Complaint.find({});
+    const categoryMap = {
+      'Electrical': 0,
+      'Plumbing': 0,
+      'Furniture': 0,
+      'Cleaning': 0,
+      'Internet': 0,
+      'Other': 0
+    };
+    allComplaints.forEach(c => {
+      const cat = c.category || 'Other';
+      if (categoryMap[cat] !== undefined) {
+        categoryMap[cat] += 1;
+      } else {
+        categoryMap['Other'] += 1;
+      }
+    });
+    const categoryWise = Object.entries(categoryMap).map(([name, count]) => ({ name, count }));
+
     res.status(200).json({
       totalStudents,
-      vacantBeds,
+      vacantBeds: vacantBedsCount,
       pendingGatePasses: pendingGatePassesCount,
-      openComplaints: openComplaintsCount
+      openComplaints: openComplaintsCount,
+      paidCount,
+      pendingCount,
+      partialCount,
+      collectedTotal,
+      outstandingTotal,
+      totalFees,
+      occupancyStats: {
+        totalBeds,
+        occupiedBeds,
+        vacantBeds,
+        blockWise,
+        floorWise
+      },
+      studentStats: {
+        branchWise,
+        yearWise
+      },
+      complaintStats: {
+        categoryWise
+      }
     });
   } catch (error) {
     console.error('Warden overview error:', error.message);
