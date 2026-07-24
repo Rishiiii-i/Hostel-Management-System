@@ -150,6 +150,25 @@ export default function AdminStudents() {
     }
   }
 
+  const handleToggleFee = async (email) => {
+    if (!email) return;
+    try {
+      const res = await fetchWithAuth(`http://localhost:5000/api/warden/students/${email}/toggle-fee`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(data.message);
+        loadStudents();
+      } else {
+        const errData = await res.json();
+        alert(errData.message || 'Failed to toggle fee status.');
+      }
+    } catch (err) {
+      console.error('Failed to toggle fee status:', err);
+    }
+  };
+
   const filtered = Array.isArray(students) ? students.filter(s =>
     (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (s.room || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -229,9 +248,39 @@ export default function AdminStudents() {
                   </td>
                   <td><strong>{s.room ? `${s.room} (${s.block || 'N/A'})` : 'Not Allocated'}</strong></td>
                   <td>
-                    <span className={`owner-pill ${s.feeStatus ? s.feeStatus.toLowerCase() : 'unpaid'}`}>
-                      {s.feeStatus || 'Unpaid'}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className={`owner-pill ${s.feeStatus ? s.feeStatus.toLowerCase() : 'unpaid'}`} style={{ margin: 0 }}>
+                        {s.feeStatus || 'Unpaid'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFee(s.email)}
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          color: '#475569',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease-in-out',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#f1f5f9';
+                          e.currentTarget.style.borderColor = '#94a3b8';
+                          e.currentTarget.style.color = '#1e293b';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#ffffff';
+                          e.currentTarget.style.borderColor = '#cbd5e1';
+                          e.currentTarget.style.color = '#475569';
+                        }}
+                      >
+                        Update Status
+                      </button>
+                    </div>
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -492,17 +541,6 @@ export default function AdminStudents() {
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Roll Number</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="University roll no"
-                  value={studentForm.rollNo}
-                  onChange={(e) => setStudentForm({ ...studentForm, rollNo: e.target.value })}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
-                />
-              </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Branch</label>
@@ -520,19 +558,6 @@ export default function AdminStudents() {
                 </select>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Academic Year</label>
-                <select
-                  value={studentForm.year}
-                  onChange={(e) => setStudentForm({ ...studentForm, year: e.target.value })}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '14px', boxSizing: 'border-box' }}
-                >
-                  <option value="1st Year">1st Year</option>
-                  <option value="2nd Year">2nd Year</option>
-                  <option value="3rd Year">3rd Year</option>
-                  <option value="4th Year">4th Year</option>
-                </select>
-              </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Hostel Room No</label>

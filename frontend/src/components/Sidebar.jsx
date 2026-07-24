@@ -211,7 +211,10 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
 
           const prof = await fetchWithHeaders('http://localhost:5000/api/student/profile');
           if (prof && setProfile) {
-            setProfile(prof);
+            setProfile({
+              ...prof,
+              fullName: prof.name || prof.fullName || ''
+            });
           }
 
           const notificationsList = prof && prof.notifications && Array.isArray(prof.notifications)
