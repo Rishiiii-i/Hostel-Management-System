@@ -145,7 +145,12 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             room: profileData.room || '',
             block: profileData.block || '',
             rollNo: profileData.rollNo || '',
-            photo: profileData.photo || ''
+            photo: profileData.photo || '',
+            feeStatus: profileData.feeStatus || 'Unpaid',
+            totalFee: totalF,
+            paidFee: paidF,
+            dueFee: dueF,
+            notifications: profileData.notifications || []
           };
           if (setProfile) setProfile(mappedProfile);
           localStorage.setItem('shm_user_profile', JSON.stringify(mappedProfile));
@@ -603,18 +608,30 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           
           const amountPaid = Number(payAmount) || 0;
           
-          if (paymentPeriod === 'Hostel Fee') {
+          if (['Hostel Fee', 'Mess Fee', 'Utility Bill', 'Amenity Fee', 'Other Charges'].includes(paymentPeriod)) {
             setFeeDetails(prev => {
               const newPaid = prev.paidFee + amountPaid;
               const newDue = Math.max(0, prev.totalFee - newPaid);
               const isCleared = newDue <= 0;
+              const nextStatus = isCleared ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Unpaid');
               
               setFeePaid(isCleared);
+
+              // Instantly update parent state and localStorage to prevent desync on refresh
+              const updatedProfile = {
+                ...profile,
+                paidFee: newPaid,
+                dueFee: newDue,
+                feeStatus: nextStatus
+              };
+              if (setProfile) setProfile(updatedProfile);
+              localStorage.setItem('shm_user_profile', JSON.stringify(updatedProfile));
+              
               return {
                 ...prev,
                 paidFee: newPaid,
                 dueFee: newDue,
-                feeStatus: isCleared ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Unpaid')
+                feeStatus: nextStatus
               };
             });
           }
@@ -823,11 +840,11 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 </div>
                 <div className="info-row">
                   <span className="info-label">Bed Position</span>
-                  <strong className="info-val">0</strong>
+                  <strong className="info-val">{profile?.room ? (profile?.bedPosition || 'Bed A') : 'N/A'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Floor Level</span>
-                  <strong className="info-val">0</strong>
+                  <strong className="info-val">{profile?.room ? (profile?.floor || '1st Floor') : 'N/A'}</strong>
                 </div>
               </div>
             </div>

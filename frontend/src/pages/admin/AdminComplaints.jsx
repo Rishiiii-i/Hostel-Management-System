@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 export default function AdminComplaints() {
   const [complaints, setComplaints] = useState([])
@@ -133,7 +134,7 @@ export default function AdminComplaints() {
       </div>
 
       {/* Update Status Modal */}
-      {showStatusModal && (
+      {showStatusModal && createPortal(
         <div style={{
           position: 'fixed',
           inset: 0,
@@ -194,7 +195,8 @@ export default function AdminComplaints() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

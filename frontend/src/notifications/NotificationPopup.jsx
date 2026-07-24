@@ -1,28 +1,15 @@
 /**
  * NotificationPopup Component
- * Displays real-time stacked top-right popup banners (Slack/WhatsApp style) with auto-close timers.
+ * Displays real-time stacked top-right popup banners (clean theme) with auto-close timers.
+ * Emojis and action buttons have been removed.
  */
 
 import React, { useEffect } from 'react';
 import { useNotifications } from './NotificationProvider';
-import { navigateFromNotification } from '../utils/deepLinking';
 import './notificationStyles.css';
 
-const ICON_MAP = {
-  complaint: '🛠️',
-  gatepass: '🚗',
-  leave: '🚗',
-  fee: '💳',
-  payment: '💳',
-  notice: '📢',
-  announcement: '📢',
-  mess: '🍲',
-  room: '🚪',
-  general: '🔔'
-};
-
 export default function NotificationPopup() {
-  const { activePopups, removePopup, markAsRead } = useNotifications();
+  const { activePopups, removePopup } = useNotifications();
 
   if (!activePopups || activePopups.length === 0) {
     return null;
@@ -35,18 +22,13 @@ export default function NotificationPopup() {
           key={popup.id}
           popup={popup}
           onClose={() => removePopup(popup.id)}
-          onNavigate={() => {
-            markAsRead(popup.id);
-            removePopup(popup.id);
-            navigateFromNotification(popup);
-          }}
         />
       ))}
     </div>
   );
 }
 
-function PopupCard({ popup, onClose, onNavigate }) {
+function PopupCard({ popup, onClose }) {
   // Auto-dismiss after 6 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -55,13 +37,10 @@ function PopupCard({ popup, onClose, onNavigate }) {
     return () => clearTimeout(timer);
   }, [popup.id, onClose]);
 
-  const icon = ICON_MAP[popup.type] || '🔔';
-
   return (
     <div className={`notification-popup-card type-${popup.type}`}>
       <div className="notification-popup-header">
         <div className="notification-popup-title-box">
-          <div className="notification-popup-icon">{icon}</div>
           <h4 className="notification-popup-title">{popup.title}</h4>
         </div>
         <button
@@ -78,13 +57,6 @@ function PopupCard({ popup, onClose, onNavigate }) {
 
       <div className="notification-popup-footer">
         <span className="notification-popup-time">{popup.timestampText || 'Just now'}</span>
-        <button
-          type="button"
-          className="notification-popup-action-btn"
-          onClick={onNavigate}
-        >
-          View Details
-        </button>
       </div>
 
       <div className="notification-popup-progress" />
