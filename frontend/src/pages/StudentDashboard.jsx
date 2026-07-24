@@ -84,6 +84,26 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     return fetch(url, { ...options, headers });
   };
 
+  // Sync local fee states when profile prop changes (e.g. background sidebar fetch)
+  useEffect(() => {
+    if (profile) {
+      const isPaid = profile.feeStatus === 'Paid';
+      setFeePaid(isPaid);
+      
+      const totalF = profile.totalFee !== undefined ? Number(profile.totalFee) : 45000;
+      const paidF = profile.paidFee !== undefined ? Number(profile.paidFee) : 0;
+      const dueF = profile.dueFee !== undefined ? Number(profile.dueFee) : (totalF - paidF);
+      
+      setFeeDetails({
+        totalFee: totalF,
+        paidFee: paidF,
+        dueFee: dueF,
+        feeStatus: profile.feeStatus || 'Unpaid'
+      });
+      setPayAmount(dueF.toString());
+    }
+  }, [profile]);
+
   // Get dashboard data from server on startup
   useEffect(() => {
     let active = true;
@@ -593,7 +613,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="welcome-banner">
             <div className="banner-content">
-              <h1>Welcome back, {profile?.fullName || 'Student'}</h1>
+              <h1>Welcome back, {profile?.fullName || profile?.name || 'Student'}</h1>
               <p>Manage your room details, fee receipts, gate passes, and maintenance requests in one dashboard.</p>
             </div>
             <div className="banner-quick-stats">
