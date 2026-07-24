@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 import { User, Room, Complaint, Transaction, Notice } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { FCMService } from '../services/fcmService.js';
@@ -823,16 +824,20 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Administrator not found' });
     }
 
-    // Check if the current password is correct (plain text check)
+    // Check if the current password is correct using bcrypt (with legacy plaintext fallback)
+    let isCurrentMatch = false;
     if (admin.password) {
-      if (admin.password !== currentPassword) {
-        return res.status(400).json({ message: 'Incorrect current password' });
+      if (/^\$2[aby]\$\d+\$/.test(admin.password)) {
+        isCurrentMatch = await bcrypt.compare(currentPassword, admin.password);
+      } else {
+        isCurrentMatch = (admin.password === currentPassword);
       }
     } else {
-      // Fallback for predefined login before registration password set
-      if (currentPassword !== 'admin123') {
-        return res.status(400).json({ message: 'Incorrect current password' });
-      }
+      isCurrentMatch = (currentPassword === 'admin123');
+    }
+
+    if (!isCurrentMatch) {
+      return res.status(400).json({ message: 'Incorrect current password' });
     }
 
     admin.password = newPassword;
