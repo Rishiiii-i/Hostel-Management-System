@@ -267,9 +267,6 @@ router.post('/transactions', authenticateToken, async (req, res) => {
     };
 
     const txn = new Transaction(newTxnData);
-    await txn.save();
-
-    const student = await User.findOne({ email: req.user.email.toLowerCase() });
     if (student) {
       const currentPaid = student.paidFee || 0;
       student.paidFee = currentPaid + parsedAmount;
