@@ -77,6 +77,22 @@ export default function WardenOverview({ setActiveTab }) {
   const activeComplaints = Array.isArray(complaints) ? complaints.filter(c => c.status !== 'Resolved').slice(0, 5) : [];
   const recentNotices = Array.isArray(notices) ? notices.slice(0, 3) : [];
 
+  // Calculate conic gradient for the complaints donut chart
+  const pendingComplaintsCount = Array.isArray(complaints) ? complaints.filter(c => c.status === 'Pending').length : 0;
+  const inProgressComplaintsCount = Array.isArray(complaints) ? complaints.filter(c => c.status === 'In Progress').length : 0;
+  const resolvedComplaintsCount = Array.isArray(complaints) ? complaints.filter(c => c.status === 'Resolved').length : 0;
+  const totalComp = pendingComplaintsCount + inProgressComplaintsCount + resolvedComplaintsCount;
+
+  const pendingPct = totalComp > 0 ? (pendingComplaintsCount / totalComp) * 100 : 0;
+  const inProgressPct = totalComp > 0 ? (inProgressComplaintsCount / totalComp) * 100 : 0;
+
+  const pendingEnd = pendingPct;
+  const inProgressEnd = pendingPct + inProgressPct;
+
+  const conicGradient = totalComp > 0
+    ? `conic-gradient(#f59e0b 0% ${pendingEnd}%, #3b82f6 ${pendingEnd}% ${inProgressEnd}%, #10b981 ${inProgressEnd}% 100%)`
+    : '#e2e8f0';
+
   return (
     <div className="tab-pane animate-fade-in-slide-up">
       {/* Welcome Banner */}
@@ -195,6 +211,46 @@ export default function WardenOverview({ setActiveTab }) {
               </small>
               <div style={{ font: '800 32px "Manrope", sans-serif', color: '#10b981', marginTop: '6px' }}>
                 {complaints.filter(c => c.status !== 'Resolved').length}
+              </div>
+            </div>
+          </div>
+
+          {/* Middle Row Charts */}
+          <div className="owner-charts-grid" style={{ marginTop: '24px' }}>
+            <div className="owner-card-box">
+              <div className="owner-card-header">
+                <h3>Fee Status Breakdown</h3>
+                <p>Paid: {stats.paidCount} &bull; Pending: {stats.pendingCount} &bull; Partial: {stats.partialCount}</p>
+              </div>
+              <div className="bar-chart-container">
+                <div className="bar-column">
+                  <div className="bar-fill green" style={{ height: stats.totalStudents > 0 ? `${(stats.paidCount / stats.totalStudents) * 100}%` : '0%' }}></div>
+                  <span className="bar-label">Paid ({stats.paidCount})</span>
+                </div>
+                <div className="bar-column">
+                  <div className="bar-fill amber" style={{ height: stats.totalStudents > 0 ? `${(stats.pendingCount / stats.totalStudents) * 100}%` : '0%' }}></div>
+                  <span className="bar-label">Pending ({stats.pendingCount})</span>
+                </div>
+                <div className="bar-column">
+                  <div className="bar-fill blue" style={{ height: stats.totalStudents > 0 ? `${(stats.partialCount / stats.totalStudents) * 100}%` : '0%' }}></div>
+                  <span className="bar-label">Partial ({stats.partialCount})</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="owner-card-box">
+              <div className="owner-card-header">
+                <h3>Complaint Status</h3>
+              </div>
+              <div className="donut-chart-wrapper">
+                <div className="donut-circle" style={{ background: conicGradient }}>
+                  <div className="donut-inner"></div>
+                </div>
+                <div className="chart-legend">
+                  <span className="legend-item"><span className="legend-dot amber"></span> Pending ({pendingComplaintsCount})</span>
+                  <span className="legend-item"><span className="legend-dot blue"></span> In Progress ({inProgressComplaintsCount})</span>
+                  <span className="legend-item"><span className="legend-dot green"></span> Resolved ({resolvedComplaintsCount})</span>
+                </div>
               </div>
             </div>
           </div>
