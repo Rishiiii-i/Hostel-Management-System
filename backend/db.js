@@ -1,21 +1,12 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import dns from 'dns';
-
-// Google DNS to fix connection errors on Windows
-dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
-// Check if the URI has placeholder values
-const hasPlaceholders = MONGODB_URI.includes('<db_username>') || MONGODB_URI.includes('<db_password>');
-
 if (!MONGODB_URI) {
   console.warn('MONGODB_URI is not set in backend/.env.');
-} else if (hasPlaceholders) {
-  console.warn('MONGODB_URI contains placeholder values (<db_username> / <db_password>). Please edit your backend/.env file and enter your actual database credentials.');
 } else {
   mongoose.connect(MONGODB_URI, {
     family: 4 // Connect using IPv4

@@ -230,11 +230,13 @@ router.post('/transactions', authenticateToken, async (req, res) => {
 
     const student = await User.findOne({ email: req.user.email.toLowerCase() });
     if (student) {
-      const currentPaid = student.paidFee || 0;
-      student.paidFee = currentPaid + parsedAmount;
-      student.dueFee = Math.max(0, (student.totalFee || 45000) - student.paidFee);
-      student.feeStatus = student.dueFee <= 0 ? 'Paid' : (student.paidFee > 0 ? 'Partial' : 'Unpaid');
-      await student.save();
+      if (newTxnData.period === 'Hostel Fee') {
+        const currentPaid = student.paidFee || 0;
+        student.paidFee = currentPaid + parsedAmount;
+        student.dueFee = Math.max(0, (student.totalFee || 45000) - student.paidFee);
+        student.feeStatus = student.dueFee <= 0 ? 'Paid' : (student.paidFee > 0 ? 'Partial' : 'Unpaid');
+        await student.save();
+      }
 
       // Dispatch notifications to Warden and Admin
       try {
