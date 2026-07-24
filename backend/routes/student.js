@@ -328,6 +328,7 @@ router.post('/transactions', authenticateToken, async (req, res) => {
       } catch (notifErr) {
         console.error('Failed to dispatch fee notifications to admin/warden:', notifErr);
       }
+    }
 
     res.status(201).json(txn);
   } catch (error) {
