@@ -64,6 +64,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const [newComplaint, setNewComplaint] = useState({ category: 'Electrical', title: '', priority: 'Medium' })
   const [newGatePass, setNewGatePass] = useState({ reason: '', departure: '', returnDate: '' })
   const [payAmount, setPayAmount] = useState('5000.00')
+  const [paymentPeriod, setPaymentPeriod] = useState('Hostel Fee')
 
   const [savedSuccessMsg, setSavedSuccessMsg] = useState('')
   const [customCategory, setCustomCategory] = useState('')
@@ -529,6 +530,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   };
 
   const handleOpenPayModal = () => {
+    setPaymentPeriod('Hostel Fee');
     setPayAmount(feeDetails.dueFee.toString());
     setShowPayModal(true);
   };
@@ -543,7 +545,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           method: 'POST',
           body: JSON.stringify({
             amount: payAmount,
-            period: 'Hostel Fee'
+            period: paymentPeriod
           })
         });
         if (res.ok) {
@@ -552,19 +554,21 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           
           const amountPaid = Number(payAmount) || 0;
           
-          setFeeDetails(prev => {
-            const newPaid = prev.paidFee + amountPaid;
-            const newDue = Math.max(0, prev.totalFee - newPaid);
-            const isCleared = newDue <= 0;
-            
-            setFeePaid(isCleared);
-            return {
-              ...prev,
-              paidFee: newPaid,
-              dueFee: newDue,
-              feeStatus: isCleared ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Unpaid')
-            };
-          });
+          if (paymentPeriod === 'Hostel Fee') {
+            setFeeDetails(prev => {
+              const newPaid = prev.paidFee + amountPaid;
+              const newDue = Math.max(0, prev.totalFee - newPaid);
+              const isCleared = newDue <= 0;
+              
+              setFeePaid(isCleared);
+              return {
+                ...prev,
+                paidFee: newPaid,
+                dueFee: newDue,
+                feeStatus: isCleared ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Unpaid')
+              };
+            });
+          }
 
           setShowPayModal(false);
           setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
@@ -1366,6 +1370,48 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               </div>
             ) : (
               <form onSubmit={handlePayFee}>
+                <label className="form-label">
+                  Payment Category
+                  <select
+                    value={paymentPeriod}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setPaymentPeriod(val);
+                      if (val === 'Hostel Fee') {
+                        setPayAmount(feeDetails.dueFee.toString());
+                      } else if (val === 'Mess Fee') {
+                        setPayAmount('3000.00');
+                      } else if (val === 'Utility Bill') {
+                        setPayAmount('800.00');
+                      } else if (val === 'Amenity Fee') {
+                        setPayAmount('1200.00');
+                      } else {
+                        setPayAmount('1000.00');
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      backgroundColor: '#ffffff',
+                      color: '#1e293b',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      marginTop: '6px',
+                      marginBottom: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value="Hostel Fee">Hostel Fee (Dues: ₹{feeDetails.dueFee})</option>
+                    <option value="Mess Fee">Mess Fee</option>
+                    <option value="Utility Bill">Utility Bill (Electricity, Water, Wifi)</option>
+                    <option value="Amenity Fee">Amenity Fee (Gym, Laundry)</option>
+                    <option value="Other Charges">Other Charges</option>
+                  </select>
+                </label>
+
                 <label className="form-label">
                   Amount (₹)
                   <input
