@@ -6,7 +6,6 @@ dotenv.config();
 import mongoose from 'mongoose';
 import { User, findUserByEmail, createUser } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
-import bcrypt from 'bcryptjs';
 
 
 const router = express.Router();
