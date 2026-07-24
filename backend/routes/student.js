@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { User, GatePass, Complaint, Notice, Transaction, WardenProfile, MessMenu, Attendance } from '../db.js';
+import { User, GatePass, Complaint, Notice, Transaction, WardenProfile, MessMenu, Attendance, Room } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { FCMService } from '../services/fcmService.js';
 import { notificationQueue } from '../services/notificationQueue.js';
@@ -39,13 +39,25 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 
     let roomStudentsCount = 0;
+    let floor = '1st Floor';
+    let bedPosition = 'Bed A';
+
     if (user.room) {
       roomStudentsCount = await User.countDocuments({ room: user.room, block: user.block });
+      const roomDetails = await Room.findOne({ roomNo: user.room, block: user.block });
+      if (roomDetails) {
+        floor = roomDetails.floor || (user.room ? (user.room.substring(0, 1) + 'st Floor') : '1st Floor');
+      }
+      const roommates = await User.find({ room: user.room, block: user.block }).sort({ name: 1 });
+      const userIndex = roommates.findIndex(r => r.email.toLowerCase() === user.email.toLowerCase());
+      bedPosition = userIndex === 1 ? 'Bed B' : 'Bed A';
     }
 
     const responseObj = user.toObject();
     responseObj.wardenInfo = wardenInfo;
     responseObj.roomStudentsCount = roomStudentsCount;
+    responseObj.floor = floor;
+    responseObj.bedPosition = bedPosition;
 
     res.status(200).json(responseObj);
   } catch (error) {
@@ -267,6 +279,8 @@ router.post('/transactions', authenticateToken, async (req, res) => {
     };
 
     const txn = new Transaction(newTxnData);
+    await txn.save();
+    
     if (student) {
       const currentPaid = student.paidFee || 0;
       student.paidFee = currentPaid + parsedAmount;

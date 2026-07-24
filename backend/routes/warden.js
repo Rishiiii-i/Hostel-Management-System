@@ -18,9 +18,16 @@ router.get('/attendance', async (req, res) => {
     const searchDate = date || new Date().toISOString().split('T')[0];
     console.log('GET /attendance queried for date:', searchDate);
     if (!isDbConnected()) return res.status(200).json([]);
+    
     const records = await Attendance.find({ date: searchDate });
-    console.log('GET /attendance returned count:', records.length);
-    res.status(200).json(records);
+    
+    // Filter records to only include active students
+    const activeStudents = await User.find({ role: 'student' });
+    const activeStudentIds = new Set(activeStudents.map(s => s.id));
+    const activeRecords = records.filter(r => activeStudentIds.has(r.studentId));
+    
+    console.log('GET /attendance returned filtered count:', activeRecords.length);
+    res.status(200).json(activeRecords);
   } catch (error) {
     console.error('Error fetching attendance:', error);
     res.status(500).json({ message: 'Error fetching attendance records' });

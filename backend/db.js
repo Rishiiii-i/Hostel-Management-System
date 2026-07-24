@@ -357,8 +357,7 @@ async function initMissingAdminWardenPasswords() {
 
     for (const account of accounts) {
       const defaultPassword = account.role === 'administrator' ? DEFAULT_ADMIN_PASSWORD : DEFAULT_WARDEN_PASSWORD;
-      const salt = await bcrypt.genSalt(10);
-      account.password = await bcrypt.hash(defaultPassword, salt);
+      account.password = defaultPassword;
       await account.save();
       console.log(`Seeded default password for ${account.role} account: ${account.email}`);
     }
