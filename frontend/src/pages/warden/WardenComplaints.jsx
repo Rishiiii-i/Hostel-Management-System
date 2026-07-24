@@ -38,7 +38,15 @@ export default function WardenComplaints() {
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
-        alert(`Complaint status successfully updated to ${newStatus}`);
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Complaint Status Updated',
+              body: `Complaint ${id} status changed to ${newStatus}.`
+            },
+            data: { type: 'complaint', targetScreen: 'complaints', targetHash: '#warden-dashboard', id }
+          }
+        }));
         loadComplaintsData();
       } else {
         alert('Failed to update complaint status.');

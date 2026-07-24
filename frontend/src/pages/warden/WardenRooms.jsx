@@ -72,8 +72,16 @@ export default function WardenRooms() {
         body: JSON.stringify(newRoom)
       })
       if (res.ok) {
-        alert('Room successfully added');
-        setNewRoom({ roomNo: '', block: 'Block A', capacity: 2, type: '2-Sharing Non-AC', floor: '1st Floor' })
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Room Added',
+              body: `Room ${newRoom.roomNo} in ${newRoom.block} added.`
+            },
+            data: { type: 'room', targetScreen: 'profile', targetHash: '#warden-dashboard' }
+          }
+        }));
+        setNewRoom({ roomNo: '', block: 'Block A', capacity: 2 })
         setShowAddModal(false)
         loadRoomsData()
       } else {
@@ -105,7 +113,15 @@ export default function WardenRooms() {
         })
       })
       if (res.ok) {
-        alert('Room successfully allocated');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Room Allocated',
+              body: `Room ${selectedRoom.roomNo} allocated to ${occupantEmail}.`
+            },
+            data: { type: 'room', targetScreen: 'profile', targetHash: '#warden-dashboard' }
+          }
+        }));
         setShowAllocateModal(false)
         setSelectedRoom(null)
         setOccupantEmail('')
@@ -133,7 +149,15 @@ export default function WardenRooms() {
         })
       })
       if (res.ok) {
-        alert('Room successfully deallocated');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Room Deallocated',
+              body: `Occupant deallocated from Room ${room.roomNo}.`
+            },
+            data: { type: 'room', targetScreen: 'profile', targetHash: '#warden-dashboard' }
+          }
+        }));
         loadRoomsData()
       } else {
         alert('Failed to deallocate room.')

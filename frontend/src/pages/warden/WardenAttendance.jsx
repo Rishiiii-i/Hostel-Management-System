@@ -101,7 +101,15 @@ export default function WardenAttendance() {
       });
 
       if (res.ok) {
-        alert('Attendance records successfully updated');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Attendance Saved',
+              body: `Attendance for ${selectedDate} saved successfully.`
+            },
+            data: { type: 'general', targetScreen: 'overview', targetHash: '#warden-dashboard' }
+          }
+        }));
         setAlreadyMarked(true);
       } else {
         alert('Failed to save attendance records.');

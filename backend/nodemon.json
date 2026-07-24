@@ -1,0 +1,6 @@
+{
+  "exec": "node server.js",
+  "delay": 500,
+  "watch": ["server.js", "app.js", "db.js", "config", "services", "middleware", "routes"],
+  "ext": "js,mjs,cjs,json"
+}

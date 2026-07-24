@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { User, GatePass, Complaint, Notice, Transaction, WardenProfile, MessMenu, Attendance } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { FCMService } from '../services/fcmService.js';
+import { notificationQueue } from '../services/notificationQueue.js';
 
 const router = express.Router();
 
@@ -60,22 +62,20 @@ router.put('/profile', authenticateToken, async (req, res) => {
     if (!isDbConnected()) {
       return res.status(200).json({ name, rollNo, phone, emergencyContact, room, block, photo });
     }
-
-    const student = await User.findOne({ email: req.user.email.toLowerCase() });
-    if (!student) {
-      return res.status(404).json({ message: 'Student user not found' });
-    }
-
-    if (name !== undefined && name.trim() !== '') student.name = name;
-    if (rollNo !== undefined) student.rollNo = rollNo;
-    if (phone !== undefined) student.phone = phone;
-    if (emergencyContact !== undefined) student.emergencyContact = emergencyContact;
-    if (room !== undefined) student.room = room;
-    if (block !== undefined) student.block = block;
-    if (photo !== undefined) student.photo = photo;
-
-    await student.save();
-    res.status(200).json(student);
+    const user = await User.findOneAndUpdate(
+      { email: req.user.email.toLowerCase() },
+      { 
+        name, 
+        rollNo, 
+        phone, 
+        emergencyContact, 
+        room, 
+        block, 
+        photo 
+      },
+      { returnDocument: 'after' }
+    );
+    res.status(200).json(user);
   } catch (error) {
     console.error('Failed to update student profile:', error);
     res.status(500).json({ message: 'Failed to update student profile' });
@@ -99,13 +99,21 @@ router.get('/complaints', authenticateToken, async (req, res) => {
 router.post('/complaints', authenticateToken, async (req, res) => {
   try {
     const { category, title, priority } = req.body;
+    
+    if (!isDbConnected()) {
+      return res.status(503).json({ message: 'Database disconnected.' });
+    }
+
     const student = await User.findOne({ email: req.user.email.toLowerCase() });
+    if (!student) {
+      return res.status(404).json({ message: 'Student profile not found in database.' });
+    }
     
     const newComplaintData = {
       id: `REQ-${Math.floor(100 + Math.random() * 900)}`,
-      studentName: student ? student.name : req.user.name,
-      studentEmail: req.user.email.toLowerCase(),
-      room: student && student.room ? student.room : 'N/A',
+      studentName: student.name,
+      studentEmail: student.email.toLowerCase(),
+      room: student.room || 'N/A',
       category,
       title,
       priority,
@@ -113,12 +121,22 @@ router.post('/complaints', authenticateToken, async (req, res) => {
       date: new Date().toISOString().split('T')[0]
     };
 
-    if (!isDbConnected()) {
-      return res.status(201).json(newComplaintData);
-    }
-
     const complaint = new Complaint(newComplaintData);
     await complaint.save();
+
+    notificationQueue.enqueue({
+      type: 'ROLE',
+      target: 'warden',
+      payload: {
+        title: 'New Student Complaint',
+        body: `${student.name} (${student.room || 'N/A'}) submitted: "${title}"`,
+        notificationType: 'COMPLAINT_SUBMITTED',
+        targetHash: '#warden-dashboard',
+        targetTab: 'complaints',
+        data: { type: 'complaint', id: complaint.id }
+      }
+    });
+
     res.status(201).json(complaint);
   } catch (error) {
     console.error('Failed to register new complaint:', error);
@@ -143,26 +161,44 @@ router.get('/gatepasses', authenticateToken, async (req, res) => {
 router.post('/gatepasses', authenticateToken, async (req, res) => {
   try {
     const { reason, departure, returnDate } = req.body;
+    
+    if (!isDbConnected()) {
+      return res.status(503).json({ message: 'Database disconnected.' });
+    }
+
     const student = await User.findOne({ email: req.user.email.toLowerCase() });
+    if (!student) {
+      return res.status(404).json({ message: 'Student profile not found in database.' });
+    }
     
     const newPassData = {
       id: `GP-${Math.floor(100 + Math.random() * 900)}`,
-      studentName: student ? student.name : req.user.name,
-      studentEmail: req.user.email.toLowerCase(),
-      rollNo: student && student.rollNo ? student.rollNo : '',
-      room: student && student.room ? student.room : 'N/A',
+      studentName: student.name,
+      studentEmail: student.email.toLowerCase(),
+      rollNo: student.rollNo || '',
+      room: student.room || 'N/A',
       reason,
       departure,
       returnDate,
       status: 'Pending'
     };
 
-    if (!isDbConnected()) {
-      return res.status(201).json(newPassData);
-    }
-
     const gatePass = new GatePass(newPassData);
     await gatePass.save();
+
+    notificationQueue.enqueue({
+      type: 'ROLE',
+      target: 'warden',
+      payload: {
+        title: 'New Gate Pass Request',
+        body: `${student.name} requested leave for "${reason}"`,
+        notificationType: 'GATE_PASS_SUBMITTED',
+        targetHash: '#warden-dashboard',
+        targetTab: 'leave',
+        data: { type: 'gatepass', id: gatePass.id }
+      }
+    });
+
     res.status(201).json(gatePass);
   } catch (error) {
     console.error('Failed to submit gate pass request:', error);
@@ -212,31 +248,34 @@ router.post('/transactions', authenticateToken, async (req, res) => {
     const { amount, period } = req.body;
     const parsedAmount = Number(amount) || 0;
     
+    if (!isDbConnected()) {
+      return res.status(503).json({ message: 'Database disconnected.' });
+    }
+
+    const student = await User.findOne({ email: req.user.email.toLowerCase() });
+    if (!student) {
+      return res.status(404).json({ message: 'Student profile not found in database.' });
+    }
+
     const newTxnData = {
       id: `TXN-${Math.floor(1000 + Math.random() * 9000)}`,
-      studentEmail: req.user.email.toLowerCase(),
+      studentEmail: student.email.toLowerCase(),
       period: period || 'Hostel Fee',
       amount: `₹${parsedAmount}`,
       date: new Date().toISOString().split('T')[0],
       status: 'Paid'
     };
 
-    if (!isDbConnected()) {
-      return res.status(201).json(newTxnData);
-    }
-
     const txn = new Transaction(newTxnData);
     await txn.save();
 
     const student = await User.findOne({ email: req.user.email.toLowerCase() });
     if (student) {
-      if (newTxnData.period === 'Hostel Fee') {
-        const currentPaid = student.paidFee || 0;
-        student.paidFee = currentPaid + parsedAmount;
-        student.dueFee = Math.max(0, (student.totalFee || 45000) - student.paidFee);
-        student.feeStatus = student.dueFee <= 0 ? 'Paid' : (student.paidFee > 0 ? 'Partial' : 'Unpaid');
-        await student.save();
-      }
+      const currentPaid = student.paidFee || 0;
+      student.paidFee = currentPaid + parsedAmount;
+      student.dueFee = Math.max(0, (student.totalFee || 45000) - student.paidFee);
+      student.feeStatus = student.dueFee <= 0 ? 'Paid' : (student.paidFee > 0 ? 'Partial' : 'Unpaid');
+      await student.save();
 
       // Dispatch notifications to Warden and Admin
       try {
@@ -263,10 +302,35 @@ router.post('/transactions', authenticateToken, async (req, res) => {
           admin.markModified('notifications');
           await admin.save();
         }
+
+        notificationQueue.enqueue({
+          type: 'ROLE',
+          target: 'warden',
+          payload: {
+            title: payNotification.title,
+            body: payNotification.text,
+            notificationType: 'PAYMENT_CONFIRMATION',
+            targetHash: '#warden-dashboard',
+            targetTab: 'fee',
+            data: { type: 'fee_payment' }
+          }
+        });
+
+        notificationQueue.enqueue({
+          type: 'ROLE',
+          target: 'administrator',
+          payload: {
+            title: payNotification.title,
+            body: payNotification.text,
+            notificationType: 'PAYMENT_CONFIRMATION',
+            targetHash: '#admin-dashboard',
+            targetTab: 'fee',
+            data: { type: 'fee_payment' }
+          }
+        });
       } catch (notifErr) {
         console.error('Failed to dispatch fee notifications to admin/warden:', notifErr);
       }
-    }
 
     res.status(201).json(txn);
   } catch (error) {

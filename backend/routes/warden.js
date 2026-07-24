@@ -1,6 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { GatePass, Complaint, Room, Notice, WardenProfile, User, Attendance, MessMenu, Transaction } from '../db.js';
+import { FCMService } from '../services/fcmService.js';
+import { notificationQueue } from '../services/notificationQueue.js';
 
 const router = express.Router();
 
@@ -244,7 +246,7 @@ router.put('/gatepasses/:id/status', async (req, res) => {
     const updated = await GatePass.findOneAndUpdate(
       { id: req.params.id },
       { status },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (updated && updated.studentEmail) {
@@ -259,6 +261,19 @@ router.put('/gatepasses/:id/status', async (req, res) => {
         };
         student.notifications.unshift(newNotification);
         await student.save();
+
+        notificationQueue.enqueue({
+          type: 'USERS',
+          target: [student.email],
+          payload: {
+            title: newNotification.title,
+            body: newNotification.text,
+            notificationType: 'GATE_PASS_UPDATE',
+            targetHash: '#dashboard',
+            targetTab: 'leave',
+            data: { type: 'gatepass', id: updated.id }
+          }
+        });
       }
     }
 
@@ -289,7 +304,7 @@ router.put('/complaints/:id/status', async (req, res) => {
     const updated = await Complaint.findOneAndUpdate(
       { id: req.params.id },
       { status },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (updated && updated.studentEmail) {
@@ -304,6 +319,19 @@ router.put('/complaints/:id/status', async (req, res) => {
         };
         student.notifications.unshift(newNotification);
         await student.save();
+
+        notificationQueue.enqueue({
+          type: 'USERS',
+          target: [student.email],
+          payload: {
+            title: newNotification.title,
+            body: newNotification.text,
+            notificationType: 'COMPLAINT_UPDATE',
+            targetHash: '#dashboard',
+            targetTab: 'complaints',
+            data: { type: 'complaint', id: updated.id }
+          }
+        });
       }
     }
 
@@ -375,6 +403,19 @@ router.post('/rooms/allocate', async (req, res) => {
       student.notifications.unshift(newNotification);
       await student.save();
 
+      notificationQueue.enqueue({
+        type: 'USERS',
+        target: [student.email],
+        payload: {
+          title: newNotification.title,
+          body: newNotification.text,
+          notificationType: 'ROOM_ALLOCATION',
+          targetHash: '#dashboard',
+          targetTab: 'profile',
+          data: { type: 'room' }
+        }
+      });
+
       // Update room details
       room.occupantName = student.name;
       room.occupantEmail = student.email;
@@ -399,6 +440,19 @@ router.post('/rooms/allocate', async (req, res) => {
           };
           student.notifications.unshift(newNotification);
           await student.save();
+
+          notificationQueue.enqueue({
+            type: 'USERS',
+            target: [student.email],
+            payload: {
+              title: newNotification.title,
+              body: newNotification.text,
+              notificationType: 'ROOM_DEALLOCATION',
+              targetHash: '#dashboard',
+              targetTab: 'profile',
+              data: { type: 'room' }
+            }
+          });
         }
       }
 
@@ -499,6 +553,20 @@ router.post('/notices', async (req, res) => {
         student.notifications.unshift(noticeNotification);
         await student.save();
       }
+
+      const targetEmails = students.map(s => s.email);
+      notificationQueue.enqueue({
+        type: 'USERS',
+        target: targetEmails,
+        payload: {
+          title: noticeNotification.title,
+          body: noticeNotification.text,
+          notificationType: 'SYSTEM_ANNOUNCEMENT',
+          targetHash: '#dashboard',
+          targetTab: 'notices',
+          data: { type: 'notice' }
+        }
+      });
     } catch (notifErr) {
       console.error('Failed to dispatch notice notifications to students:', notifErr);
     }
@@ -550,7 +618,7 @@ router.put('/profile', async (req, res) => {
     const profile = await WardenProfile.findOneAndUpdate(
       {},
       updates,
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
 
     // Synchronize photo, name, and phone updates with the Warden's User document
@@ -611,6 +679,14 @@ router.post('/notifications/individual', async (req, res) => {
     student.notifications.unshift(newNotification);
     await student.save();
 
+    FCMService.sendFCMToUserIds([student.email], {
+      title: newNotification.title,
+      body: newNotification.text,
+      targetHash: '#dashboard',
+      targetTab: 'overview',
+      data: { type: 'individual' }
+    }).catch(err => console.error('[FCM] Error sending individual push:', err));
+
     // Create a notice card for this student
     const personalNotice = new Notice({
       id: `N-${Math.floor(100 + Math.random() * 900)}`,
@@ -656,7 +732,7 @@ router.put('/mess/menu/:day', async (req, res) => {
     const updated = await MessMenu.findOneAndUpdate(
       { day },
       { breakfast, lunch, snacks, dinner },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     
     // Send notification alerts to students
@@ -673,6 +749,14 @@ router.put('/mess/menu/:day', async (req, res) => {
         student.notifications.unshift(menuNotification);
         await student.save();
       }
+
+      FCMService.sendFCMToRole('student', {
+        title: menuNotification.title,
+        body: menuNotification.text,
+        targetHash: '#dashboard',
+        targetTab: 'mess',
+        data: { type: 'mess' }
+      }).catch(err => console.error('[FCM] Error sending mess menu push:', err));
     } catch (notifErr) {
       console.error('Failed to notify students of menu update:', notifErr);
     }

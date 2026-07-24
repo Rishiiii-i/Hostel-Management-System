@@ -65,7 +65,15 @@ export default function WardenMess() {
         body: JSON.stringify(editForm)
       });
       if (res.ok) {
-        alert('Mess menu successfully updated');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Mess Menu Updated',
+              body: `Mess menu for ${selectedDay} has been updated.`
+            },
+            data: { type: 'mess', targetScreen: 'mess', targetHash: '#warden-dashboard' }
+          }
+        }));
         setShowModal(false);
         loadMessData();
       } else {

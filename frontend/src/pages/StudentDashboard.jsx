@@ -4,7 +4,7 @@ import Icon from '../components/Icon'
 import { useAuth } from '../context/AuthContext'
 
 export default function StudentDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
-  const { updateProfileName } = useAuth()
+  const { user, updateProfileName, updateUserData } = useAuth()
   const fileInputRef = useRef(null)
   const [complaints, setComplaints] = useState([])
   const [gatePasses, setGatePasses] = useState([])
@@ -106,6 +106,9 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
 
   // Get dashboard data from server on startup
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!user || !token) return;
+
     let active = true;
     const loadDashboardData = async () => {
       setLoadingData(true);
@@ -207,7 +210,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     return () => {
       active = false;
     };
-  }, []);
+  }, [user, user?.email]);
 
   // Upload student photo
   const handlePhotoUpload = (e) => {
@@ -225,7 +228,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
       try {
         localStorage.setItem('shm_user_profile', JSON.stringify(updated))
         // Save changes to database
-        await fetchWithAuth('http://localhost:5000/api/student/profile', {
+        const res = await fetchWithAuth('http://localhost:5000/api/student/profile', {
           method: 'PUT',
           body: JSON.stringify({
             name: updated.fullName || '',
@@ -237,6 +240,10 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             photo: updated.photo || ''
           })
         });
+        if (res.ok && updateUserData) {
+          const resData = await res.json();
+          await updateUserData(resData);
+        }
       } catch (err) {
         console.error('Failed to save profile photo:', err);
       }
@@ -254,7 +261,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     try {
       localStorage.setItem('shm_user_profile', JSON.stringify(updated))
       // Save changes to database
-      await fetchWithAuth('http://localhost:5000/api/student/profile', {
+      const res = await fetchWithAuth('http://localhost:5000/api/student/profile', {
         method: 'PUT',
         body: JSON.stringify({
           name: updated.fullName || '',
@@ -266,6 +273,10 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           photo: ''
         })
       });
+      if (res.ok && updateUserData) {
+        const resData = await res.json();
+        await updateUserData(resData);
+      }
     } catch (err) {
       console.error('Failed to remove profile photo:', err);
     }
@@ -305,7 +316,9 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         if (setProfile) setProfile(localProfile);
         setIsFormEdited(false);
         localStorage.setItem('shm_user_profile', JSON.stringify(localProfile));
-        if (updateProfileName) {
+        if (updateUserData) {
+          await updateUserData(updated);
+        } else if (updateProfileName) {
           await updateProfileName(updated.name);
         }
         setSavedSuccessMsg('Profile details updated successfully!')
@@ -336,7 +349,15 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         const saved = await res.json();
         setComplaints([saved, ...complaints]);
         setCustomCategory('');
-        alert('Complaint registration successfully completed');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Complaint Registered',
+              body: `Your ${saved.priority || ''} complaint "${saved.title}" has been submitted.`
+            },
+            data: { type: 'complaint', targetScreen: 'complaints', targetHash: '#dashboard', id: saved.id }
+          }
+        }));
       } else {
         const errData = await res.json().catch(() => ({}));
         alert(`Failed to submit complaint: ${errData.error || errData.message || 'Server error'}`);
@@ -366,7 +387,15 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
       if (res.ok) {
         const saved = await res.json();
         setGatePasses([saved, ...gatePasses]);
-        alert('Gate pass request successfully completed');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Gate Pass Requested',
+              body: `Your leave request for "${saved.reason}" has been submitted.`
+            },
+            data: { type: 'gatepass', targetScreen: 'leave', targetHash: '#dashboard', id: saved.id }
+          }
+        }));
       } else {
         const errData = await res.json().catch(() => ({}));
         alert(`Failed to request gate pass: ${errData.error || errData.message || 'Server error'}`);
@@ -593,7 +622,15 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           setShowPayModal(false);
           setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
           setUpiId('');
-          alert('Payment successfully completed');
+          window.dispatchEvent(new CustomEvent('shm:new_notification', {
+            detail: {
+              notification: {
+                title: 'Fee Payment Completed',
+                body: `Payment of ₹${payAmount} processed successfully.`
+              },
+              data: { type: 'fee', targetScreen: 'fee', targetHash: '#dashboard' }
+            }
+          }));
         } else {
           const errData = await res.json();
           alert(errData.message || 'Failed to process payment.');
