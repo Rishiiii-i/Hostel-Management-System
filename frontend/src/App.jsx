@@ -106,6 +106,15 @@ function App() {
     }
   }, [user])
 
+  // Sync profile state changes to localStorage (persisting notifications list, feeStatus, dues across refresh)
+  useEffect(() => {
+    if (profile && profile.email) {
+      try {
+        localStorage.setItem('shm_user_profile', JSON.stringify(profile));
+      } catch (e) {}
+    }
+  }, [profile]);
+
   useEffect(() => {
     const updateRoute = () => {
       const hash = window.location.hash || '#home'
@@ -119,6 +128,18 @@ function App() {
         window.location.hash = '#login'
       } else if (isAuthRoute && user) {
         window.location.hash = (user.role === 'administrator' || user.role === 'admin') ? '#admin-dashboard' : user.role === 'warden' ? '#warden-dashboard' : '#dashboard'
+      } else if (user) {
+        const isAdminUser = user.role === 'administrator' || user.role === 'admin';
+        const isWardenUser = user.role === 'warden';
+        if (isAdminUser && hash !== '#admin-dashboard' && isDashboardRoute) {
+          window.location.hash = '#admin-dashboard';
+        } else if (isWardenUser && hash !== '#warden-dashboard' && isDashboardRoute) {
+          window.location.hash = '#warden-dashboard';
+        } else if (!isAdminUser && !isWardenUser && hash !== '#dashboard' && hash !== '#student-dashboard' && isDashboardRoute) {
+          window.location.hash = '#dashboard';
+        } else {
+          setRoute(hash);
+        }
       } else {
         setRoute(hash)
       }
@@ -135,6 +156,18 @@ function App() {
       window.location.hash = '#login'
     } else if (isAuthRoute && user) {
       window.location.hash = (user.role === 'administrator' || user.role === 'admin') ? '#admin-dashboard' : user.role === 'warden' ? '#warden-dashboard' : '#dashboard'
+    } else if (user) {
+      const isAdminUser = user.role === 'administrator' || user.role === 'admin';
+      const isWardenUser = user.role === 'warden';
+      if (isAdminUser && hash !== '#admin-dashboard' && isDashboardRoute) {
+        window.location.hash = '#admin-dashboard';
+      } else if (isWardenUser && hash !== '#warden-dashboard' && isDashboardRoute) {
+        window.location.hash = '#warden-dashboard';
+      } else if (!isAdminUser && !isWardenUser && hash !== '#dashboard' && hash !== '#student-dashboard' && isDashboardRoute) {
+        window.location.hash = '#dashboard';
+      } else {
+        setRoute(hash);
+      }
     } else {
       setRoute(hash)
     }

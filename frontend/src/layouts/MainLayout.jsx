@@ -41,25 +41,50 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
 
   const handleNotificationClick = (item) => {
     markAsRead(item.id);
+    if (profile && profile.notifications) {
+      const updatedNotifications = profile.notifications.map((n, idx) => {
+        const generatedId = n.id || `profile_notif_${idx}`;
+        if (n.id === item.id || generatedId === item.id) {
+          return { ...n, read: true };
+        }
+        return n;
+      });
+      setProfile(prev => ({
+        ...prev,
+        notifications: updatedNotifications
+      }));
+    }
     setShowNotifications(false);
     navigateFromNotification(item, setActiveTab);
   };
 
   const handleMarkAllRead = () => {
     markAllAsRead();
+    if (profile && profile.notifications) {
+      const updatedNotifications = profile.notifications.map(n => ({ ...n, read: true }));
+      setProfile(prev => ({
+        ...prev,
+        notifications: updatedNotifications
+      }));
+    }
   };
 
-  // Combine live store history with any profile notifications
-  const allNotifications = history && history.length > 0
-    ? history
-    : (profile?.notifications || []).map((n, idx) => ({
-        id: n.id || `profile_notif_${idx}`,
-        title: n.title,
-        body: n.text || n.body,
-        read: n.read,
-        timestampText: n.time || 'Recently',
-        type: 'general'
-      }));
+  // Combine live store history with database-backed profile notifications
+  const liveIds = new Set((history || []).map(n => n.id));
+  const dbNotifications = (profile?.notifications || [])
+    .filter(n => !liveIds.has(n.id))
+    .map((n, idx) => ({
+      id: n.id || `profile_notif_${idx}`,
+      title: n.title,
+      body: n.text || n.body,
+      read: n.read || false,
+      timestampText: n.time || 'Recently',
+      type: 'general'
+    }));
+
+  const allNotifications = [...(history || []), ...dbNotifications];
+
+  const displayUnreadCount = allNotifications.filter(n => !n.read).length;
 
   return (
     <div className="dashboard-container">
@@ -88,13 +113,13 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
             </div>
             <p className="header-date">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
-
+ 
           <div className="header-right">
             <div className="header-search">
               <Icon name="search" width="15" height="15" />
               <input type="text" placeholder="Search dashboard..." />
             </div>
-
+ 
             <div className="notification-wrapper">
               <button 
                 type="button" 
@@ -104,20 +129,20 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
                 aria-label="Notifications"
               >
                 <Icon name="bell" width="18" height="18" />
-                {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
+                {displayUnreadCount > 0 && <span className="badge">{displayUnreadCount}</span>}
               </button>
-
+ 
               {showNotifications && (
                 <div className="notification-dropdown animate-fade-in-slide-up">
                   <div className="dropdown-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <h4 style={{ margin: 0 }}>Notifications</h4>
-                    {unreadCount > 0 ? (
+                    {displayUnreadCount > 0 ? (
                       <button 
                         type="button"
                         onClick={handleMarkAllRead}
                         style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
                       >
-                        Mark all read ({unreadCount})
+                        Mark all read ({displayUnreadCount})
                       </button>
                     ) : (
                       <span className="count">0 new</span>

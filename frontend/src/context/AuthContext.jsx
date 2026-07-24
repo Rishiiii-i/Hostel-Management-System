@@ -182,38 +182,29 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
-      // Create account if user does not exist
+      // Fall back to backend REST API login instead of mock auto-signup
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        setFirebaseUser(userCredential.user);
-        const syncedUser = await syncUserWithBackend(userCredential.user, null, null, password);
-        setLoading(false);
-        return { firebaseUser: userCredential.user, user: syncedUser };
-      } catch (signupErr) {
-        // Fall back to backend REST API login instead of a mock session
-        try {
-          const response = await fetch('http://localhost:5000/api/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-          });
-          if (response.ok) {
-            const data = await response.json();
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            setUser(data.user);
-            setLoading(false);
-            return { firebaseUser: null, user: data.user };
-          } else {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || 'Login failed');
-          }
-        } catch (backendErr) {
-          console.error('Backend login fallback failed:', backendErr);
-          throw error;
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          setUser(data.user);
+          setLoading(false);
+          return { firebaseUser: null, user: data.user };
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || 'Login failed');
         }
+      } catch (backendErr) {
+        console.error('Backend login fallback failed:', backendErr);
+        throw error;
       }
     }
   };
