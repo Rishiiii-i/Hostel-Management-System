@@ -699,19 +699,29 @@ router.post('/students/:email/toggle-fee', async (req, res) => {
 
     const newStatus = student.feeStatus === 'Paid' ? 'Unpaid' : 'Paid';
     student.feeStatus = newStatus;
+    
+    if (newStatus === 'Paid') {
+      student.paidFee = student.totalFee || 45000;
+      student.dueFee = 0;
+    } else {
+      student.paidFee = 0;
+      student.dueFee = student.totalFee || 45000;
+    }
+    
     await student.save();
 
     if (newStatus === 'Paid') {
       const newTxn = new Transaction({
         id: `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
         studentEmail: student.email.toLowerCase(),
-        period: 'July 2026 Room & Mess Fee',
-        amount: '$5000.00',
-        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        period: 'Hostel Fee',
+        amount: `₹${student.totalFee || 45000}`,
+        date: new Date().toISOString().split('T')[0],
         status: 'Paid'
       });
       await newTxn.save();
     } else {
+      await Transaction.deleteMany({ studentEmail: student.email.toLowerCase(), period: 'Hostel Fee' });
       await Transaction.deleteMany({ studentEmail: student.email.toLowerCase(), period: 'July 2026 Room & Mess Fee' });
     }
 
