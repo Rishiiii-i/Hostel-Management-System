@@ -7,12 +7,12 @@ import { notificationQueue } from '../services/notificationQueue.js';
 
 const router = express.Router();
 
-// Check if MongoDB is connected
+// check if mongodb is connected
 function isDbConnected() {
   return mongoose.connection.readyState === 1;
 }
 
-// Get student profile
+// get student profile
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -66,7 +66,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Update student profile
+// update student profile
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const { name, rollNo, phone, emergencyContact, room, block, photo } = req.body;
@@ -94,7 +94,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Get all student complaints
+// get all student complaints
 router.get('/complaints', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -107,7 +107,7 @@ router.get('/complaints', authenticateToken, async (req, res) => {
   }
 });
 
-// Add new complaint
+// add new complaint
 router.post('/complaints', authenticateToken, async (req, res) => {
   try {
     const { category, title, priority } = req.body;
@@ -156,7 +156,7 @@ router.post('/complaints', authenticateToken, async (req, res) => {
   }
 });
 
-// Get student gate passes
+// get student gate passes
 router.get('/gatepasses', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -169,7 +169,7 @@ router.get('/gatepasses', authenticateToken, async (req, res) => {
   }
 });
 
-// Add new gate pass request
+// add new gate pass request
 router.post('/gatepasses', authenticateToken, async (req, res) => {
   try {
     const { reason, departure, returnDate } = req.body;
@@ -218,7 +218,7 @@ router.post('/gatepasses', authenticateToken, async (req, res) => {
   }
 });
 
-// Get notices for the student
+// get notices for the student
 router.get('/notices', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -241,7 +241,7 @@ router.get('/notices', authenticateToken, async (req, res) => {
   }
 });
 
-// Get student transactions
+// get student transactions
 router.get('/transactions', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -254,7 +254,7 @@ router.get('/transactions', authenticateToken, async (req, res) => {
   }
 });
 
-// Add a payment transaction
+// add a payment transaction
 router.post('/transactions', authenticateToken, async (req, res) => {
   try {
     const { amount, period } = req.body;
@@ -288,7 +288,7 @@ router.post('/transactions', authenticateToken, async (req, res) => {
       student.feeStatus = student.dueFee <= 0 ? 'Paid' : (student.paidFee > 0 ? 'Partial' : 'Unpaid');
       await student.save();
 
-      // Dispatch notifications to Warden and Admin
+      // dispatch notifications to warden and admin
       try {
         const payNotification = {
           id: `NT-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -298,7 +298,7 @@ router.post('/transactions', authenticateToken, async (req, res) => {
           read: false
         };
 
-        // Notify Warden
+        // notify warden
         const warden = await User.findOne({ email: 'warden@smarthostel.com' });
         if (warden) {
           warden.notifications.unshift(payNotification);
@@ -306,7 +306,7 @@ router.post('/transactions', authenticateToken, async (req, res) => {
           await warden.save();
         }
 
-        // Notify Admin
+        // notify admin
         const admin = await User.findOne({ email: 'admin@smarthostel.com' });
         if (admin) {
           admin.notifications.unshift(payNotification);
@@ -351,7 +351,7 @@ router.post('/transactions', authenticateToken, async (req, res) => {
   }
 });
 
-// Mark notifications as read
+// mark notifications as read
 router.post('/notifications/read', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Success' });
@@ -380,7 +380,7 @@ router.post('/notifications/read', authenticateToken, async (req, res) => {
         await user.save();
       }
     } else {
-      // Mark all read
+      // mark all read
       await User.updateOne(
         { email: req.user.email.toLowerCase() },
         { $set: { "notifications.$[].read": true } }
@@ -394,7 +394,7 @@ router.post('/notifications/read', authenticateToken, async (req, res) => {
   }
 });
 
-// Get student attendance stats
+// get student attendance stats
 router.get('/attendance/stats', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -434,7 +434,7 @@ router.get('/attendance/stats', authenticateToken, async (req, res) => {
   }
 });
 
-// Get mess menu
+// get mess menu
 router.get('/mess/menu', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);

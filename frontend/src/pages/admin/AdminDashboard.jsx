@@ -6,9 +6,10 @@ import AdminFees from './AdminFees'
 import AdminComplaints from './AdminComplaints'
 import AdminProfile from './AdminProfile'
 import AdminNotices from './AdminNotices'
+import Chat from '../chat/Chat'
 
 export default function AdminDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
-  const validTabs = ['overview', 'students', 'rooms', 'fees', 'complaints', 'notices', 'profile']
+  const validTabs = ['overview', 'students', 'rooms', 'fees', 'complaints', 'notices', 'chat', 'profile']
   const currentTab = validTabs.includes(activeTab) ? activeTab : 'overview'
 
   return (
@@ -19,6 +20,7 @@ export default function AdminDashboard({ activeTab = 'overview', setActiveTab, p
       {currentTab === 'fees' && <AdminFees />}
       {currentTab === 'complaints' && <AdminComplaints />}
       {currentTab === 'notices' && <AdminNotices />}
+      {currentTab === 'chat' && <Chat />}
       {currentTab === 'profile' && <AdminProfile profile={profile} setProfile={setProfile} />}
     </div>
   )

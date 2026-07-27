@@ -12,11 +12,11 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
+// start firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Initialize Firebase Cloud Messaging conditionally based on browser support
+// start firebase cloud messaging conditionally based on browser support
 let messagingPromise = null;
 const getMessagingInstance = async () => {
     try {

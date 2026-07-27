@@ -69,7 +69,7 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
     }
   };
 
-  // Combine live store history with database-backed profile notifications
+  // combine live store history with database-backed profile notifications
   const liveIds = new Set((history || []).map(n => n.id));
   const dbNotifications = (profile?.notifications || [])
     .filter(n => !liveIds.has(n.id))
@@ -172,11 +172,18 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
 
             <div className="user-profile-header-card">
               <div className="header-avatar-circle" style={{ overflow: 'hidden', borderRadius: '50%', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {profile?.photo || user?.photoURL ? (
-                  <img src={profile?.photo || user.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <Icon name="user" width="18" height="18" />
-                )}
+                {(() => {
+                  const photoUrl = (profile?.photo && (profile.photo.startsWith('data:image') || profile.photo.startsWith('http') || profile.photo.startsWith('/')))
+                    ? profile.photo
+                    : (user?.photoURL && (user.photoURL.startsWith('data:image') || user.photoURL.startsWith('http') || user.photoURL.startsWith('/')))
+                      ? user.photoURL
+                      : null;
+                  return photoUrl ? (
+                    <img src={photoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <Icon name="user" width="18" height="18" />
+                  );
+                })()}
               </div>
               <div className="user-profile-text">
                 <span className="user-profile-name">{profile?.fullName || user?.name || 'User'}</span>

@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import dns from 'dns';
 
-// Use Google/Cloudflare DNS to fix SRV lookup errors on Windows
+// use google/cloudflare dns to fix srv lookup errors on windows
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 dotenv.config();
@@ -40,7 +40,7 @@ if (!connectionString) {
   console.warn('MongoDB connection string contains placeholder values (<db_username> / <db_password>). Please edit backend/.env and enter your actual database credentials.');
 } else {
   mongoose.connect(connectionString, {
-    family: 4, // Connect using IPv4
+    family: 4, // connect using ipv4
     serverSelectionTimeoutMS: 10000,
     maxPoolSize: 10
   })
@@ -58,7 +58,7 @@ if (!connectionString) {
     });
 }
 
-// User Schema
+// user schema
 const userSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -154,7 +154,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Gate Pass Schema
+// gate pass schema
 const gatePassSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   studentName: { type: String, required: true },
@@ -171,7 +171,7 @@ const gatePassSchema = new mongoose.Schema({
 
 const GatePass = mongoose.model('GatePass', gatePassSchema);
 
-// Complaint Schema
+// complaint schema
 const complaintSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   studentName: { type: String, required: true },
@@ -187,7 +187,7 @@ const complaintSchema = new mongoose.Schema({
 
 const Complaint = mongoose.model('Complaint', complaintSchema);
 
-// Room Schema
+// room schema
 const roomSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   roomNo: { type: String, required: true },
@@ -202,7 +202,7 @@ const roomSchema = new mongoose.Schema({
 
 const Room = mongoose.model('Room', roomSchema);
 
-// Notice Schema
+// notice schema
 const noticeSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   title: { type: String, required: true },
@@ -217,7 +217,7 @@ const noticeSchema = new mongoose.Schema({
 
 const Notice = mongoose.model('Notice', noticeSchema);
 
-// Warden Profile Schema
+// warden profile schema
 const wardenProfileSchema = new mongoose.Schema({
   wardenId: { type: String, required: true, unique: true, default: 'WDN-2026-01' },
   fullName: { type: String, default: 'Dileep' },
@@ -231,7 +231,7 @@ const wardenProfileSchema = new mongoose.Schema({
 
 const WardenProfile = mongoose.model('WardenProfile', wardenProfileSchema);
 
-// Attendance Schema
+// attendance schema
 const attendanceSchema = new mongoose.Schema({
   date: { type: String, required: true },
   studentId: { type: String, required: true },
@@ -243,7 +243,7 @@ const attendanceSchema = new mongoose.Schema({
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 
-// Transaction Schema
+// transaction schema
 const transactionSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   studentEmail: { type: String, required: true },
@@ -256,7 +256,7 @@ const transactionSchema = new mongoose.Schema({
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
-// Mess Menu Schema
+// mess menu schema
 const messMenuSchema = new mongoose.Schema({
   day: { type: String, required: true, unique: true },
   breakfast: { type: String, default: 'Tea, Coffee & Idli with Chutney' },
@@ -267,7 +267,7 @@ const messMenuSchema = new mongoose.Schema({
 
 const MessMenu = mongoose.model('MessMenu', messMenuSchema);
 
-// Set default mess menu if it is empty
+// set default mess menu if it is empty
 async function initDefaultMessMenu() {
   try {
     if (mongoose.connection.readyState !== 1) return;
@@ -295,7 +295,7 @@ async function initDefaultMessMenu() {
   }
 }
 
-// Set default rooms if it is empty
+// set default rooms if it is empty
 async function initDefaultRooms() {
   try {
     if (mongoose.connection.readyState !== 1) return;
@@ -320,7 +320,7 @@ async function initDefaultRooms() {
   }
 }
 
-// Set default warden profile if it is empty
+// set default warden profile if it is empty
 async function initDefaultWardenProfile() {
   try {
     if (mongoose.connection.readyState !== 1) return;
@@ -366,7 +366,7 @@ async function initMissingAdminWardenPasswords() {
   }
 }
 
-// Find user by email
+// find user by email
 async function findUserByEmail(email) {
   try {
     if (mongoose.connection.readyState !== 1) return null;
@@ -377,7 +377,7 @@ async function findUserByEmail(email) {
   }
 }
 
-// Create new user
+// create new user
 async function createUser(userData) {
   try {
     if (mongoose.connection.readyState !== 1) return null;
@@ -386,6 +386,107 @@ async function createUser(userData) {
   } catch (error) {
     console.error('Error creating user in database:', error.message);
     return null;
+  }
+}
+
+// chat room schema
+const chatRoomSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  type: { type: String, enum: ['dm', 'channel'], required: true },
+  name: { type: String, default: '' },
+  description: { type: String, default: '' },
+  participants: { type: [String], default: [] }, // array of user emails for dms
+  lastMessage: {
+    text: { type: String, default: '' },
+    senderName: { type: String, default: '' },
+    senderEmail: { type: String, default: '' },
+    timestamp: { type: Date, default: Date.now }
+  },
+  deletedBy: { type: [String], default: [] }, // track users who deleted the room
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);
+
+// chat message schema
+const chatMessageSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  chatRoomId: { type: String, required: true, index: true },
+  senderId: { type: String, required: true },
+  senderName: { type: String, required: true },
+  senderEmail: { type: String, required: true },
+  senderRole: { type: String, required: true },
+  text: { type: String, default: '' },
+  attachment: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null
+  },
+  readBy: { type: [String], default: [] }, // array of user emails
+  deletedBy: { type: [String], default: [] }, // track users who deleted this message
+  createdAt: { type: Date, default: Date.now }
+});
+
+const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);
+
+// set default chat channels if they don't exist
+async function initDefaultChatChannels() {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+
+    const defaultChannels = [
+      {
+        id: 'chan-general',
+        type: 'channel',
+        name: 'general',
+        description: 'Global announcement and discussion channel for all students, wardens, and admins',
+        participants: []
+      },
+      {
+        id: 'chan-announcements',
+        type: 'channel',
+        name: 'announcements',
+        description: 'Broad announcements for everyone. Only admins and wardens can send messages here.',
+        participants: []
+      },
+      {
+        id: 'chan-staff',
+        type: 'channel',
+        name: 'staff',
+        description: 'Private discussion channel for Wardens and Admins only',
+        participants: []
+      },
+      {
+        id: 'chan-block-a',
+        type: 'channel',
+        name: 'block-a',
+        description: 'Discussion channel for Block A residents and wardens',
+        participants: []
+      },
+      {
+        id: 'chan-block-b',
+        type: 'channel',
+        name: 'block-b',
+        description: 'Discussion channel for Block B residents and wardens',
+        participants: []
+      }
+    ];
+
+    for (const channel of defaultChannels) {
+      await ChatRoom.findOneAndUpdate(
+        { id: channel.id },
+        { 
+          type: channel.type,
+          name: channel.name,
+          description: channel.description,
+          participants: channel.participants
+        },
+        { returnDocument: 'after', upsert: true }
+      );
+    }
+    console.log('Default chat channels initialized successfully!');
+  } catch (err) {
+    console.error('Failed to initialize default chat channels:', err);
   }
 }
 
@@ -399,6 +500,9 @@ export {
   Attendance,
   Transaction,
   MessMenu,
+  ChatRoom,
+  ChatMessage,
   findUserByEmail,
   createUser
 };
+

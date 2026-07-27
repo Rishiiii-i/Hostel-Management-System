@@ -1,8 +1,4 @@
-/**
- * NotificationPopup Component
- * Displays real-time stacked top-right popup banners (clean theme) with auto-close timers.
- * Emojis and action buttons have been removed.
- */
+/** * notificationpopup component * displays real-time stacked top-right popup banners (clean theme) with auto-close timers * emojis and action buttons have been removed */
 
 import React, { useEffect } from 'react';
 import { useNotifications } from './NotificationProvider';
@@ -29,7 +25,7 @@ export default function NotificationPopup() {
 }
 
 function PopupCard({ popup, onClose }) {
-  // Auto-dismiss after 6 seconds
+  // auto-dismiss after 6 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();

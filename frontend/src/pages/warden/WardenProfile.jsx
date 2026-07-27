@@ -16,7 +16,7 @@ export default function WardenProfile({ profile, setProfile }) {
     photo: profile?.photo || user?.photoURL || ''
   })
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -235,7 +235,7 @@ export default function WardenProfile({ profile, setProfile }) {
         </div>
       )}
 
-      {/* Header Banner */}
+      {/* header banner */}
       <div className="owner-card-box" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div style={{
@@ -324,7 +324,7 @@ export default function WardenProfile({ profile, setProfile }) {
         </div>
       </div>
 
-      {/* Personal Info Form */}
+      {/* personal info form */}
       <div className="owner-card-box" style={{ marginBottom: '24px' }}>
         <div style={{ marginBottom: '20px' }}>
           <h3 style={{ margin: 0, font: '800 18px "Manrope", sans-serif', color: '#0f172a' }}>Warden Profile Details</h3>
@@ -409,7 +409,7 @@ export default function WardenProfile({ profile, setProfile }) {
         </form>
       </div>
 
-      {/* Password Security Form */}
+      {/* password security form */}
       <div className="owner-card-box">
         <div style={{ marginBottom: '24px', textAlign: 'center' }}>
           <h3 style={{ margin: 0, font: '800 18px "Manrope", sans-serif', color: '#0f172a' }}>Security &amp; Password</h3>

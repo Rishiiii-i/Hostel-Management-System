@@ -24,7 +24,7 @@ export default function AdminProfile({ profile, setProfile }) {
   const [showPassword, setShowPassword] = useState(false)
   const [msg, setMsg] = useState({ type: '', text: '' })
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -205,7 +205,7 @@ export default function AdminProfile({ profile, setProfile }) {
         </div>
       )}
 
-      {/* Profile Header Banner */}
+      {/* profile header banner */}
       <div className="owner-card-box" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div style={{
@@ -294,7 +294,7 @@ export default function AdminProfile({ profile, setProfile }) {
         </div>
       </div>
 
-      {/* Information Form */}
+      {/* information form */}
       <div className="owner-card-box" style={{ marginBottom: '24px' }}>
         <div className="owner-card-header">
           <h3>Administrator Details</h3>
@@ -354,7 +354,7 @@ export default function AdminProfile({ profile, setProfile }) {
         </form>
       </div>
 
-      {/* Password Security Form */}
+      {/* password security form */}
       <div className="owner-card-box">
         <div className="owner-card-header">
           <h3>Security &amp; Password</h3>

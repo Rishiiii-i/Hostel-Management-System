@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './Sidebar.css'
 import Icon from './Icon'
 import { useAuth } from '../context/AuthContext'
+import { notificationStore } from '../notifications/notificationStore'
 
 export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProfile }) {
   const { user, logOut } = useAuth()
+  const lastCheckedRoomsRef = useRef({})
 
   const isAdmin = user?.role === 'administrator' || user?.role === 'admin' || window.location.hash === '#admin-dashboard'
   const isWarden = user?.role === 'warden' || window.location.hash === '#warden-dashboard'
@@ -39,6 +41,11 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
       id: 'notices',
       label: 'Notices',
       icon: <Icon name="bell" width="18" height="18" />
+    },
+    {
+      id: 'chat',
+      label: 'Chat Room',
+      icon: <Icon name="chat" width="18" height="18" />
     },
     {
       id: 'profile',
@@ -82,6 +89,11 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
       icon: <Icon name="fee" width="18" height="18" />
     },
     {
+      id: 'chat',
+      label: 'Chat Room',
+      icon: <Icon name="chat" width="18" height="18" />
+    },
+    {
       id: 'profile',
       label: 'Profile',
       icon: <Icon name="user" width="18" height="18" />
@@ -118,6 +130,11 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
       icon: <Icon name="bell" width="18" height="18" />
     },
     {
+      id: 'chat',
+      label: 'Chat Room',
+      icon: <Icon name="chat" width="18" height="18" />
+    },
+    {
       id: 'settings',
       label: 'Profile',
       icon: <Icon name="settings" width="18" height="18" />
@@ -130,7 +147,8 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
     attendanceUnmarked: false,
     feesUnpaid: false,
     roomNotifications: 0,
-    noticesNotifications: 0
+    noticesNotifications: 0,
+    chatUnread: 0
   });
 
   useEffect(() => {
@@ -155,6 +173,36 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
       };
 
       try {
+        const chatRooms = await fetchWithHeaders('http://localhost:5000/api/chat/rooms');
+        if (chatRooms && Array.isArray(chatRooms)) {
+          const isFirstFetch = Object.keys(lastCheckedRoomsRef.current).length === 0;
+          chatRooms.forEach(room => {
+            if (!isFirstFetch) {
+              const prevUnread = lastCheckedRoomsRef.current[room.id];
+              // only alert if unread count increased
+              if (prevUnread !== undefined && room.unreadCount > prevUnread) {
+                notificationStore.addNotification({
+                  notification: {
+                    title: `New Message from ${room.name}`,
+                    body: room.lastMessage?.text || 'Shared an attachment'
+                  },
+                  data: {
+                    type: 'chat',
+                    targetScreen: 'chat',
+                    targetHash: '#chat',
+                    id: room.id
+                  }
+                });
+              }
+            }
+            lastCheckedRoomsRef.current[room.id] = room.unreadCount;
+          });
+        }
+
+        const chatUnread = chatRooms && Array.isArray(chatRooms) 
+          ? chatRooms.reduce((sum, r) => sum + (r.unreadCount || 0), 0)
+          : 0;
+
         if (isWarden) {
           const comps = await fetchWithHeaders('http://localhost:5000/api/warden/complaints');
           const pendingComps = comps && Array.isArray(comps) ? comps.filter(c => c.status === 'Pending').length : 0;
@@ -166,7 +214,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
           const att = await fetchWithHeaders(`http://localhost:5000/api/warden/attendance?date=${today}`);
           const unmarked = att && Array.isArray(att) ? att.length === 0 : false;
 
-          // Sync warden profile for notifications
+          // sync warden profile for notifications
           const prof = await fetchWithHeaders('http://localhost:5000/api/warden/profile');
           if (prof && setProfile) {
             setProfile(prof);
@@ -179,7 +227,8 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
               attendanceUnmarked: unmarked,
               feesUnpaid: false,
               roomNotifications: 0,
-              noticesNotifications: 0
+              noticesNotifications: 0,
+              chatUnread
             });
           }
         } else if (isAdmin) {
@@ -189,7 +238,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
           const passes = await fetchWithHeaders('http://localhost:5000/api/warden/gatepasses');
           const pendingPasses = passes && Array.isArray(passes) ? passes.filter(p => p.status === 'Pending').length : 0;
 
-          // Sync admin profile for notifications
+          // sync admin profile for notifications
           const prof = await fetchWithHeaders('http://localhost:5000/api/admin/profile');
           if (prof && setProfile) {
             setProfile(prof);
@@ -202,7 +251,8 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
               attendanceUnmarked: false,
               feesUnpaid: false,
               roomNotifications: 0,
-              noticesNotifications: 0
+              noticesNotifications: 0,
+              chatUnread
             });
           }
         } else {
@@ -253,7 +303,8 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
               attendanceUnmarked: false,
               feesUnpaid: unpaid,
               roomNotifications: roomUnread,
-              noticesNotifications: noticesUnread
+              noticesNotifications: noticesUnread,
+              chatUnread
             });
           }
         }
@@ -263,7 +314,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
     };
 
     fetchBadges();
-    const interval = setInterval(fetchBadges, 30000);
+    const interval = setInterval(fetchBadges, 5000);
     return () => {
       active = false;
       clearInterval(interval);
@@ -378,6 +429,9 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
           } else if (item.id === 'fees' && badges.feesUnpaid) {
             badgeText = 'unpaid';
             badgeColor = '#ef4444';
+          } else if (item.id === 'chat' && badges.chatUnread > 0) {
+            badgeText = badges.chatUnread;
+            badgeColor = '#ef4444';
           }
 
           return (
@@ -415,11 +469,18 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
         <div className="user-profile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', minWidth: 0, flex: 1 }}>
             <div className="user-avatar-wrapper" style={{ overflow: 'hidden', borderRadius: '50%', width: '38px', height: '38px', display: 'grid', placeItems: 'center', background: '#1e6b51', color: '#ffffff', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>
-              {profile?.photo || user?.photoURL ? (
-                <img src={profile?.photo || user?.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                userInitials
-              )}
+              {(() => {
+                const photoUrl = (profile?.photo && (profile.photo.startsWith('data:image') || profile.photo.startsWith('http') || profile.photo.startsWith('/')))
+                  ? profile.photo
+                  : (user?.photoURL && (user.photoURL.startsWith('data:image') || user.photoURL.startsWith('http') || user.photoURL.startsWith('/')))
+                    ? user.photoURL
+                    : null;
+                return photoUrl ? (
+                  <img src={photoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  userInitials
+                );
+              })()}
             </div>
             <div className="user-info" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
               <span className="user-name" style={{ fontWeight: 700, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

@@ -1,7 +1,4 @@
-/**
- * Main Notification Service Facade
- * Coordinates TokenManager, NotificationHandler, ServiceWorker messaging, and DeepLinking.
- */
+/** * main notification service facade * coordinates tokenmanager notificationhandler serviceworker messaging and deeplinking */
 
 import { TokenManager } from './tokenManager';
 import { notificationHandler } from './notificationHandler';
@@ -13,26 +10,22 @@ class NotificationService {
     this.swMessageListenerRegistered = false;
   }
 
-  /**
-   * Initialize FCM push notification engine for an authenticated user
-   * @param {string} userToken JWT authentication token of the logged-in user
-   * @param {Function} setActiveTab Optional React state setter for active navigation tab
-   */
+  /** * start fcm push notification engine for an logged in user * @param {string} usertoken jwt login check token of the logged-in user * @param {function} setactivetab optional react state setter for active navigation tab */
   async initialize(userToken, setActiveTab = null) {
     if (!userToken) return;
 
     try {
       console.log('[NotificationService] Initializing FCM notification system...');
 
-      // 1. Sync FCM Token with backend
+      // 1 sync fcm token with backend
       await TokenManager.syncTokenWithBackend(userToken);
 
-      // 2. Start Foreground Messaging Listener
+      // 2 start foreground messaging listener
       await notificationHandler.listen((notification) => {
         console.log('[NotificationService] Processing foreground payload:', notification);
       });
 
-      // 3. Register Service Worker message listener for notification clicks (background -> foreground focus)
+      // 3 register service worker message listener for notification clicks (background -> foreground focus)
       if ('serviceWorker' in navigator && !this.swMessageListenerRegistered) {
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data && event.data.type === 'FCM_NOTIFICATION_CLICK') {
@@ -53,9 +46,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Diagnostic helper to trigger a instant native OS system notification
-   */
+  /** * diagnostic helper to trigger a instant native os system notification */
   async triggerTestNativeNotification() {
     if (!('Notification' in window)) {
       alert('Browser does not support desktop notifications.');
@@ -90,10 +81,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Clean up notification listeners and unregister FCM token on user logout
-   * @param {string} userToken 
-   */
+  /** * clean up notification listeners and unregister fcm token on user logout * @param {string} usertoken */
   async teardown(userToken) {
     try {
       notificationHandler.stop();

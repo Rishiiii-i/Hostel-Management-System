@@ -1,7 +1,4 @@
-/**
- * Firebase Admin SDK Configuration
- * Safely initializes Firebase Admin SDK for sending FCM Push Notifications.
- */
+/** * firebase admin sdk configuration * safely initializes firebase admin sdk for sending fcm push notifications */
 
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
@@ -23,13 +20,13 @@ function initializeFirebaseAdmin() {
   try {
     let credential = null;
 
-    // 1. Check if full JSON credential string is stored in env
+    // 1 check if full json credential string is stored in env
     if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
       credential = cert(serviceAccount);
       console.log('[FirebaseAdmin] Initialized via FIREBASE_SERVICE_ACCOUNT_JSON env variable.');
     } 
-    // 2. Check if custom file path is specified in env
+    // 2 check if custom file path is specified in env
     else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
       const resolvedPath = path.resolve(process.cwd(), process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
       if (fs.existsSync(resolvedPath)) {
@@ -38,7 +35,7 @@ function initializeFirebaseAdmin() {
         console.log(`[FirebaseAdmin] Initialized via file path: ${resolvedPath}`);
       }
     } 
-    // 3. Fallback to serviceAccountKey.json in backend directory
+    // 3 fallback to serviceaccountkeyjson in backend directory
     else {
       const defaultPath = path.resolve(__dirname, '../serviceAccountKey.json');
       if (fs.existsSync(defaultPath)) {

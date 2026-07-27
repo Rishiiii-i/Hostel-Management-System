@@ -4,7 +4,7 @@ import MainLayout from './layouts/MainLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/AuthContext'
 
-// Load pages only when they are needed
+// load pages only when they are needed
 const Login = lazy(() => import('./pages/Login'))
 const LandingPage = lazy(() => import('./pages/LandingPage'))
 const StudentDashboard = lazy(() => import('./pages/StudentDashboard'))
@@ -63,7 +63,7 @@ function App() {
     }
   })
 
-  // Update local profile when user changes
+  // update local profile when user changes
   useEffect(() => {
     if (user) {
       setProfile(prev => {
@@ -79,7 +79,7 @@ function App() {
           fullName: shouldUpdateName ? (user.name || '') : prev.fullName,
           email: user.email || prev.email || '',
           photo: user.photo !== undefined ? user.photo : (isDifferentUser ? (user.photoURL || '') : (prev.photo || user.photoURL || '')),
-          // Sync database-backed fields from user if available
+          // sync database-backed fields from user if available
           phone: user.phone !== undefined ? user.phone : (isDifferentUser ? '' : prev.phone),
           emergencyContact: user.emergencyContact !== undefined ? user.emergencyContact : (isDifferentUser ? '' : prev.emergencyContact),
           room: user.room !== undefined ? user.room : (isDifferentUser ? '' : prev.room),
@@ -92,7 +92,7 @@ function App() {
         return updated
       })
     } else {
-      // Clear profile state when user logs out
+      // clear profile state when user logs out
       setProfile({
         fullName: '',
         email: '',
@@ -106,7 +106,7 @@ function App() {
     }
   }, [user])
 
-  // Sync profile state changes to localStorage (persisting notifications list, feeStatus, dues across refresh)
+  // sync profile state changes to localstorage (persisting notifications list feestatus dues across refresh)
   useEffect(() => {
     if (profile && profile.email) {
       try {

@@ -5,12 +5,12 @@ export default function AdminRooms() {
   const [rooms, setRooms] = useState([])
   const [loading, setLoading] = useState(true)
   
-  // Modals
+  // modals
   const [showAddModal, setShowAddModal] = useState(false)
   const [showAllocateModal, setShowAllocateModal] = useState(false)
   const [selectedRoom, setSelectedRoom] = useState(null)
   
-  // Form states
+  // form states
   const [roomForm, setRoomForm] = useState({
     roomNo: '',
     block: 'Block A',
@@ -32,7 +32,7 @@ export default function AdminRooms() {
     })
   }
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -199,7 +199,7 @@ export default function AdminRooms() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Header Bar */}
+      {/* header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div>
@@ -216,7 +216,7 @@ export default function AdminRooms() {
         </div>
       </div>
 
-      {/* Table Container */}
+      {/* table container */}
       <div className="owner-table-wrapper">
         {loading ? (
           <p className="empty-state-text" style={{ padding: '36px 0', textAlign: 'center', margin: 0, fontWeight: 600 }}>Loading rooms list...</p>
@@ -296,7 +296,7 @@ export default function AdminRooms() {
         )}
       </div>
 
-      {/* Add Room Modal */}
+      {/* add room modal */}
       {showAddModal && createPortal(
         <div style={{
           position: 'fixed',
@@ -408,7 +408,7 @@ export default function AdminRooms() {
         document.body
       )}
 
-      {/* Allocate Occupant Modal */}
+      {/* allocate occupant modal */}
       {showAllocateModal && createPortal(
         <div style={{
           position: 'fixed',

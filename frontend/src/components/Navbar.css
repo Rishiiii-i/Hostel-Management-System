@@ -1,4 +1,4 @@
-/* Navbar Header Container */
+/* navbar header container */
 .nav-header {
   position: sticky;
   top: 0;
@@ -27,7 +27,7 @@ html.dark .nav-header {
   justify-content: space-between;
 }
 
-/* Brand */
+/* brand */
 .nav-container .brand {
   font: 800 24px 'Manrope', sans-serif;
   letter-spacing: -0.8px;
@@ -71,7 +71,7 @@ html.dark .brand-highlight {
   color: #34d399;
 }
 
-/* Right Corner Actions & Links */
+/* right corner actions & links */
 .nav-right-actions {
   display: flex;
   align-items: center;
@@ -124,7 +124,7 @@ html.dark .nav-link-item::after {
   width: 100%;
 }
 
-/* Sign In / Logout Text Link (No button background box) */
+/* sign in / logout text link (no button background box) */
 .nav-link-login {
   font-size: 15px;
   font-weight: 800;
@@ -168,7 +168,7 @@ html.dark .nav-link-login .arrow {
   transform: translateX(4px);
 }
 
-/* Mobile Hamburger */
+/* mobile hamburger */
 .mobile-hamburger {
   display: none;
   flex-direction: column;

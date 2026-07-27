@@ -6,7 +6,7 @@ dotenv.config();
 
 export async function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Get the token from header
+  const token = authHeader && authHeader.split(' ')[1]; // get the token from header
 
   if (!token) {
     return res.status(401).json({ message: 'Access token is required' });
@@ -20,7 +20,7 @@ export async function authenticateToken(req, res, next) {
     req.user = decoded;
     next();
   } catch (error) {
-    // If verification fails, try to decode the token (handles Firebase ID tokens / expired tokens)
+    // if check fails try to decode the token (handles firebase id tokens / expired tokens)
     try {
       const decoded = jwt.decode(token);
       if (decoded && decoded.email) {

@@ -7,7 +7,7 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
-  // Start the server on the selected port
+  // start the server on the selected port
   console.log(`Server is running on port ${PORT}`);
 });
 
@@ -19,7 +19,7 @@ server.on('error', (err) => {
   console.error('Server error:', err);
 });
 
-// Handle graceful shutdown for nodemon restarts on Windows
+// handle graceful shutdown for nodemon restarts on windows
 const handleShutdown = () => {
   server.close(() => {
     process.exit(0);

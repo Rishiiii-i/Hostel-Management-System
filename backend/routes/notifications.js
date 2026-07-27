@@ -1,7 +1,4 @@
-/**
- * FCM Notification Express Routes
- * Handles token registration, topic subscriptions, topic broadcasts, and test push endpoints.
- */
+/** * fcm notification express routes * handles token registration topic subscriptions topic broadcasts and test push endpoints */
 
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
@@ -11,10 +8,7 @@ import { notificationQueue } from '../services/notificationQueue.js';
 
 const router = express.Router();
 
-/**
- * POST /api/notifications/fcm-token
- * Register or update FCM device token for authenticated user
- */
+/** * post /api/notifications/fcm-token * register or update fcm device token for logged in user */
 router.post('/fcm-token', authenticateToken, async (req, res) => {
   try {
     const { fcmToken, deviceType = 'web' } = req.body;
@@ -50,7 +44,7 @@ router.post('/fcm-token', authenticateToken, async (req, res) => {
       });
     }
 
-    // Disassociate token from any other user accounts
+    // disassociate token from any other user accounts
     await User.updateMany(
       { email: { $ne: email } },
       { $pull: { fcmTokens: { token: fcmToken } } }
@@ -58,7 +52,7 @@ router.post('/fcm-token', authenticateToken, async (req, res) => {
 
     await user.save();
 
-    // Automatically subscribe user token to relevant role topic & announcements channel
+    // automatically subscribe user token to relevant role topic & announcements channel
     const topicsToSubscribe = ['system_announcements'];
     if (user.role === 'student') topicsToSubscribe.push('students_all');
     else if (user.role === 'warden') topicsToSubscribe.push('wardens_all');
@@ -82,10 +76,7 @@ router.post('/fcm-token', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * DELETE /api/notifications/fcm-token
- * Unregister FCM device token when user logs out
- */
+/** * delete /api/notifications/fcm-token * unregister fcm device token when user logs out */
 router.delete('/fcm-token', authenticateToken, async (req, res) => {
   try {
     const { fcmToken } = req.body;
@@ -115,10 +106,7 @@ router.delete('/fcm-token', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * POST /api/notifications/topics/subscribe
- * Subscribe authenticated user token to a specific topic
- */
+/** * post /api/notifications/topics/subscribe * subscribe logged in user token to a specific topic */
 router.post('/topics/subscribe', authenticateToken, async (req, res) => {
   try {
     const { fcmToken, topic } = req.body;
@@ -134,10 +122,7 @@ router.post('/topics/subscribe', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * POST /api/notifications/topics/unsubscribe
- * Unsubscribe token from a topic
- */
+/** * post /api/notifications/topics/unsubscribe * unsubscribe token from a topic */
 router.post('/topics/unsubscribe', authenticateToken, async (req, res) => {
   try {
     const { fcmToken, topic } = req.body;
@@ -153,10 +138,7 @@ router.post('/topics/unsubscribe', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * POST /api/notifications/topics/send
- * Send broadcast notification to a topic (Admin/Warden only)
- */
+/** * post /api/notifications/topics/send * send broadcast notification to a topic (admin/warden only) */
 router.post('/topics/send', authenticateToken, async (req, res) => {
   try {
     const { topic, title, body, targetHash = '#dashboard', targetTab = 'notices' } = req.body;
@@ -164,7 +146,7 @@ router.post('/topics/send', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'topic, title, and body are required' });
     }
 
-    // Queue job asynchronously
+    // queue job asynchronously
     notificationQueue.enqueue({
       type: 'TOPIC',
       target: topic,
@@ -184,10 +166,7 @@ router.post('/topics/send', authenticateToken, async (req, res) => {
   }
 });
 
-/**
- * POST /api/notifications/test-push
- * Dev test endpoint to trigger async push notification
- */
+/** * post /api/notifications/test-push * dev test endpoint to trigger async push notification */
 router.post('/test-push', authenticateToken, async (req, res) => {
   try {
     const email = req.user?.email;

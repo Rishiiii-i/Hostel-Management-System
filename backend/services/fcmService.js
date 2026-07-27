@@ -1,17 +1,11 @@
-/**
- * FCM Push Notification Service
- * Dispatches multicast and topic-based push notifications using Firebase Admin SDK.
- * Features standardized payload schema, topic management, and automatic stale token pruning.
- */
+/** * fcm push notification service * dispatches multicast and topic-based push notifications using firebase admin sdk * features standardized payload schema topic management and automatic stale token pruning */
 
 import mongoose from 'mongoose';
 import { adminInstance, getMessaging } from '../config/firebaseAdmin.js';
 import { User } from '../db.js';
 
 export class FCMService {
-  /**
-   * Format payload into standard production schema
-   */
+  /** * format payload into standard production schema */
   static formatPayload(payload = {}) {
     const {
       title = 'Smart Hostel Alert',
@@ -52,11 +46,7 @@ export class FCMService {
     };
   }
 
-  /**
-   * Subscribe FCM registration tokens to a topic
-   * @param {string[]} tokens 
-   * @param {string} topic 
-   */
+  /** * subscribe fcm registration tokens to a topic * @param {string[]} tokens * @param {string} topic */
   static async subscribeToTopic(tokens, topic) {
     if (!adminInstance || !tokens || tokens.length === 0 || !topic) return null;
     try {
@@ -69,11 +59,7 @@ export class FCMService {
     }
   }
 
-  /**
-   * Unsubscribe FCM registration tokens from a topic
-   * @param {string[]} tokens 
-   * @param {string} topic 
-   */
+  /** * unsubscribe fcm registration tokens from a topic * @param {string[]} tokens * @param {string} topic */
   static async unsubscribeFromTopic(tokens, topic) {
     if (!adminInstance || !tokens || tokens.length === 0 || !topic) return null;
     try {
@@ -86,11 +72,7 @@ export class FCMService {
     }
   }
 
-  /**
-   * Send notification to a specific topic
-   * @param {string} topic 
-   * @param {Object} rawPayload 
-   */
+  /** * send notification to a specific topic * @param {string} topic * @param {object} rawpayload */
   static async sendToTopic(topic, rawPayload = {}) {
     if (!adminInstance) {
       console.warn('[FCMService] Firebase Admin is not initialized. Skipping topic dispatch.');
@@ -127,11 +109,7 @@ export class FCMService {
     }
   }
 
-  /**
-   * Send FCM push notification to a list of target tokens
-   * @param {string[]} tokens Array of FCM registration tokens
-   * @param {Object} rawPayload 
-   */
+  /** * send fcm push notification to a list of target tokens * @param {string[]} tokens array of fcm registration tokens * @param {object} rawpayload */
   static async sendMulticastPush(tokens, rawPayload = {}) {
     if (!tokens || tokens.length === 0) {
       return { successCount: 0, failureCount: 0 };
@@ -167,7 +145,7 @@ export class FCMService {
 
       console.log(`[FCMService] FCM Multicast Result: ${response.successCount} succeeded, ${response.failureCount} failed.`);
 
-      // Identify invalid or expired tokens and prune them from MongoDB
+      // identify invalid or expired tokens and prune them from mongodb
       if (response.failureCount > 0) {
         const failedTokens = [];
         response.responses.forEach((resp, idx) => {
@@ -201,9 +179,7 @@ export class FCMService {
     }
   }
 
-  /**
-   * Send FCM push notification to specific users by ID/email
-   */
+  /** * send fcm push notification to specific users by id/email */
   static async sendFCMToUserIds(userIds, payload) {
     if (!userIds || userIds.length === 0) return;
 
@@ -236,9 +212,7 @@ export class FCMService {
     }
   }
 
-  /**
-   * Send FCM push notification to all users with a specific role
-   */
+  /** * send fcm push notification to all users with a specific role */
   static async sendFCMToRole(role, payload) {
     try {
       const users = await User.find({ role }).select('fcmTokens');

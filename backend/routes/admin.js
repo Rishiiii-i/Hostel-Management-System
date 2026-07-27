@@ -12,7 +12,7 @@ function isDbConnected() {
   return mongoose.connection.readyState === 1;
 }
 
-// Middleware to check if user is admin
+// middleware to check if user is admin
 function isAdmin(req, res, next) {
   if (req.user && (req.user.role === 'administrator' || req.user.role === 'admin' || req.user.email?.toLowerCase().includes('admin'))) {
     next();
@@ -21,7 +21,7 @@ function isAdmin(req, res, next) {
   }
 }
 
-// Get dashboard overview stats for admin
+// get dashboard overview stats for admin
 router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -97,7 +97,7 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
         expectedStatus = 'Partial';
       }
 
-      // Self-heal: update database if document attributes are mismatched
+      // self-heal: update database if document attributes are mismatched
       if (s.feeStatus !== expectedStatus || s.dueFee !== due) {
         s.dueFee = due;
         s.feeStatus = expectedStatus;
@@ -117,7 +117,7 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
       }
     }
 
-    // List of students with outstanding fees
+    // list of students with outstanding fees
     const pendingFeesList = students
       .filter(s => (Number(s.totalFee) || 0) > (Number(s.paidFee) || 0))
       .map(s => ({
@@ -131,7 +131,7 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
       }))
       .slice(0, 5);
 
-    // List of active complaints
+    // list of active complaints
     const activeComplaints = await Complaint.find({ status: { $ne: 'Resolved' } })
       .sort({ createdAt: -1 })
       .limit(5);
@@ -145,7 +145,7 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
       status: c.status
     }));
 
-    // In-memory calculations for occupancy stats
+    // in-memory calculations for occupancy stats
     const rooms = await Room.find({});
     const totalRooms = rooms.length;
     const totalBeds = rooms.reduce((acc, r) => acc + (r.capacity || 2), 0);
@@ -172,7 +172,7 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
     const blockWise = Object.values(blockMap);
     const floorWise = Object.values(floorMap);
 
-    // Demographics stats
+    // demographics stats
     const branchMap = {};
     const yearMap = {};
     students.forEach(s => {
@@ -186,7 +186,7 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
     const branchWise = Object.entries(branchMap).map(([name, count]) => ({ name, count }));
     const yearWise = Object.entries(yearMap).map(([name, count]) => ({ name, count }));
 
-    // Complaints breakdown by category
+    // complaints breakdown by category
     const allComplaints = await Complaint.find({});
     const categoryMap = {
       'Electrical': 0,
@@ -244,7 +244,7 @@ router.get('/overview', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Get all users (students, wardens, admins)
+// get all users (students wardens admins)
 router.get('/users', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(503).json({ message: 'Database offline' });
@@ -260,7 +260,7 @@ router.get('/users', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Get all students
+// get all students
 router.get('/students', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(503).json({ message: 'Database offline' });
@@ -272,7 +272,7 @@ router.get('/students', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Add a student
+// add a student
 router.post('/students', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -309,7 +309,7 @@ router.post('/students', authenticateToken, isAdmin, async (req, res) => {
       role: 'student'
     });
 
-    // Handle room allocation if room is assigned
+    // handle room allocation if room is assigned
     if (room) {
       const roomDoc = await Room.findOne({ roomNo: room });
       if (roomDoc) {
@@ -328,7 +328,7 @@ router.post('/students', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Update student
+// update student
 router.put('/students/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -340,10 +340,10 @@ router.put('/students/:id', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    // Check if room changed
+    // check if room changed
     const oldRoom = student.room;
     if (oldRoom !== room) {
-      // Deallocate old room
+      // deallocate old room
       if (oldRoom) {
         const oldRoomDoc = await Room.findOne({ roomNo: oldRoom });
         if (oldRoomDoc && oldRoomDoc.occupantEmail === student.email) {
@@ -353,7 +353,7 @@ router.put('/students/:id', authenticateToken, isAdmin, async (req, res) => {
           await oldRoomDoc.save();
         }
       }
-      // Allocate new room
+      // allocate new room
       if (room) {
         const newRoomDoc = await Room.findOne({ roomNo: room });
         if (newRoomDoc) {
@@ -391,7 +391,7 @@ router.put('/students/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Delete student
+// delete student
 router.delete('/students/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -402,7 +402,7 @@ router.delete('/students/:id', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    // Deallocate room
+    // deallocate room
     if (student.room) {
       const roomDoc = await Room.findOne({ roomNo: student.room });
       if (roomDoc && roomDoc.occupantEmail === student.email) {
@@ -421,13 +421,13 @@ router.delete('/students/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Get all rooms
+// get all rooms
 router.get('/rooms', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
     const rooms = await Room.find({});
     
-    // Add dynamically calculated floor and type if not set
+    // add dynamically calculated floor and type if not set
     const processedRooms = rooms.map(r => {
       const rObj = r.toObject();
       if (!rObj.floor) {
@@ -447,7 +447,7 @@ router.get('/rooms', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Add a room
+// add a room
 router.post('/rooms', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -477,7 +477,7 @@ router.post('/rooms', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Delete a room
+// delete a room
 router.delete('/rooms/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -488,7 +488,7 @@ router.delete('/rooms/:id', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Room not found' });
     }
 
-    // Update occupant student
+    // update occupant student
     if (room.occupantEmail) {
       const student = await User.findOne({ email: room.occupantEmail });
       if (student) {
@@ -506,7 +506,7 @@ router.delete('/rooms/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Allocate/Deallocate a room
+// allocate/deallocate a room
 router.post('/rooms/allocate', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -518,7 +518,7 @@ router.post('/rooms/allocate', authenticateToken, isAdmin, async (req, res) => {
     }
 
     if (status === 'Vacant' || !occupantEmail) {
-      // Deallocate
+      // deallocate
       const oldEmail = roomDoc.occupantEmail;
       if (oldEmail) {
         const student = await User.findOne({ email: oldEmail.toLowerCase() });
@@ -536,13 +536,13 @@ router.post('/rooms/allocate', authenticateToken, isAdmin, async (req, res) => {
 
       return res.status(200).json({ message: 'Room deallocated successfully', room: roomDoc });
     } else {
-      // Allocate
+      // allocate
       const student = await User.findOne({ email: occupantEmail.toLowerCase() });
       if (!student) {
         return res.status(404).json({ message: 'No registered student found with this email' });
       }
 
-      // Check if student is already in a room
+      // check if student is already in a room
       if (student.room) {
         const otherRoom = await Room.findOne({ roomNo: student.room });
         if (otherRoom) {
@@ -570,7 +570,7 @@ router.post('/rooms/allocate', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Get fees list
+// get fees list
 router.get('/fees', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -632,7 +632,7 @@ router.get('/fees', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Update fee for a student
+// update fee for a student
 router.put('/students/:id/fees', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -654,7 +654,7 @@ router.put('/students/:id/fees', authenticateToken, isAdmin, async (req, res) =>
 
     await student.save();
 
-    // Create a mock transaction if payment is recorded
+    // create a mock transaction if payment is recorded
     if (paidFee !== undefined && paidFee > 0) {
       const txnId = `TXN-${Math.floor(1000 + Math.random() * 9000)}`;
       const newTxn = new Transaction({
@@ -685,7 +685,7 @@ router.put('/students/:id/fees', authenticateToken, isAdmin, async (req, res) =>
   }
 });
 
-// Get all complaints
+// get all complaints
 router.get('/complaints', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -697,7 +697,7 @@ router.get('/complaints', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Update complaint status
+// update complaint status
 router.put('/complaints/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -747,7 +747,7 @@ router.put('/complaints/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Get administrator profile
+// get administrator profile
 router.get('/profile', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -779,7 +779,7 @@ router.get('/profile', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Update administrator profile
+// update administrator profile
 router.put('/profile', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -792,7 +792,7 @@ router.put('/profile', authenticateToken, isAdmin, async (req, res) => {
 
     admin.name = fullName || admin.name;
     admin.phone = phone || admin.phone;
-    admin.block = office || admin.block; // Storing office location in block attribute
+    admin.block = office || admin.block; // storing office location in block attribute
     if (photo !== undefined) admin.photo = photo;
 
     await admin.save();
@@ -813,7 +813,7 @@ router.put('/profile', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Change administrator password
+// change administrator password
 router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
@@ -824,8 +824,12 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Administrator not found' });
     }
 
+<<<<<<< Updated upstream
     // Check if the current password is correct using bcrypt (with legacy plaintext fallback)
     let isCurrentMatch = false;
+=======
+    // check if the current password is correct (plain text check)
+>>>>>>> Stashed changes
     if (admin.password) {
       if (/^\$2[aby]\$\d+\$/.test(admin.password)) {
         isCurrentMatch = await bcrypt.compare(currentPassword, admin.password);
@@ -833,11 +837,18 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
         isCurrentMatch = (admin.password === currentPassword);
       }
     } else {
+<<<<<<< Updated upstream
       isCurrentMatch = (currentPassword === 'admin123');
     }
 
     if (!isCurrentMatch) {
       return res.status(400).json({ message: 'Incorrect current password' });
+=======
+      // fallback for predefined login before registration password set
+      if (currentPassword !== 'admin123') {
+        return res.status(400).json({ message: 'Incorrect current password' });
+      }
+>>>>>>> Stashed changes
     }
 
     admin.password = newPassword;
@@ -850,9 +861,9 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Notices Endpoints
+// notices endpoints
 
-// Get all notices
+// get all notices
 router.get('/notices', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -864,7 +875,7 @@ router.get('/notices', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Post a broadcast notice
+// post a broadcast notice
 router.post('/notices', authenticateToken, isAdmin, async (req, res) => {
   try {
     const { title, content, targetBlock, isUrgent } = req.body;
@@ -886,7 +897,7 @@ router.post('/notices', authenticateToken, isAdmin, async (req, res) => {
     const newNotice = new Notice(newNoticeData);
     await newNotice.save();
 
-    // Send notifications to corresponding students
+    // send notifications to corresponding students
     try {
       const studentQuery = { role: 'student' };
       if (targetBlock && targetBlock !== 'All Blocks') {
@@ -931,7 +942,7 @@ router.post('/notices', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Send notification to individual student
+// send notification to individual student
 router.post('/notifications/individual', authenticateToken, isAdmin, async (req, res) => {
   try {
     const { studentEmail, title, content, isUrgent } = req.body;
@@ -972,7 +983,7 @@ router.post('/notifications/individual', authenticateToken, isAdmin, async (req,
       }
     });
 
-    // Create a personal notice card
+    // create a personal notice card
     const personalNotice = new Notice({
       id: `N-${Math.floor(100 + Math.random() * 900)}`,
       title: isUrgent ? `Urgent Alert: ${title}` : title,
@@ -992,7 +1003,7 @@ router.post('/notifications/individual', authenticateToken, isAdmin, async (req,
   }
 });
 
-// Delete a notice
+// delete a notice
 router.delete('/notices/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });

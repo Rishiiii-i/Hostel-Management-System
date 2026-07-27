@@ -1,7 +1,4 @@
-/**
- * Notification Store
- * Manages active in-app popups, unread badge counter, and notification history.
- */
+/** * notification store * manages active in-app popups unread badge counter and notification history */
 
 class NotificationStore {
   constructor() {
@@ -24,13 +21,11 @@ class NotificationStore {
     }));
   }
 
-  /**
-   * Add new incoming notification payload to popups & history
-   */
+  /** * add new incoming notification payload to popups & history */
   addNotification(payload = {}) {
     const id = payload.id || payload.messageId || payload.data?.eventId || 'notif_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
 
-    // Prevent duplicate entries
+    // prevent duplicate entries
     if (this.history.some(n => n.id === id)) {
       return;
     }
@@ -54,27 +49,23 @@ class NotificationStore {
       data: payload.data || {}
     };
 
-    // Add to popups stack (max 5 active popups at a time)
+    // add to popups stack (max 5 active popups at a time)
     this.activePopups = [item, ...this.activePopups.slice(0, 4)];
 
-    // Add to history
+    // add to history
     this.history = [item, ...this.history];
     this.unreadCount += 1;
 
     this.notify();
   }
 
-  /**
-   * Dismiss an active popup from the screen
-   */
+  /** * dismiss an active popup from the screen */
   removePopup(id) {
     this.activePopups = this.activePopups.filter(p => p.id !== id);
     this.notify();
   }
 
-  /**
-   * Mark single notification as read
-   */
+  /** * mark single notification as read */
   markAsRead(id) {
     let updated = false;
     this.history = this.history.map(item => {
@@ -91,18 +82,14 @@ class NotificationStore {
     }
   }
 
-  /**
-   * Mark all notifications as read
-   */
+  /** * mark all notifications as read */
   markAllAsRead() {
     this.history = this.history.map(item => ({ ...item, read: true }));
     this.unreadCount = 0;
     this.notify();
   }
 
-  /**
-   * Clear active popups
-   */
+  /** * clear active popups */
   clearPopups() {
     this.activePopups = [];
     this.notify();

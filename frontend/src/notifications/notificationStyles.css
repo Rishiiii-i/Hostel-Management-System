@@ -1,4 +1,4 @@
-/* Real-Time In-App Notification Styles — Clean Static White Theme (No Animations) */
+/* real-time in-app notification styles — clean static white theme (no animations) */
 
 .notification-popup-container {
   position: fixed;
@@ -26,7 +26,7 @@
   overflow: hidden;
 }
 
-/* Category-specific accent colors */
+/* category-specific accent colors */
 .notification-popup-card.type-complaint { border-left-color: #f59e0b; }
 .notification-popup-card.type-gatepass,
 .notification-popup-card.type-leave { border-left-color: #3b82f6; }

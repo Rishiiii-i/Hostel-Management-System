@@ -1,8 +1,4 @@
-/**
- * FCM Foreground Native System Notification Handler
- * Triggers NATIVE OS/browser system notifications when FCM messages arrive while app is active.
- * No custom React or in-app UI popup popups are rendered.
- */
+/** * fcm foreground native system notification handler * triggers native os/browser system notifications when fcm messages arrive while app is active * no custom react or in-app ui popup popups are rendered */
 
 import { onMessage } from 'firebase/messaging';
 import { getMessagingInstance } from '../firebase';
@@ -14,9 +10,7 @@ class NotificationHandler {
     this.unsubscribe = null;
   }
 
-  /**
-   * Deduplicate incoming messages using messageId signature
-   */
+  /** * deduplicate incoming messages using messageid signature */
   isDuplicate(payload) {
     const id = payload.messageId || payload.data?.eventId || payload.data?.notificationId || (payload.notification?.title + '_' + payload.notification?.body);
     if (!id) return false;
@@ -28,7 +22,7 @@ class NotificationHandler {
 
     this.processedMessageIds.add(id);
 
-    // Clean up old IDs after 5 minutes
+    // clean up old ids after 5 minutes
     setTimeout(() => {
       this.processedMessageIds.delete(id);
     }, 5 * 60 * 1000);
@@ -36,10 +30,7 @@ class NotificationHandler {
     return false;
   }
 
-  /**
-   * Display native operating system/browser notification
-   * @param {Object} payload FCM message payload
-   */
+  /** * display native operating system/browser notification * @param {object} payload fcm message payload */
   async showNativeNotification(payload) {
     if (!('Notification' in window) || Notification.permission !== 'granted') {
       console.warn('[NotificationHandler] Native notification permission is not granted.');
@@ -60,7 +51,7 @@ class NotificationHandler {
     };
 
     try {
-      // Try displaying via Service Worker registration first for native OS behavior
+      // try displaying via service worker registration first for native os behavior
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.ready;
         if (registration && registration.showNotification) {
@@ -69,7 +60,7 @@ class NotificationHandler {
         }
       }
 
-      // Fallback to standard Window Notification API
+      // fallback to standard window notification api
       const nativeNotif = new Notification(title, options);
 
       nativeNotif.onclick = (event) => {
@@ -84,9 +75,7 @@ class NotificationHandler {
     }
   }
 
-  /**
-   * Start listening for foreground messages
-   */
+  /** * start listening for foreground messages */
   async listen() {
     const messaging = await getMessagingInstance();
     if (!messaging) {
@@ -103,16 +92,14 @@ class NotificationHandler {
 
       if (this.isDuplicate(payload)) return;
 
-      // Trigger NATIVE OS notification directly
+      // trigger native os notification directly
       this.showNativeNotification(payload);
     });
 
     console.log('[NotificationHandler] Native foreground FCM listener initialized.');
   }
 
-  /**
-   * Stop listening
-   */
+  /** * stop listening */
   stop() {
     if (this.unsubscribe) {
       this.unsubscribe();

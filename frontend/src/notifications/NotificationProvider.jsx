@@ -1,7 +1,4 @@
-/**
- * NotificationProvider Component
- * Context Provider wrapping the main app interface to supply reactive notification store state.
- */
+/** * notificationprovider component * context provider wrapping the main app interface to supply reactive notification store state */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { notificationStore } from './notificationStore';

@@ -13,7 +13,7 @@ export default function WardenMess() {
     dinner: ''
   })
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -30,7 +30,7 @@ export default function WardenMess() {
       const res = await fetchWithAuth('http://localhost:5000/api/warden/mess/menu');
       if (res.ok) {
         const data = await res.json();
-        // Sort days from Monday to Sunday
+        // sort days from monday to sunday
         const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         const sorted = data.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
         setMessMenu(sorted);
@@ -86,7 +86,7 @@ export default function WardenMess() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Header Bar */}
+      {/* header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -96,7 +96,7 @@ export default function WardenMess() {
         </div>
       </div>
 
-      {/* Mess Table */}
+      {/* mess table */}
       <div className="owner-table-wrapper">
         {loading ? (
           <div style={{ padding: '40px 0', textAlign: 'center', fontWeight: 600, color: '#475569' }}>
@@ -143,7 +143,7 @@ export default function WardenMess() {
         )}
       </div>
 
-      {/* Edit Menu Modal */}
+      {/* edit menu modal */}
       {showModal && (
         <div style={{
           position: 'fixed',

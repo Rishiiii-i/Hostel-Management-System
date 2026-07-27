@@ -1,7 +1,4 @@
-/**
- * Notification Service (Frontend FCM Engine)
- * Manages token registration, FCM foreground listeners, and syncing with NotificationStore.
- */
+/** * notification service (frontend fcm engine) * manages token registration fcm foreground listeners and syncing with notificationstore */
 
 import { onMessage } from 'firebase/messaging';
 import { getMessagingInstance } from '../firebase';
@@ -14,19 +11,17 @@ class NotificationService {
     this.unsubscribeFCM = null;
   }
 
-  /**
-   * Initialize FCM Push Notification engine for logged in user
-   */
+  /** * start fcm push notification engine for logged in user */
   async initialize(userToken) {
     if (!userToken) return;
 
     try {
       console.log('[NotificationService] Initializing Real-Time FCM Notification System...');
 
-      // 1. Request Permission & Sync FCM device token with backend
+      // 1 request permission & sync fcm device token with backend
       await TokenManager.syncTokenWithBackend(userToken);
 
-      // 2. Start FCM Foreground Listener
+      // 2 start fcm foreground listener
       const messaging = await getMessagingInstance();
       if (messaging) {
         if (this.unsubscribeFCM) {
@@ -35,7 +30,7 @@ class NotificationService {
 
         this.unsubscribeFCM = onMessage(messaging, (payload) => {
           console.log('[NotificationService] Received real-time FCM payload:', payload);
-          // Pass incoming message directly to the UI Notification Store to render popup
+          // pass incoming message directly to the ui notification store to render popup
           notificationStore.addNotification(payload);
         });
       }
@@ -47,9 +42,7 @@ class NotificationService {
     }
   }
 
-  /**
-   * Clean up listeners on logout
-   */
+  /** * clean up listeners on logout */
   async teardown(userToken) {
     try {
       if (this.unsubscribeFCM) {

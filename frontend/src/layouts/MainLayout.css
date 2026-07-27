@@ -1,4 +1,4 @@
-/* Main layout styles */
+/* main layout styles */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
@@ -249,7 +249,7 @@ html.dark .user-profile-role {
   border-color: #7f1d1d;
 }
 
-/* Notification Dropdown Styling */
+/* notification dropdown styling */
 .dropdown-header {
   display: flex;
   justify-content: space-between;
@@ -295,7 +295,7 @@ html.dark .dropdown-header .count {
   padding-right: 4px;
 }
 
-/* Custom scrollbar for dropdown list */
+/* custom scrollbar for dropdown list */
 .dropdown-list::-webkit-scrollbar {
   width: 5px;
 }

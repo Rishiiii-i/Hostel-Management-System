@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Icon from '../../components/Icon'
 
 export default function WardenAttendance() {
-  // Get date as string
+  // get date as string
   const getLocalDateString = () => {
     const date = new Date();
     const year = date.getFullYear();
@@ -17,7 +17,7 @@ export default function WardenAttendance() {
   const [alreadyMarked, setAlreadyMarked] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -31,14 +31,14 @@ export default function WardenAttendance() {
   const loadAttendanceData = async () => {
     setLoading(true);
     try {
-      // 1. Get all students
+      // 1 get all students
       const studentsRes = await fetchWithAuth('http://localhost:5000/api/warden/students');
       let studentList = [];
       if (studentsRes.ok) {
         studentList = await studentsRes.json();
       }
 
-      // 2. Get attendance for the date
+      // 2 get attendance for the date
       const res = await fetchWithAuth(`http://localhost:5000/api/warden/attendance?date=${selectedDate}`);
       let attRecords = [];
       if (res.ok) {
@@ -47,7 +47,7 @@ export default function WardenAttendance() {
 
       setAlreadyMarked(attRecords.length > 0);
 
-      // 3. Merge students with their attendance status
+      // 3 merge students with their attendance status
       const merged = studentList.map(s => {
         const studentId = s.id || s.email;
         const matchingRecord = attRecords.find(r => r.studentId === studentId);
@@ -72,17 +72,17 @@ export default function WardenAttendance() {
     loadAttendanceData();
   }, [selectedDate]);
 
-  // Update status in state
+  // update status in state
   const handleSetStatus = (id, status) => {
     setStudents(students.map(s => s.id === id ? { ...s, status } : s))
   }
 
-  // Update all status in state
+  // update all status in state
   const handleMarkAll = (status) => {
     setStudents(students.map(s => ({ ...s, status })))
   }
 
-  // Save records to database
+  // save records to database
   const handleSaveAttendance = async () => {
     try {
       const recordsToPost = students.map(s => ({
@@ -131,7 +131,7 @@ export default function WardenAttendance() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Top Filter Bar */}
+      {/* top filter bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
@@ -190,7 +190,7 @@ export default function WardenAttendance() {
         </div>
       ) : (
         <>
-          {/* 4 Summary Cards Grid */}
+          {/* 4 summary cards grid */}
           <div className="owner-stat-grid" style={{ marginBottom: '24px' }}>
             <div className="owner-card-box">
               <small style={{ color: '#059669', fontWeight: 700, textTransform: 'uppercase', fontSize: '11.5px', letterSpacing: '0.5px' }}>Present</small>
@@ -217,7 +217,7 @@ export default function WardenAttendance() {
             </div>
           </div>
 
-          {/* Warning Banner */}
+          {/* warning banner */}
           <div className="rector-warn-banner" style={{ background: alreadyMarked ? '#ecfdf5' : '#fffbeb', border: alreadyMarked ? '1px solid #a7f3d0' : '1px solid #fef3c7', color: alreadyMarked ? '#065f46' : '#92400e' }}>
             <span>
               {alreadyMarked 
@@ -226,7 +226,7 @@ export default function WardenAttendance() {
             </span>
           </div>
 
-          {/* Student List Container */}
+          {/* student list container */}
           <div className="owner-card-box">
             <div style={{ fontSize: '14px', fontWeight: 700, color: '#64748b', marginBottom: '16px' }}>{filtered.length} students</div>
             {filtered.length === 0 ? (

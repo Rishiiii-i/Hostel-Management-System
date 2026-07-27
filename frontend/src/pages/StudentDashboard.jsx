@@ -2,6 +2,7 @@ import './StudentDashboard.css'
 import { useState, useRef, useEffect } from 'react'
 import Icon from '../components/Icon'
 import { useAuth } from '../context/AuthContext'
+import Chat from './chat/Chat'
 
 export default function StudentDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
   const { user, updateProfileName, updateUserData } = useAuth()
@@ -28,12 +29,12 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const [loadingData, setLoadingData] = useState(true)
   const [isFormEdited, setIsFormEdited] = useState(false)
 
-  // Reset edit status when changing tabs
+  // reset edit status when changing tabs
   useEffect(() => {
     setIsFormEdited(false);
   }, [activeTab]);
 
-  // Sync profile form without losing edits
+  // sync profile form without losing edits
   useEffect(() => {
     if (profile) {
       if (!isFormEdited || activeTab !== 'settings') {
@@ -73,7 +74,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const [upiId, setUpiId] = useState('')
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -84,7 +85,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     return fetch(url, { ...options, headers });
   };
 
-  // Sync local fee states when profile prop changes (e.g. background sidebar fetch)
+  // sync local fee states when profile prop changes (eg background sidebar fetch)
   useEffect(() => {
     if (profile) {
       const isPaid = profile.feeStatus === 'Paid';
@@ -104,7 +105,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     }
   }, [profile]);
 
-  // Get dashboard data from server on startup
+  // get dashboard data from server on startup
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!user || !token) return;
@@ -113,7 +114,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     const loadDashboardData = async () => {
       setLoadingData(true);
       try {
-        // Get student profile
+        // get student profile
         const profileRes = await fetchWithAuth('http://localhost:5000/api/student/profile');
         if (!profileRes.ok) {
           console.error('Failed to fetch profile:', profileRes.status);
@@ -156,35 +157,35 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           localStorage.setItem('shm_user_profile', JSON.stringify(mappedProfile));
         }
 
-        // Get student complaints
+        // get student complaints
         const complaintsRes = await fetchWithAuth('http://localhost:5000/api/student/complaints');
         if (complaintsRes.ok && active) {
           const complaintsData = await complaintsRes.json();
           setComplaints(complaintsData);
         }
 
-        // Get student gate passes
+        // get student gate passes
         const gatePassesRes = await fetchWithAuth('http://localhost:5000/api/student/gatepasses');
         if (gatePassesRes.ok && active) {
           const gatePassesData = await gatePassesRes.json();
           setGatePasses(gatePassesData);
         }
 
-        // Get student payment transactions
+        // get student payment transactions
         const transactionsRes = await fetchWithAuth('http://localhost:5000/api/student/transactions');
         if (transactionsRes.ok && active) {
           const transactionsData = await transactionsRes.json();
           setTransactions(transactionsData);
         }
 
-        // Get weekly mess menu
+        // get weekly mess menu
         const messMenuRes = await fetchWithAuth('http://localhost:5000/api/student/mess/menu');
         if (messMenuRes.ok && active) {
           const messMenuData = await messMenuRes.json();
           setMessMenu(messMenuData);
         }
 
-        // Get notices
+        // get notices
         const noticesRes = await fetchWithAuth('http://localhost:5000/api/student/notices');
         if (noticesRes.ok && active) {
           const noticesData = await noticesRes.json();
@@ -198,7 +199,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           setNotices(formattedNotices);
         }
 
-        // Get student attendance stats
+        // get student attendance stats
         const attendanceStatsRes = await fetchWithAuth('http://localhost:5000/api/student/attendance/stats');
         if (attendanceStatsRes.ok && active) {
           const statsData = await attendanceStatsRes.json();
@@ -217,7 +218,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     };
   }, [user, user?.email]);
 
-  // Upload student photo
+  // upload student photo
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -232,7 +233,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
       setProfileForm(prev => ({ ...prev, photo: reader.result }))
       try {
         localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-        // Save changes to database
+        // save changes to database
         const res = await fetchWithAuth('http://localhost:5000/api/student/profile', {
           method: 'PUT',
           body: JSON.stringify({
@@ -258,14 +259,14 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     reader.readAsDataURL(file)
   }
 
-  // Remove student photo
+  // remove student photo
   const handleRemovePhoto = async () => {
     const updated = { ...(profile || {}), photo: '' }
     if (setProfile) setProfile(updated)
     setProfileForm(prev => ({ ...prev, photo: '' }))
     try {
       localStorage.setItem('shm_user_profile', JSON.stringify(updated))
-      // Save changes to database
+      // save changes to database
       const res = await fetchWithAuth('http://localhost:5000/api/student/profile', {
         method: 'PUT',
         body: JSON.stringify({
@@ -290,7 +291,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     setTimeout(() => setSavedSuccessMsg(''), 4000)
   }
 
-  // Save profile details
+  // save profile details
   const handleSaveProfile = async (e) => {
     e.preventDefault()
     try {
@@ -336,7 +337,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     setTimeout(() => setSavedSuccessMsg(''), 4000)
   }
 
-  // Submit new complaint
+  // submit new complaint
   const handleAddComplaint = async (e) => {
     e.preventDefault()
     if (!newComplaint.title) return
@@ -374,7 +375,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     setShowComplaintModal(false)
   }
 
-  // Request gate pass
+  // request gate pass
   const handleAddGatePass = async (e) => {
     e.preventDefault()
     if (!newGatePass.reason) return
@@ -412,7 +413,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
     setShowGatePassModal(false)
   }
 
-  // Download payment receipt as PDF
+  // download payment receipt as pdf
   const handleDownloadReceipt = (txn) => {
     const printWindow = window.open('', '_blank', 'width=800,height=600');
     if (!printWindow) {
@@ -617,7 +618,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               
               setFeePaid(isCleared);
 
-              // Instantly update parent state and localStorage to prevent desync on refresh
+              // instantly update parent state and localstorage to prevent desync on refresh
               const updatedProfile = {
                 ...profile,
                 paidFee: newPaid,
@@ -662,7 +663,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
 
   return (
     <div className="student-dashboard-page">
-      {/* OVERVIEW TAB */}
+      {/* overview tab */}
       {activeTab === 'overview' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="welcome-banner">
@@ -806,7 +807,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* MY ROOM TAB */}
+      {/* my room tab */}
       {activeTab === 'room' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -901,7 +902,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* FEES & PAYMENTS TAB */}
+      {/* fees & payments tab */}
       {activeTab === 'fees' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -990,7 +991,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* COMPLAINTS TAB */}
+      {/* complaints tab */}
       {activeTab === 'complaints' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -1050,7 +1051,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* GATE PASS & ATTENDANCE TAB */}
+      {/* gate pass & attendance tab */}
       {activeTab === 'gatepass' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -1116,7 +1117,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* NOTICES TAB */}
+      {/* notices tab */}
       {activeTab === 'notices' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -1154,7 +1155,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* WARDEN DESK TAB */}
+      {/* warden desk tab */}
       {activeTab === 'warden' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -1240,7 +1241,12 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* SETTINGS TAB */}
+      {/* chat tab */}
+      {activeTab === 'chat' && (
+        <Chat />
+      )}
+
+      {/* settings tab */}
       {activeTab === 'settings' && (
         <div className="tab-pane animate-fade-in-slide-up">
           <div className="tab-header-box">
@@ -1268,7 +1274,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="dash-card profile-card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                 <div className="profile-avatar-big" style={{ overflow: 'hidden', position: 'relative', width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, #1e6b51 0%, #10b981 100%)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  {profile?.photo ? (
+                  {profile?.photo && (profile.photo.startsWith('data:image') || profile.photo.startsWith('http') || profile.photo.startsWith('/')) ? (
                     <img src={profile.photo} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   ) : (
                     <Icon name="user" width="32" height="32" />
@@ -1432,7 +1438,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
         </div>
       )}
 
-      {/* MODALS */}
+      {/* modals */}
       {showPayModal && (
         <div className="modal-backdrop modal-pay-fee animate-fade-in">
           <div className="modal-box animate-scale-in">

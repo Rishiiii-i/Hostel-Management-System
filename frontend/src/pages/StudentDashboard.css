@@ -1,4 +1,4 @@
-/* Student Dashboard Comprehensive Styling */
+/* student dashboard comprehensive styling */
 
 .student-dashboard {
   padding: 36px;
@@ -18,7 +18,7 @@
   width: 100%;
 }
 
-/* Header Box */
+/* header box */
 .tab-header-box {
   background: #ffffff;
   border: 1px solid rgba(215, 228, 216, 0.9);
@@ -84,7 +84,7 @@ html.dark .tab-subtitle {
   color: #9cb4a6;
 }
 
-/* Cards & Layout Grids */
+/* cards & layout grids */
 .dash-card {
   background: #ffffff;
   border: 1px solid rgba(215, 228, 216, 0.9);
@@ -133,7 +133,7 @@ html.dark .dash-card h3 {
   gap: 24px;
 }
 
-/* Welcome Banner */
+/* welcome banner */
 .welcome-banner {
   background: linear-gradient(135deg, #164635 0%, #0f2c20 100%);
   color: #ffffff;
@@ -194,7 +194,7 @@ html.dark .dash-card h3 {
   margin-top: 2px;
 }
 
-/* Feature Grid Cards */
+/* feature grid cards */
 .dashboard-feature-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -209,7 +209,7 @@ html.dark .dash-card h3 {
   cursor: pointer;
 }
 
-/* Room Details (Teal/Emerald Theme) */
+/* room details (teal/emerald theme) */
 .dashboard-feature-card.room-theme {
   background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
   border-top: 4px solid #10b981;
@@ -234,7 +234,7 @@ html.dark .dash-card h3 {
   color: #059669;
 }
 
-/* Fees & Payments (Indigo/Purple Theme) */
+/* fees & payments (indigo/purple theme) */
 .dashboard-feature-card.fees-theme {
   background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
   border-top: 4px solid #6366f1;
@@ -259,7 +259,7 @@ html.dark .dash-card h3 {
   color: #4f46e5;
 }
 
-/* Complaints & Repairs (Amber/Orange Theme) */
+/* complaints & repairs (amber/orange theme) */
 .dashboard-feature-card.complaints-theme {
   background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
   border-top: 4px solid #f59e0b;
@@ -284,7 +284,7 @@ html.dark .dash-card h3 {
   color: #d97706;
 }
 
-/* Gate Pass & Attendance (Sky Blue Theme) */
+/* gate pass & attendance (sky blue theme) */
 .dashboard-feature-card.gatepass-theme {
   background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
   border-top: 4px solid #0ea5e9;
@@ -385,7 +385,7 @@ html.dark .dashboard-feature-card p {
   transform: translateX(4px);
 }
 
-/* Mess Menu & Announcements */
+/* mess menu & announcements */
 .mess-menu-grid {
   display: flex;
   flex-direction: column;
@@ -424,7 +424,7 @@ html.dark .menu-meal-item span {
   color: #9cb4a6;
 }
 
-/* Quick Action Buttons */
+/* quick action buttons */
 .quick-actions-btns {
   display: flex;
   flex-direction: column;
@@ -458,7 +458,7 @@ html.dark .menu-meal-item span {
   white-space: nowrap;
 }
 
-/* Pay Fee Dues - Emerald Green Theme */
+/* pay fee dues - emerald green theme */
 .btn-pay-fee {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
@@ -470,7 +470,7 @@ html.dark .menu-meal-item span {
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
-/* Report Problem - Soft Light Red Theme */
+/* report problem - soft light red theme */
 .btn-report-problem {
   background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
   color: #ffffff;
@@ -482,7 +482,7 @@ html.dark .menu-meal-item span {
   box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
 }
 
-/* Request Gate Pass - Sky Blue Theme */
+/* request gate pass - sky blue theme */
 .btn-ask-gatepass {
   background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
   color: #ffffff;
@@ -506,7 +506,7 @@ html.dark .menu-meal-item span {
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
 }
 
-/* Room Details Info Grid */
+/* room details info grid */
 .room-info-grid {
   display: flex;
   flex-direction: column;
@@ -565,7 +565,7 @@ html.dark .amenities-list li {
   color: #d1e2d7;
 }
 
-/* Fees Summary Box */
+/* fees summary box */
 .fee-summary-box {
   background: #f7faf6;
   border: 1px solid #e1ebe2;
@@ -655,7 +655,7 @@ html.dark .fee-item {
   color: #b0c9bb;
 }
 
-/* Tables */
+/* tables */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -667,7 +667,7 @@ html.dark .fee-item {
   padding-right: 4px;
 }
 
-/* Custom scrollbar for payment history box */
+/* custom scrollbar for payment history box */
 .payment-history-scroll-box::-webkit-scrollbar {
   width: 5px;
 }
@@ -682,7 +682,7 @@ html.dark .payment-history-scroll-box::-webkit-scrollbar-thumb {
   background: #475569;
 }
 
-/* Sticky headers inside scroll container */
+/* sticky headers inside scroll container */
 .payment-history-scroll-box thead th {
   position: sticky;
   top: 0;
@@ -744,7 +744,7 @@ html.dark .custom-table td {
   background: rgba(30, 107, 81, 0.15);
 }
 
-/* Attendance & Gate Pass */
+/* attendance & gate pass */
 .attendance-summary-box {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -853,7 +853,7 @@ html.dark .gp-times {
   color: #9cb4a6;
 }
 
-/* Status Badges */
+/* status badges */
 .status-badge {
   display: inline-block;
   padding: 4px 10px;
@@ -946,7 +946,7 @@ html.dark .notice-feed-card p {
   color: #9cb4a6;
 }
 
-/* Settings Form */
+/* settings form */
 .settings-container-grid {
   display: flex;
   flex-direction: column;
@@ -1067,16 +1067,16 @@ html.dark .form-label select {
   font-size: 14px;
 }
 
-/* Modals Styling */
+/* modals styling */
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(18, 38, 28, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1131,7 +1131,7 @@ html.dark .modal-actions .btn-secondary {
   color: #9cb4a6;
 }
 
-/* Responsive */
+/* responsive */
 @media (max-width: 1024px) {
   .dashboard-feature-grid {
     grid-template-columns: repeat(2, 1fr);

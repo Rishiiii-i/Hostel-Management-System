@@ -23,7 +23,7 @@ export default function AdminNotices() {
     isUrgent: false
   })
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -146,7 +146,7 @@ export default function AdminNotices() {
           isUrgent: false
         })
         setShowIndividualModal(false)
-        loadNotices() // Reload notice board list
+        loadNotices() // reload notice board list
       } else {
         const err = await res.json().catch(() => ({}))
         alert(`Failed to send notification: ${err.message || 'Server error'}`)
@@ -177,7 +177,7 @@ export default function AdminNotices() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Header Bar */}
+      {/* header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div>
@@ -205,7 +205,7 @@ export default function AdminNotices() {
         </div>
       </div>
 
-      {/* Notice Board List */}
+      {/* notice board list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {loading ? (
           <div className="owner-card-box" style={{ textAlign: 'center', padding: '36px 0', fontWeight: 600 }}>Loading announcements...</div>
@@ -266,7 +266,7 @@ export default function AdminNotices() {
         )}
       </div>
 
-      {/* Broadcast Notice Modal */}
+      {/* broadcast notice modal */}
       {showModal && createPortal(
         <div style={{
           position: 'fixed',
@@ -362,7 +362,7 @@ export default function AdminNotices() {
         document.body
       )}
 
-      {/* Send Personal Alert Modal */}
+      {/* send personal alert modal */}
       {showIndividualModal && createPortal(
         <div style={{
           position: 'fixed',

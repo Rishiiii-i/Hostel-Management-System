@@ -7,12 +7,12 @@ export default function AdminStudents() {
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
   
-  // Modals
+  // modals
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
 
-  // Forms
+  // forms
   const [studentForm, setStudentForm] = useState({
     name: '',
     email: '',
@@ -41,7 +41,7 @@ export default function AdminStudents() {
     })
   }
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -194,7 +194,7 @@ export default function AdminStudents() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Search & Action Header Bar */}
+      {/* search & action header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px' }}>
@@ -237,7 +237,7 @@ export default function AdminStudents() {
         </div>
       </div>
 
-      {/* Table Container */}
+      {/* table container */}
       <div className="owner-table-wrapper">
         {loading ? (
           <p className="empty-state-text" style={{ padding: '36px 0', textAlign: 'center', margin: 0, fontWeight: 600 }}>Loading student accounts...</p>
@@ -327,7 +327,7 @@ export default function AdminStudents() {
         )}
       </div>
 
-      {/* Add Student Modal */}
+      {/* add student modal */}
       {showAddModal && createPortal(
         <div style={{
           position: 'fixed',
@@ -497,7 +497,7 @@ export default function AdminStudents() {
         document.body
       )}
 
-      {/* Edit Student Modal */}
+      {/* edit student modal */}
       {showEditModal && createPortal(
         <div style={{
           position: 'fixed',

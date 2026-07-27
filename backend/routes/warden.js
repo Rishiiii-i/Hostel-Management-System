@@ -6,12 +6,12 @@ import { notificationQueue } from '../services/notificationQueue.js';
 
 const router = express.Router();
 
-// Check if MongoDB is connected
+// check if mongodb is connected
 function isDbConnected() {
   return mongoose.connection.readyState === 1;
 }
 
-// Attendance API
+// attendance api
 router.get('/attendance', async (req, res) => {
   try {
     const { date } = req.query;
@@ -21,7 +21,7 @@ router.get('/attendance', async (req, res) => {
     
     const records = await Attendance.find({ date: searchDate });
     
-    // Filter records to only include active students
+    // filter records to only include active students
     const activeStudents = await User.find({ role: 'student' });
     const activeStudentIds = new Set(activeStudents.map(s => s.id));
     const activeRecords = records.filter(r => activeStudentIds.has(r.studentId));
@@ -68,7 +68,7 @@ router.post('/attendance/mark', async (req, res) => {
   }
 });
 
-// Get overview stats
+// get overview stats
 router.get('/overview', async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -140,7 +140,7 @@ router.get('/overview', async (req, res) => {
       }
     }
 
-    // In-memory calculations for occupancy stats
+    // in-memory calculations for occupancy stats
     const rooms = await Room.find({});
     const totalRooms = rooms.length;
     const totalBeds = rooms.reduce((acc, r) => acc + (r.capacity || 2), 0);
@@ -167,7 +167,7 @@ router.get('/overview', async (req, res) => {
     const blockWise = Object.values(blockMap);
     const floorWise = Object.values(floorMap);
 
-    // Demographics stats
+    // demographics stats
     const branchMap = {};
     const yearMap = {};
     students.forEach(s => {
@@ -181,7 +181,7 @@ router.get('/overview', async (req, res) => {
     const branchWise = Object.entries(branchMap).map(([name, count]) => ({ name, count }));
     const yearWise = Object.entries(yearMap).map(([name, count]) => ({ name, count }));
 
-    // Complaints breakdown by category
+    // complaints breakdown by category
     const allComplaints = await Complaint.find({});
     const categoryMap = {
       'Electrical': 0,
@@ -233,7 +233,7 @@ router.get('/overview', async (req, res) => {
   }
 });
 
-// Gate Pass API
+// gate pass api
 router.get('/gatepasses', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -291,7 +291,7 @@ router.put('/gatepasses/:id/status', async (req, res) => {
   }
 });
 
-// Complaints API
+// complaints api
 router.get('/complaints', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -349,7 +349,7 @@ router.put('/complaints/:id/status', async (req, res) => {
   }
 });
 
-// Rooms API
+// rooms api
 router.get('/rooms', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -396,7 +396,7 @@ router.post('/rooms/allocate', async (req, res) => {
         return res.status(404).json({ message: 'Student email not found in database' });
       }
 
-      // Update student details
+      // update student details
       student.room = room.roomNo;
       student.block = room.block;
       
@@ -423,7 +423,7 @@ router.post('/rooms/allocate', async (req, res) => {
         }
       });
 
-      // Update room details
+      // update room details
       room.occupantName = student.name;
       room.occupantEmail = student.email;
       room.status = 'Occupied';
@@ -431,7 +431,7 @@ router.post('/rooms/allocate', async (req, res) => {
 
       return res.status(200).json(room);
     } else {
-      // Deallocate room
+      // deallocate room
       if (room.occupantEmail) {
         const student = await User.findOne({ email: room.occupantEmail.toLowerCase() });
         if (student) {
@@ -476,7 +476,7 @@ router.post('/rooms/allocate', async (req, res) => {
   }
 });
 
-// Create new room
+// create new room
 router.post('/rooms', async (req, res) => {
   try {
     const { roomNo, block, capacity, type, floor } = req.body;
@@ -510,7 +510,7 @@ router.post('/rooms', async (req, res) => {
   }
 });
 
-// Notices API
+// notices api
 router.get('/notices', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -540,7 +540,7 @@ router.post('/notices', async (req, res) => {
     const newNotice = new Notice(newNoticeData);
     await newNotice.save();
 
-    // Send notification alerts to students
+    // send notification alerts to students
     try {
       const studentQuery = { role: 'student' };
       if (targetBlock && targetBlock !== 'All Blocks') {
@@ -585,7 +585,7 @@ router.post('/notices', async (req, res) => {
   }
 });
 
-// Warden Profile API
+// warden profile api
 router.get('/profile', async (req, res) => {
   try {
     if (!isDbConnected()) {
@@ -628,7 +628,7 @@ router.put('/profile', async (req, res) => {
       { returnDocument: 'after', upsert: true }
     );
 
-    // Synchronize photo, name, and phone updates with the Warden's User document
+    // synchronize photo name and phone updates with the warden's user document
     if (updates.email) {
       await User.findOneAndUpdate(
         { email: updates.email.toLowerCase() },
@@ -647,7 +647,7 @@ router.put('/profile', async (req, res) => {
   }
 });
 
-// Get all students
+// get all students
 router.get('/students', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -658,7 +658,7 @@ router.get('/students', async (req, res) => {
   }
 });
 
-// Send message to one student
+// send message to one student
 router.post('/notifications/individual', async (req, res) => {
   try {
     const { studentEmail, title, content, isUrgent } = req.body;
@@ -694,7 +694,7 @@ router.post('/notifications/individual', async (req, res) => {
       data: { type: 'individual' }
     }).catch(err => console.error('[FCM] Error sending individual push:', err));
 
-    // Create a notice card for this student
+    // create a notice card for this student
     const personalNotice = new Notice({
       id: `N-${Math.floor(100 + Math.random() * 900)}`,
       title: isUrgent ? `Urgent Alert: ${title}` : title,
@@ -714,7 +714,7 @@ router.post('/notifications/individual', async (req, res) => {
   }
 });
 
-// Get mess menu
+// get mess menu
 router.get('/mess/menu', async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json([]);
@@ -726,7 +726,7 @@ router.get('/mess/menu', async (req, res) => {
   }
 });
 
-// Update mess menu for a day
+// update mess menu for a day
 router.put('/mess/menu/:day', async (req, res) => {
   try {
     const { day } = req.params;
@@ -742,7 +742,7 @@ router.put('/mess/menu/:day', async (req, res) => {
       { returnDocument: 'after', upsert: true }
     );
     
-    // Send notification alerts to students
+    // send notification alerts to students
     try {
       const students = await User.find({ role: 'student' });
       const menuNotification = {
@@ -775,7 +775,7 @@ router.put('/mess/menu/:day', async (req, res) => {
   }
 });
 
-// Toggle student fee status
+// toggle student fee status
 router.post('/students/:email/toggle-fee', async (req, res) => {
   try {
     const { email } = req.params;

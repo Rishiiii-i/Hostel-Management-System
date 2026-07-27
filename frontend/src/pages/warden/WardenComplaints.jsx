@@ -5,7 +5,7 @@ export default function WardenComplaints() {
   const [complaints, setComplaints] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -62,7 +62,7 @@ export default function WardenComplaints() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Header Bar */}
+      {/* header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -81,7 +81,7 @@ export default function WardenComplaints() {
         </div>
       </div>
 
-      {/* Complaints Table Container */}
+      {/* complaints table container */}
       <div className="dash-card">
         {loading ? (
           <div style={{ padding: '40px 0', textAlign: 'center', fontWeight: 600, color: '#557162' }}>

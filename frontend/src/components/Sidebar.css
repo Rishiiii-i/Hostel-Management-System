@@ -1,4 +1,4 @@
-/* Sidebar styles */
+/* sidebar styles */
 .dashboard-sidebar {
   width: 270px;
   background: #ffffff;
@@ -18,7 +18,7 @@ html.dark .dashboard-sidebar {
   border-right-color: #233e30;
 }
 
-/* Owner/Admin/Warden Dark Navy Sidebar Theme */
+/* owner/admin/warden dark navy sidebar theme */
 .dashboard-sidebar.owner-dark-sidebar {
   background: #0d0f1d !important;
   border-right: 1px solid #1e2238 !important;

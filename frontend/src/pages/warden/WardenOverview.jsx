@@ -10,7 +10,7 @@ export default function WardenOverview({ setActiveTab }) {
   const [notices, setNotices] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -24,14 +24,14 @@ export default function WardenOverview({ setActiveTab }) {
   const loadOverviewData = async () => {
     setLoading(true);
     try {
-      // Get statistics
+      // get statistics
       const statsRes = await fetchWithAuth('http://localhost:5000/api/warden/overview');
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData);
       }
 
-      // Get today attendance status
+      // get today attendance status
       const todayStr = new Date().toISOString().split('T')[0];
       const attRes = await fetchWithAuth(`http://localhost:5000/api/warden/attendance?date=${todayStr}`);
       if (attRes.ok) {
@@ -46,7 +46,7 @@ export default function WardenOverview({ setActiveTab }) {
         }
       }
 
-      // Get complaints list
+      // get complaints list
       const compRes = await fetchWithAuth('http://localhost:5000/api/warden/complaints');
       if (compRes.ok) {
         const compData = await compRes.json();
@@ -55,7 +55,7 @@ export default function WardenOverview({ setActiveTab }) {
         }
       }
 
-      // Get notices
+      // get notices
       const noticesRes = await fetchWithAuth('http://localhost:5000/api/warden/notices');
       if (noticesRes.ok) {
         const noticesData = await noticesRes.json();
@@ -77,7 +77,7 @@ export default function WardenOverview({ setActiveTab }) {
   const activeComplaints = Array.isArray(complaints) ? complaints.filter(c => c.status !== 'Resolved').slice(0, 5) : [];
   const recentNotices = Array.isArray(notices) ? notices.slice(0, 3) : [];
 
-  // Calculate conic gradient for the complaints donut chart
+  // calculate conic gradient for the complaints donut chart
   const pendingComplaintsCount = Array.isArray(complaints) ? complaints.filter(c => c.status === 'Pending').length : 0;
   const inProgressComplaintsCount = Array.isArray(complaints) ? complaints.filter(c => c.status === 'In Progress').length : 0;
   const resolvedComplaintsCount = Array.isArray(complaints) ? complaints.filter(c => c.status === 'Resolved').length : 0;
@@ -95,7 +95,7 @@ export default function WardenOverview({ setActiveTab }) {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Welcome Banner */}
+      {/* welcome banner */}
       <div className="owner-card-box" style={{
         background: 'linear-gradient(135deg, #1e6b51 0%, #0d3b2c 100%)',
         color: '#ffffff',
@@ -122,7 +122,7 @@ export default function WardenOverview({ setActiveTab }) {
         </div>
       ) : (
         <>
-          {/* 4 Top Vibrant Cards */}
+          {/* 4 top vibrant cards */}
           <div className="owner-stat-grid">
             <div className="owner-stat-card purple">
               <div className="card-top">
@@ -185,7 +185,7 @@ export default function WardenOverview({ setActiveTab }) {
             </div>
           </div>
 
-          {/* Middle Row 3 Stat Cards */}
+          {/* middle row 3 stat cards */}
           <div className="owner-stat-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginTop: '24px' }}>
             <div className="owner-card-box">
               <small style={{ color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '12px' }}>
@@ -215,7 +215,7 @@ export default function WardenOverview({ setActiveTab }) {
             </div>
           </div>
 
-          {/* Middle Row Charts */}
+          {/* middle row charts */}
           <div className="owner-charts-grid" style={{ marginTop: '24px' }}>
             <div className="owner-card-box">
               <div className="owner-card-header">
@@ -255,7 +255,7 @@ export default function WardenOverview({ setActiveTab }) {
             </div>
           </div>
 
-          {/* Active Complaints */}
+          {/* active complaints */}
           <div className="owner-card-box" style={{ marginTop: '24px' }}>
             <div className="owner-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3>Active Complaints</h3>
@@ -307,7 +307,7 @@ export default function WardenOverview({ setActiveTab }) {
             )}
           </div>
 
-          {/* Recent Notices Feed */}
+          {/* recent notices feed */}
           <div className="owner-card-box" style={{ marginTop: '24px' }}>
             <div className="owner-card-header">
               <h3>Recent Notices</h3>

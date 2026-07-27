@@ -4,7 +4,7 @@ export default function WardenGatePasses() {
   const [passes, setPasses] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -61,7 +61,7 @@ export default function WardenGatePasses() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Header Bar */}
+      {/* header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -79,7 +79,7 @@ export default function WardenGatePasses() {
         </div>
       </div>
 
-      {/* Table Container */}
+      {/* table container */}
       <div className="dash-card">
         {loading ? (
           <div style={{ padding: '40px 0', textAlign: 'center', fontWeight: 600, color: '#557162' }}>

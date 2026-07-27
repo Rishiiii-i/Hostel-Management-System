@@ -24,7 +24,7 @@ export default function AdminOverview({ setActiveTab }) {
   })
   const [loading, setLoading] = useState(true)
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -54,7 +54,7 @@ export default function AdminOverview({ setActiveTab }) {
     loadOverviewData()
   }, [])
 
-  // Calculate conic gradient for the complaints donut chart
+  // calculate conic gradient for the complaints donut chart
   const totalComp = (stats.pendingComplaintsCount || 0) + (stats.inProgressComplaintsCount || 0) + (stats.resolvedComplaintsCount || 0)
   const pendingPct = totalComp > 0 ? (stats.pendingComplaintsCount / totalComp) * 100 : 0
   const inProgressPct = totalComp > 0 ? (stats.inProgressComplaintsCount / totalComp) * 100 : 0
@@ -78,7 +78,7 @@ export default function AdminOverview({ setActiveTab }) {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Welcome Banner */}
+      {/* welcome banner */}
       <div className="owner-card-box" style={{
         background: 'linear-gradient(135deg, #1e6b51 0%, #0d3b2c 100%)',
         color: '#ffffff',

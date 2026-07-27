@@ -6,15 +6,15 @@ export default function AdminFees() {
   const [loading, setLoading] = useState(true)
   const [summary, setSummary] = useState({ totalFees: 0, collectedFees: 0, outstandingFees: 0 })
   
-  // Modals
+  // modals
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
   
-  // Form fields
+  // form fields
   const [totalFee, setTotalFee] = useState(45000)
   const [paidFee, setPaidFee] = useState(0)
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -51,7 +51,7 @@ export default function AdminFees() {
 
   const handleEditClick = (record) => {
     setSelectedStudent(record)
-    // Extract numbers from strings like "₹45000"
+    // extract numbers from strings like "₹45000"
     const totalVal = Number(record.totalFee.replace(/[₹$,]/g, '')) || 0
     const paidVal = Number(record.paid.replace(/[₹$,]/g, '')) || 0
     setTotalFee(totalVal)
@@ -95,7 +95,7 @@ export default function AdminFees() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Sub tabs */}
+      {/* sub tabs */}
       <div className="owner-subtab-container">
         <button
           type="button"
@@ -113,7 +113,7 @@ export default function AdminFees() {
         </button>
       </div>
 
-      {/* 3 Top Summary Cards */}
+      {/* 3 top summary cards */}
       <div className="owner-stat-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '24px' }}>
         <div className="owner-card-box">
           <small style={{ color: '#64748b', fontWeight: 600 }}>Total Fees</small>
@@ -129,7 +129,7 @@ export default function AdminFees() {
         </div>
       </div>
 
-      {/* Fees Table */}
+      {/* fees table */}
       <div className="owner-table-wrapper">
         {loading ? (
           <p className="empty-state-text" style={{ padding: '30px 0', textAlign: 'center', fontWeight: 600 }}>Loading fee details...</p>
@@ -179,7 +179,7 @@ export default function AdminFees() {
         )}
       </div>
 
-      {/* Update Fee Modal */}
+      {/* update fee modal */}
       {showEditModal && (
         <div style={{
           position: 'fixed',

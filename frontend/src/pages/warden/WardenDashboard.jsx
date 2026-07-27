@@ -8,9 +8,10 @@ import WardenComplaints from './WardenComplaints'
 import WardenNotices from './WardenNotices'
 import WardenProfile from './WardenProfile'
 import WardenMess from './WardenMess'
+import Chat from '../chat/Chat'
 
 export default function WardenDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
-  const validTabs = ['overview', 'attendance', 'rooms', 'gatepasses', 'complaints', 'notices', 'mess', 'profile']
+  const validTabs = ['overview', 'attendance', 'rooms', 'gatepasses', 'complaints', 'notices', 'mess', 'chat', 'profile']
   const currentTab = validTabs.includes(activeTab) ? activeTab : 'overview'
 
   return (
@@ -22,6 +23,7 @@ export default function WardenDashboard({ activeTab = 'overview', setActiveTab, 
       {currentTab === 'complaints' && <WardenComplaints />}
       {currentTab === 'notices' && <WardenNotices />}
       {currentTab === 'mess' && <WardenMess />}
+      {currentTab === 'chat' && <Chat />}
       {currentTab === 'profile' && <WardenProfile profile={profile} setProfile={setProfile} />}
     </div>
   )

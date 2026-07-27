@@ -125,7 +125,7 @@ export default function LandingPage() {
     <main id="home" className="landing-page-root">
       <Navbar />
 
-      {/* Hero Section */}
+      {/* hero section */}
       <section className="hero-section">
         <div className="hero-container">
           <div className="hero-content">
@@ -254,7 +254,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* features section */}
       <section className="section-wrapper" id="features">
         <ScrollReveal animation="fade-up">
           <div className="section-header text-center">
@@ -282,7 +282,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Interactive Role Dashboards Section */}
+      {/* interactive role dashboards section */}
       <section className="section-wrapper roles-section" id="roles">
         <ScrollReveal animation="fade-up">
           <div className="section-header text-center">
@@ -366,7 +366,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Process Section */}
+      {/* process section */}
       <section className="section-wrapper process-section" id="process">
         <ScrollReveal animation="fade-up">
           <div className="section-header text-center">
@@ -392,7 +392,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* testimonials */}
       <section className="section-wrapper stories-section">
         <ScrollReveal animation="fade-up">
           <div className="section-header text-center">
@@ -423,7 +423,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Final CTA Banner */}
+      {/* final cta banner */}
       <section className="final-cta-section">
         <div className="final-cta-container">
           <ScrollReveal animation="scale-up">
@@ -441,7 +441,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* contact section */}
       <section className="contact-section" id="contact">
         <div className="contact-container">
           <ScrollReveal animation="slide-right">

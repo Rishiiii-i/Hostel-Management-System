@@ -1,8 +1,4 @@
-/**
- * FCM Token Manager Service
- * Manages notification permission requesting, FCM device token generation,
- * local storage caching, backend synchronization, and token deletion.
- */
+/** * fcm token manager service * manages notification permission requesting fcm device token generation * local storage caching backend synchronization and token deletion */
 
 import { getToken } from 'firebase/messaging';
 import { getMessagingInstance } from '../firebase';
@@ -11,10 +7,7 @@ const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || 'BH961-N2b0PmsR0_pY
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 export class TokenManager {
-  /**
-   * Request push notification permission from browser
-   * @returns {Promise<PermissionState>} 'granted', 'denied', or 'default'
-   */
+  /** * request push notification permission from browser * @returns {promise<permissionstate>} 'granted' 'denied' or 'default' */
   static async requestPermission() {
     if (!('Notification' in window)) {
       console.warn('[TokenManager] Browser does not support desktop notifications.');
@@ -31,9 +24,7 @@ export class TokenManager {
     }
   }
 
-  /**
-   * Register service worker for FCM background messaging
-   */
+  /** * register service worker for fcm background messaging */
   static async registerServiceWorker() {
     if (!('serviceWorker' in navigator)) {
       return null;
@@ -51,10 +42,7 @@ export class TokenManager {
     }
   }
 
-  /**
-   * Retrieve FCM device token from Firebase SDK
-   * @returns {Promise<string|null>} FCM token string or null
-   */
+  /** * retrieve fcm device token from firebase sdk * @returns {promise<string|null>} fcm token string or null */
   static async fetchFCMToken() {
     try {
       const permission = await this.requestPermission();
@@ -87,7 +75,7 @@ export class TokenManager {
           currentToken = await getToken(messaging, { serviceWorkerRegistration: swRegistration });
         } catch (fallbackErr) {
           console.warn('[TokenManager] Fallback token fetch failed:', fallbackErr.message);
-          // Generate persistent local device identifier as fallback
+          // generate persistent local device identifier as fallback
           currentToken = localStorage.getItem('shm_fcm_token') || 'web_device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
         }
       }
@@ -106,10 +94,7 @@ export class TokenManager {
     }
   }
 
-  /**
-   * Sync the FCM token with the backend server
-   * @param {string} authToken JWT token for authenticating user
-   */
+  /** * sync the fcm token with the backend server * @param {string} authtoken jwt token for authenticating user */
   static async syncTokenWithBackend(authToken) {
     if (!authToken) return;
 
@@ -141,10 +126,7 @@ export class TokenManager {
     }
   }
 
-  /**
-   * Remove FCM token from backend upon user logout
-   * @param {string} authToken JWT token for authentication
-   */
+  /** * remove fcm token from backend upon user logout * @param {string} authtoken jwt token for login check */
   static async unregisterTokenFromBackend(authToken) {
     const fcmToken = localStorage.getItem('shm_fcm_token');
     if (!fcmToken || !authToken) return;

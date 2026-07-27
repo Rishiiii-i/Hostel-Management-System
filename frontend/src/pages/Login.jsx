@@ -14,7 +14,7 @@ export default function Login({ mode = 'login', oobCode = '' }) {
   const [showPassword, setShowPassword] = useState(false)
   const [rollNo, setRollNo] = useState('')
 
-  // State for password reset
+  // state for password reset
   const [emailForReset, setEmailForReset] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [verifyingCode, setVerifyingCode] = useState(false)
@@ -37,16 +37,16 @@ export default function Login({ mode = 'login', oobCode = '' }) {
     setError('')
     setSuccessMessage('')
 
-    // Remove spaces
+    // remove spaces
     const trimmedEmail = email.trim()
 
-    // Reject empty email
+    // reject empty email
     if (!trimmedEmail) {
       setError('Email address is required.')
       return
     }
 
-    // Reject bad email format
+    // reject bad email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(trimmedEmail)) {
       setError('Please enter a valid email address.')
@@ -55,7 +55,7 @@ export default function Login({ mode = 'login', oobCode = '' }) {
 
     setLoading(true)
     try {
-      // 1. Check if user exists in database
+      // 1 check if user exists in database
       const verifyResponse = await fetch('http://localhost:5000/api/auth/forgot-password', {
         method: 'POST',
         headers: {
@@ -69,19 +69,19 @@ export default function Login({ mode = 'login', oobCode = '' }) {
         throw { code: 'auth/user-not-found', message: errorData.message || 'User with this email was not found' }
       }
 
-      // 2. Send password reset email
+      // 2 send password reset email
       await sendPasswordReset(trimmedEmail)
       setSuccessMessage('Password reset email has been sent successfully. Please check your Inbox and Spam folder.')
-      setEmail('') // Clear email input
+      setEmail('') // clear email input
 
-      // Go to login page after 3 seconds
+      // go to login page after 3 seconds
       setTimeout(() => {
         window.location.hash = '#login'
       }, 3000)
     } catch (err) {
       console.error('Password reset error:', err)
       
-      // Handle errors
+      // handle errors
       if (err.code === 'auth/user-not-found') {
         setError(err.message || 'No account exists with this email address.')
       } else if (err.code === 'auth/invalid-email') {
@@ -102,7 +102,7 @@ export default function Login({ mode = 'login', oobCode = '' }) {
     }
   }
 
-  // Clear messages on mode change
+  // clear messages on mode change
   useEffect(() => {
     setError('')
     setSuccessMessage('')
@@ -158,7 +158,7 @@ export default function Login({ mode = 'login', oobCode = '' }) {
       setPassword('')
       setConfirmPassword('')
 
-      // Clear URL search params
+      // clear url search params
       window.history.replaceState({}, document.title, window.location.pathname)
 
       setTimeout(() => {

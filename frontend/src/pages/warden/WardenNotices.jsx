@@ -21,7 +21,7 @@ export default function WardenNotices() {
     isUrgent: false
   })
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -159,7 +159,7 @@ export default function WardenNotices() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Header Bar */}
+      {/* header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -187,7 +187,7 @@ export default function WardenNotices() {
         </div>
       </div>
 
-      {/* Notices Feed */}
+      {/* notices feed */}
       <div className="owner-card-box">
         {loading ? (
           <div style={{ padding: '40px 0', textAlign: 'center', fontWeight: 600, color: '#557162' }}>
@@ -239,7 +239,7 @@ export default function WardenNotices() {
         )}
       </div>
 
-      {/* Post Notice Modal */}
+      {/* post notice modal */}
       {showModal && createPortal(
         <div style={{
           position: 'fixed',
@@ -336,7 +336,7 @@ export default function WardenNotices() {
       )}
 
 
-      {/* Send Individual Notification Modal */}
+      {/* send individual notification modal */}
       {showIndividualModal && createPortal(
         <div style={{
           position: 'fixed',

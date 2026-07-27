@@ -17,7 +17,7 @@ import { notificationService } from '../services/notificationService';
 
 const AuthContext = createContext(null);
 
-// Warden credentials
+// warden credentials
 export const PREDEFINED_WARDEN_CREDENTIALS = {
   email: 'warden@smarthostel.com',
   password: 'warden123',
@@ -25,7 +25,7 @@ export const PREDEFINED_WARDEN_CREDENTIALS = {
   role: 'warden'
 };
 
-// Admin credentials
+// admin credentials
 export const PREDEFINED_ADMIN_CREDENTIALS = {
   email: 'admin@smarthostel.com',
   password: 'admin123',
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  // Check if user is in local storage
+  // check if user is in local storage
   const [loading, setLoading] = useState(() => {
     return !localStorage.getItem('user');
   });
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      // Get token from backend or Firebase
+      // get token from backend or firebase
       const token = data.token || (await fbUser.getIdToken().catch(() => 'token'));
       
       localStorage.setItem('token', token);
@@ -143,12 +143,12 @@ export const AuthProvider = ({ children }) => {
       
       setFirebaseUser(userCredential.user);
 
-      // Sync synchronously to get backend-signed token before redirecting
+      // sync synchronously to get backend-signed token before redirecting
       const syncedUser = await syncUserWithBackend(userCredential.user, name, rollNo, password);
       setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (fbErr) {
-      // Fallback to backend REST API signup
+      // fallback to backend rest api signup
       try {
         const response = await fetch('http://localhost:5000/api/auth/signup', {
           method: 'POST',
@@ -177,12 +177,12 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setFirebaseUser(userCredential.user);
 
-      // Sync synchronously to get backend-signed token before redirecting
+      // sync synchronously to get backend-signed token before redirecting
       const syncedUser = await syncUserWithBackend(userCredential.user, null, null, password);
       setLoading(false);
       return { firebaseUser: userCredential.user, user: syncedUser };
     } catch (error) {
-      // Fall back to backend REST API login instead of mock auto-signup
+      // fall back to backend rest api login instead of mock auto-signup
       try {
         const response = await fetch('http://localhost:5000/api/auth/login', {
           method: 'POST',
@@ -216,7 +216,7 @@ export const AuthProvider = ({ children }) => {
     
     setFirebaseUser(userCredential.user);
 
-    // Sync synchronously to get backend-signed token before redirecting
+    // sync synchronously to get backend-signed token before redirecting
     const syncedUser = await syncUserWithBackend(userCredential.user);
     setLoading(false);
     return { firebaseUser: userCredential.user, user: syncedUser };

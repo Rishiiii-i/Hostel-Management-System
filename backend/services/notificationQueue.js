@@ -1,8 +1,4 @@
-/**
- * Asynchronous Non-Blocking Notification Queue
- * Handles push notification dispatching in background workers with retry logic.
- * Prevents API controllers from being blocked by external network calls.
- */
+/** * asynchronous non-blocking notification queue * handles push notification dispatching in background workers with retry logic * prevents api controllers from being blocked by external network calls */
 
 import { FCMService } from './fcmService.js';
 
@@ -13,10 +9,7 @@ class NotificationQueue {
     this.maxRetries = 3;
   }
 
-  /**
-   * Enqueue a push notification dispatch job
-   * @param {Object} job { type: 'MULTICAST'|'USERS'|'ROLE'|'TOPIC', target: Array|String, payload: Object, retryCount: Number }
-   */
+  /** * enqueue a push notification dispatch job * @param {object} job { type: 'multicast'|'users'|'role'|'topic' target: array|string payload: object retrycount: number } */
   enqueue(job) {
     const queueJob = {
       ...job,
@@ -28,13 +21,11 @@ class NotificationQueue {
     this.queue.push(queueJob);
     console.log(`[NotificationQueue] Job ${queueJob.id} enqueued (${queueJob.type}). Queue length: ${this.queue.length}`);
     
-    // Process asynchronously without blocking current execution stack
+    // process asynchronously without blocking current execution stack
     setImmediate(() => this.processQueue());
   }
 
-  /**
-   * Process jobs sequentially in background loop
-   */
+  /** * process jobs sequentially in background loop */
   async processQueue() {
     if (this.isProcessing || this.queue.length === 0) return;
 
@@ -61,10 +52,10 @@ class NotificationQueue {
       } catch (error) {
         console.error(`[NotificationQueue] Error processing job ${job.id}:`, error.message);
 
-        // Handle retry with exponential backoff if below max retries
+        // handle retry with exponential backoff if below max retries
         if (job.retryCount < this.maxRetries) {
           const nextRetry = job.retryCount + 1;
-          const delay = Math.pow(2, nextRetry) * 1000; // 2s, 4s, 8s
+          const delay = Math.pow(2, nextRetry) * 1000; // 2s 4s 8s
 
           console.log(`[NotificationQueue] Scheduling retry #${nextRetry} for job ${job.id} in ${delay}ms...`);
           setTimeout(() => {

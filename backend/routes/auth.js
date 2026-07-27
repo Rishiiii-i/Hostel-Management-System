@@ -11,7 +11,7 @@ import { authenticateToken } from '../middleware/auth.js';
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'smart-hostel-secret-key-12345';
 
-// Get user role from email
+// get user role from email
 function getRole(email) {
   const value = email.toLowerCase();
   if (value.includes('admin')) return 'administrator';
@@ -19,7 +19,7 @@ function getRole(email) {
   return 'student';
 }
 
-// Sync user from Firebase to MongoDB
+// sync user from firebase to mongodb
 router.post('/sync', async (req, res) => {
   try {
     const { uid, name, email, role, password, rollNo } = req.body;
@@ -35,11 +35,11 @@ router.post('/sync', async (req, res) => {
       });
     }
 
-    // Search for user by email
+    // search for user by email
     let user = await User.findOne({ email: email.toLowerCase() });
 
     if (user) {
-      // Update user details if user exists
+      // update user details if user exists
       let updated = false;
       if (!user.name || user.name.trim() === '') {
         user.name = name || email.split('@')[0];
@@ -57,7 +57,7 @@ router.post('/sync', async (req, res) => {
         await user.save();
       }
     } else {
-      // Create new user if not found
+      // create new user if not found
       const newUserData = {
         id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
         name: name || email.split('@')[0],
@@ -71,7 +71,7 @@ router.post('/sync', async (req, res) => {
       await user.save();
     }
 
-    // Create a login token
+    // create a login token
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role },
       JWT_SECRET,
@@ -99,7 +99,7 @@ router.post('/sync', async (req, res) => {
   }
 });
 
-// Signup API
+// signup api
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -113,10 +113,14 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
 
-    // Find the role
+    // find the role
     const role = getRole(email);
 
+<<<<<<< Updated upstream
     // Save the new user (userSchema pre-save hook automatically hashes password with bcrypt if not already hashed)
+=======
+    // save the new user
+>>>>>>> Stashed changes
     const newUser = {
       id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
       name,
@@ -128,14 +132,14 @@ router.post('/signup', async (req, res) => {
 
     await createUser(newUser);
 
-    // Create token
+    // create token
     const token = jwt.sign(
       { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // Send back token and user details
+    // send back token and user details
     const { password: _, ...userWithoutPassword } = newUser;
     res.status(201).json({
       message: 'User registered successfully',
@@ -148,7 +152,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// Login API
+// login api
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -162,7 +166,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+<<<<<<< Updated upstream
     // Verify password (plain text check with bcrypt fallback for legacy hashes)
+=======
+    // check password (supports bcrypt and plain text fallback)
+>>>>>>> Stashed changes
     let isMatch = false;
     if (user.password) {
       if (/^\$2[aby]\$\d+\$/.test(user.password)) {
@@ -176,7 +184,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Create token
+    // create token
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role },
       JWT_SECRET,
@@ -197,9 +205,9 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Forgot password API
-// Verifies if user exists in the MongoDB database. 
-// The actual reset email is sent by the frontend via the Firebase Client SDK.
+// forgot password api
+// verifies if user exists in the mongodb database 
+// the actual reset email is sent by the frontend via the firebase client sdk
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -221,7 +229,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-// Get user profile
+// get user profile
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const user = await findUserByEmail(req.user.email);

@@ -19,7 +19,7 @@ export default function WardenRooms() {
   const [occupantEmail, setOccupantEmail] = useState('')
   const [students, setStudents] = useState([])
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -188,7 +188,7 @@ export default function WardenRooms() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Header Bar */}
+      {/* header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -205,7 +205,7 @@ export default function WardenRooms() {
         </div>
       </div>
 
-      {/* Rooms Table Container */}
+      {/* rooms table container */}
       <div className="dash-card">
         {loading ? (
           <div style={{ padding: '40px 0', textAlign: 'center', fontWeight: 600, color: '#557162' }}>
@@ -329,7 +329,7 @@ export default function WardenRooms() {
         )}
       </div>
 
-      {/* Add Room Modal */}
+      {/* add room modal */}
       {showAddModal && createPortal(
         <div style={{
           position: 'fixed',
@@ -442,7 +442,7 @@ export default function WardenRooms() {
         document.body
       )}
 
-      {/* Allocate Occupant Modal */}
+      {/* allocate occupant modal */}
       {showAllocateModal && createPortal(
         <div style={{
           position: 'fixed',

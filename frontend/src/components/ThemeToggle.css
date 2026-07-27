@@ -1,4 +1,4 @@
-/* Container button */
+/* container button */
 .theme-toggle-switch {
   background: none;
   border: none;
@@ -17,7 +17,7 @@
   transform: scale(0.95);
 }
 
-/* Outer track */
+/* outer track */
 .theme-toggle-switch .toggle-track {
   width: 48px;
   height: 25px;
@@ -35,7 +35,7 @@ html.dark .theme-toggle-switch .toggle-track {
   border-color: #233e30;
 }
 
-/* Sliding thumb */
+/* sliding thumb */
 .theme-toggle-switch .toggle-thumb {
   width: 19px;
   height: 19px;
@@ -54,7 +54,7 @@ html.dark .theme-toggle-switch .toggle-thumb {
   background: #2b7959;
 }
 
-/* Sliding translation distance */
+/* sliding translation distance */
 .theme-toggle-switch.light .toggle-thumb {
   transform: translateX(0);
 }
@@ -63,7 +63,7 @@ html.dark .theme-toggle-switch .toggle-thumb {
   transform: translateX(23px);
 }
 
-/* Icon styling adjustments */
+/* icon styling adjustments */
 .theme-toggle-switch .toggle-thumb svg {
   display: block;
   transition: transform 0.25s ease;

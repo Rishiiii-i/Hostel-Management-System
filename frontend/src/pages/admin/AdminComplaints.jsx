@@ -5,12 +5,12 @@ export default function AdminComplaints() {
   const [complaints, setComplaints] = useState([])
   const [loading, setLoading] = useState(true)
   
-  // Modals
+  // modals
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [selectedComplaint, setSelectedComplaint] = useState(null)
   const [newStatus, setNewStatus] = useState('Pending')
 
-  // Helper for requests with auth token
+  // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const headers = {
@@ -70,7 +70,7 @@ export default function AdminComplaints() {
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
-      {/* Header Bar */}
+      {/* header bar */}
       <div className="owner-card-box" style={{ padding: '20px 24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -83,7 +83,7 @@ export default function AdminComplaints() {
         </div>
       </div>
 
-      {/* Table Container */}
+      {/* table container */}
       <div className="owner-table-wrapper">
         {loading ? (
           <p className="empty-state-text" style={{ padding: '36px 0', textAlign: 'center', margin: 0, fontWeight: 600 }}>Loading complaints...</p>
@@ -133,7 +133,7 @@ export default function AdminComplaints() {
         )}
       </div>
 
-      {/* Update Status Modal */}
+      {/* update status modal */}
       {showStatusModal && createPortal(
         <div style={{
           position: 'fixed',

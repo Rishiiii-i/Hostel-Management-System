@@ -1,8 +1,4 @@
-/**
- * NotificationToast (Disabled / Deprecated)
- * Native operating system & browser push notifications are enabled exclusively.
- * All in-app UI popup toasts have been disabled.
- */
+/** * notificationtoast (disabled / deprecated) * native operating system & browser push notifications are enabled exclusively * all in-app ui popup toasts have been disabled */
 export default function NotificationToast() {
   return null;
 }
