@@ -43,6 +43,10 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState(null);
+  const [pendingOtpEmail, setPendingOtpEmail] = useState(() => {
+    return localStorage.getItem('pending_otp_email') || null;
+  });
+
   const [user, setUser] = useState(() => {
     const cached = localStorage.getItem('user');
     try {
@@ -88,10 +92,9 @@ export const AuthProvider = ({ children }) => {
       // get token from backend or firebase
       const token = data.token || (await fbUser.getIdToken().catch(() => 'token'));
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      setUser(data.user);
+      if (token) {
+        localStorage.setItem('token', token);
+      }
       return data.user;
     } catch (error) {
       clearTimeout(timeoutId);
@@ -99,42 +102,129 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const sendOtp = async (email) => {
+    const response = await fetch('http://localhost:5000/api/auth/send-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send OTP code.');
+    }
+
+    setPendingOtpEmail(email);
+    localStorage.setItem('pending_otp_email', email);
+    return data;
+  };
+
+  const verifyOtp = async (email, otp) => {
+    const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, otp }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Invalid or expired OTP.');
+    }
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.removeItem('pending_otp_email');
+    setPendingOtpEmail(null);
+    setUser(data.user);
+    setLoading(false);
+    return data;
+  };
+
+  const resendOtp = async (email) => {
+    const response = await fetch('http://localhost:5000/api/auth/resend-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to resend OTP code.');
+    }
+
+    return data;
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
         setFirebaseUser(fbUser);
         try {
-          await syncUserWithBackend(fbUser);
+          const syncedUser = await syncUserWithBackend(fbUser);
+          // Only automatically log in without OTP if user is non-student OR has already verified 2FA token
+          const cachedUser = localStorage.getItem('user');
+          const cachedToken = localStorage.getItem('token');
+
+          if (syncedUser.role === 'student') {
+            if (cachedUser && cachedToken) {
+              setUser(JSON.parse(cachedUser));
+            } else {
+              // Student needs 2FA verification
+              setUser(null);
+            }
+          } else {
+            // Warden / Admin directly login
+            const fbToken = await fbUser.getIdToken().catch(() => 'token');
+            localStorage.setItem('token', cachedToken || fbToken);
+            localStorage.setItem('user', JSON.stringify(syncedUser));
+            setUser(syncedUser);
+          }
         } catch (error) {
           console.error("Auth state change sync failed:", error);
           const cachedUser = localStorage.getItem('user');
           if (cachedUser) {
             setUser(JSON.parse(cachedUser));
-          } else {
-            const fastUser = {
-              id: fbUser.uid,
-              name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'User'),
-              email: fbUser.email,
-              role: fbUser.email && fbUser.email.toLowerCase().includes('admin') ? 'administrator' : fbUser.email && fbUser.email.toLowerCase().includes('warden') ? 'warden' : 'student',
-              photoURL: fbUser.photoURL || '',
-              rollNo: ''
-            };
-            setUser(fastUser);
           }
         }
         setLoading(false);
       } else {
         setFirebaseUser(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('shm_user_profile');
-        setUser(null);
+        const cachedUser = localStorage.getItem('user');
+        const cachedToken = localStorage.getItem('token');
+        if (!cachedUser || !cachedToken) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('shm_user_profile');
+          setUser(null);
+        }
         setLoading(false);
       }
     });
 
     return unsubscribe;
   }, []);
+
+  const handlePostAuthentication = async (syncedUser, email) => {
+    const isStudent = !syncedUser.role || syncedUser.role === 'student';
+
+    if (isStudent) {
+      // Require 2FA OTP for Student Dashboard
+      await sendOtp(email);
+      return { requires2FA: true, email, user: syncedUser };
+    } else {
+      // Warden / Admin proceed without 2FA
+      localStorage.setItem('user', JSON.stringify(syncedUser));
+      setUser(syncedUser);
+      setLoading(false);
+      return { requires2FA: false, user: syncedUser };
+    }
+  };
 
   const signUpWithEmail = async (name, email, password, rollNo) => {
     try {
@@ -143,12 +233,11 @@ export const AuthProvider = ({ children }) => {
       
       setFirebaseUser(userCredential.user);
 
-      // sync synchronously to get backend-signed token before redirecting
+      // Sync user details with backend
       const syncedUser = await syncUserWithBackend(userCredential.user, name, rollNo, password);
-      setLoading(false);
-      return { firebaseUser: userCredential.user, user: syncedUser };
+      return await handlePostAuthentication(syncedUser, email);
     } catch (fbErr) {
-      // fallback to backend rest api signup
+      // Fallback to backend REST API signup
       try {
         const response = await fetch('http://localhost:5000/api/auth/signup', {
           method: 'POST',
@@ -159,11 +248,7 @@ export const AuthProvider = ({ children }) => {
         });
         if (response.ok) {
           const data = await response.json();
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          setUser(data.user);
-          setLoading(false);
-          return { firebaseUser: null, user: data.user };
+          return await handlePostAuthentication(data.user, email);
         }
       } catch (backendErr) {
         console.error('Backend signup fallback failed:', backendErr);
@@ -177,12 +262,11 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setFirebaseUser(userCredential.user);
 
-      // sync synchronously to get backend-signed token before redirecting
+      // Sync user details with backend
       const syncedUser = await syncUserWithBackend(userCredential.user, null, null, password);
-      setLoading(false);
-      return { firebaseUser: userCredential.user, user: syncedUser };
+      return await handlePostAuthentication(syncedUser, email);
     } catch (error) {
-      // fall back to backend rest api login instead of mock auto-signup
+      // Fall back to backend REST API login
       try {
         const response = await fetch('http://localhost:5000/api/auth/login', {
           method: 'POST',
@@ -193,11 +277,7 @@ export const AuthProvider = ({ children }) => {
         });
         if (response.ok) {
           const data = await response.json();
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          setUser(data.user);
-          setLoading(false);
-          return { firebaseUser: null, user: data.user };
+          return await handlePostAuthentication(data.user, email);
         } else {
           const errData = await response.json().catch(() => ({}));
           throw new Error(errData.message || 'Login failed');
@@ -216,10 +296,9 @@ export const AuthProvider = ({ children }) => {
     
     setFirebaseUser(userCredential.user);
 
-    // sync synchronously to get backend-signed token before redirecting
+    // Sync user details with backend
     const syncedUser = await syncUserWithBackend(userCredential.user);
-    setLoading(false);
-    return { firebaseUser: userCredential.user, user: syncedUser };
+    return await handlePostAuthentication(syncedUser, userCredential.user.email);
   };
 
   const sendPasswordReset = async (email) => {
@@ -255,32 +334,39 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logOut = async () => {
-    const confirmed = window.confirm('Are you sure you want to logout?')
-    if (!confirmed) return
+    const confirmed = window.confirm('Are you sure you want to logout?');
+    if (!confirmed) return;
 
-    const oldToken = localStorage.getItem('token')
+    const oldToken = localStorage.getItem('token');
     try {
       if (oldToken) {
         await notificationService.teardown(oldToken);
       }
-      await signOut(auth)
+      await signOut(auth);
     } catch (error) {
-      console.error('Signout failed:', error)
+      console.error('Signout failed:', error);
     } finally {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      localStorage.removeItem('shm_user_profile')
-      setUser(null)
-      setFirebaseUser(null)
-      setLoading(false)
-      window.location.hash = '#home'
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('shm_user_profile');
+      localStorage.removeItem('pending_otp_email');
+      setPendingOtpEmail(null);
+      setUser(null);
+      setFirebaseUser(null);
+      setLoading(false);
+      window.location.hash = '#home';
     }
-  }
+  };
 
   const value = {
     user,
     firebaseUser,
     loading,
+    pendingOtpEmail,
+    setPendingOtpEmail,
+    sendOtp,
+    verifyOtp,
+    resendOtp,
     signUpWithEmail,
     logInWithEmail,
     logInWithGoogle,

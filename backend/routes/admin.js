@@ -824,7 +824,7 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Administrator not found' });
     }
 
-    // check if the current password is correct
+    // Check if the current password is correct using bcrypt (with legacy plaintext fallback)
     let isCurrentMatch = false;
     if (admin.password) {
       if (/^\$2[aby]\$\d+\$/.test(admin.password)) {

@@ -10,6 +10,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'))
 const StudentDashboard = lazy(() => import('./pages/StudentDashboard'))
 const WardenDashboard = lazy(() => import('./pages/warden/WardenDashboard'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const OtpVerification = lazy(() => import('./pages/OtpVerification'))
 
 function LoadingSpinner() {
   return (
@@ -197,6 +198,16 @@ function App() {
     return (
       <Suspense fallback={<LoadingSpinner />}>
         <AuthLayout><Login mode={mode} oobCode={oobCode} /></AuthLayout>
+      </Suspense>
+    )
+  }
+
+  if (route === '#verify-otp') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <AuthLayout>
+          <OtpVerification />
+        </AuthLayout>
       </Suspense>
     )
   }

@@ -2,6 +2,7 @@
 
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
+import { getAuth } from 'firebase-admin/auth';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -60,4 +61,4 @@ function initializeFirebaseAdmin() {
 
 const adminInstance = initializeFirebaseAdmin();
 
-export { firebaseAdminApp, adminInstance, getMessaging };
+export { firebaseAdminApp, adminInstance, getMessaging, getAuth };

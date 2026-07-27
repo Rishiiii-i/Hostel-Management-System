@@ -6,7 +6,12 @@ export default function ProtectedRoute({ children }) {
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.hash = '#login';
+      const pendingEmail = localStorage.getItem('pending_otp_email');
+      if (pendingEmail) {
+        window.location.hash = '#verify-otp';
+      } else {
+        window.location.hash = '#login';
+      }
     }
   }, [user, loading]);
 

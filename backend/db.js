@@ -267,6 +267,24 @@ const messMenuSchema = new mongoose.Schema({
 
 const MessMenu = mongoose.model('MessMenu', messMenuSchema);
 
+// OTP Schema for 2FA Authentication
+const otpSchema = new mongoose.Schema({
+  userId: { type: String },
+  firebaseUid: { type: String },
+  email: { type: String, required: true, lowercase: true, trim: true, index: true },
+  otpHash: { type: String, required: true },
+  attempts: { type: Number, default: 0 },
+  verified: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date, required: true }
+});
+
+// TTL index to automatically purge expired OTP documents
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+const Otp = mongoose.model('Otp', otpSchema);
+
 // set default mess menu if it is empty
 async function initDefaultMessMenu() {
   try {
@@ -489,6 +507,7 @@ async function initDefaultChatChannels() {
 
 export {
   User,
+  Otp,
   GatePass,
   Complaint,
   Room,

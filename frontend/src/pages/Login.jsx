@@ -192,13 +192,17 @@ export default function Login({ mode = 'login', oobCode = '' }) {
         res = await logInWithEmail(email, password)
       }
 
-      const role = res?.user?.role || ''
-      if (role === 'administrator' || role === 'admin') {
-        window.location.hash = '#admin-dashboard'
-      } else if (role === 'warden') {
-        window.location.hash = '#warden-dashboard'
+      if (res?.requires2FA) {
+        window.location.hash = '#verify-otp'
       } else {
-        window.location.hash = '#dashboard'
+        const role = res?.user?.role || ''
+        if (role === 'administrator' || role === 'admin') {
+          window.location.hash = '#admin-dashboard'
+        } else if (role === 'warden') {
+          window.location.hash = '#warden-dashboard'
+        } else {
+          window.location.hash = '#dashboard'
+        }
       }
     } catch (err) {
       console.error('Auth error:', err?.code, err?.message)
@@ -223,13 +227,17 @@ export default function Login({ mode = 'login', oobCode = '' }) {
     setLoading(true)
     try {
       const res = await logInWithGoogle()
-      const role = res?.user?.role || ''
-      if (role === 'administrator' || role === 'admin') {
-        window.location.hash = '#admin-dashboard'
-      } else if (role === 'warden') {
-        window.location.hash = '#warden-dashboard'
+      if (res?.requires2FA) {
+        window.location.hash = '#verify-otp'
       } else {
-        window.location.hash = '#dashboard'
+        const role = res?.user?.role || ''
+        if (role === 'administrator' || role === 'admin') {
+          window.location.hash = '#admin-dashboard'
+        } else if (role === 'warden') {
+          window.location.hash = '#warden-dashboard'
+        } else {
+          window.location.hash = '#dashboard'
+        }
       }
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
