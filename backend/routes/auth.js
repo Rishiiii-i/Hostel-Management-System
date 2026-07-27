@@ -116,11 +116,7 @@ router.post('/signup', async (req, res) => {
     // find the role
     const role = getRole(email);
 
-<<<<<<< Updated upstream
-    // Save the new user (userSchema pre-save hook automatically hashes password with bcrypt if not already hashed)
-=======
     // save the new user
->>>>>>> Stashed changes
     const newUser = {
       id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
       name,
@@ -166,11 +162,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-<<<<<<< Updated upstream
-    // Verify password (plain text check with bcrypt fallback for legacy hashes)
-=======
-    // check password (supports bcrypt and plain text fallback)
->>>>>>> Stashed changes
+    // check password
     let isMatch = false;
     if (user.password) {
       if (/^\$2[aby]\$\d+\$/.test(user.password)) {

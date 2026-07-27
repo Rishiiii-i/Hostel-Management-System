@@ -409,11 +409,8 @@ const chatRoomSchema = new mongoose.Schema({
 
 const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);
 
-// chat message schema
 const chatMessageSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  chatRoomId: { type: String, required: true, index: true },
-  senderId: { type: String, required: true },
+  chatRoom: { type: mongoose.Schema.Types.ObjectId, ref: 'ChatRoom', required: true, index: true },
   senderName: { type: String, required: true },
   senderEmail: { type: String, required: true },
   senderRole: { type: String, required: true },

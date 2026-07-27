@@ -824,12 +824,8 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Administrator not found' });
     }
 
-<<<<<<< Updated upstream
-    // Check if the current password is correct using bcrypt (with legacy plaintext fallback)
+    // check if the current password is correct
     let isCurrentMatch = false;
-=======
-    // check if the current password is correct (plain text check)
->>>>>>> Stashed changes
     if (admin.password) {
       if (/^\$2[aby]\$\d+\$/.test(admin.password)) {
         isCurrentMatch = await bcrypt.compare(currentPassword, admin.password);
@@ -837,18 +833,11 @@ router.put('/change-password', authenticateToken, isAdmin, async (req, res) => {
         isCurrentMatch = (admin.password === currentPassword);
       }
     } else {
-<<<<<<< Updated upstream
       isCurrentMatch = (currentPassword === 'admin123');
     }
 
     if (!isCurrentMatch) {
       return res.status(400).json({ message: 'Incorrect current password' });
-=======
-      // fallback for predefined login before registration password set
-      if (currentPassword !== 'admin123') {
-        return res.status(400).json({ message: 'Incorrect current password' });
-      }
->>>>>>> Stashed changes
     }
 
     admin.password = newPassword;

@@ -24,7 +24,7 @@ router.get('/rooms', authenticateToken, async (req, res) => {
 
       // find unread messages
       const unreadCount = await ChatMessage.countDocuments({
-        chatRoomId: room.id,
+        chatRoom: room._id,
         senderEmail: { $ne: userEmail },
         readBy: { $ne: userEmail }
       });
@@ -85,7 +85,7 @@ router.get('/rooms/:roomId/messages', authenticateToken, async (req, res) => {
 
     // get messages for user if not deleted
     const messages = await ChatMessage.find({ 
-      chatRoomId: roomId,
+      chatRoom: room._id,
       deletedBy: { $ne: userEmail }
     })
       .sort({ createdAt: 1 })
@@ -218,7 +218,7 @@ router.post('/rooms/:roomId/read', authenticateToken, async (req, res) => {
 
     // add user email to read array
     await ChatMessage.updateMany(
-      { chatRoomId: roomId, senderEmail: { $ne: userEmail }, readBy: { $ne: userEmail } },
+      { chatRoom: room._id, senderEmail: { $ne: userEmail }, readBy: { $ne: userEmail } },
       { $addToSet: { readBy: userEmail } }
     );
 
@@ -255,12 +255,8 @@ router.post('/rooms/:roomId/messages', authenticateToken, async (req, res) => {
       return res.status(403).json({ message: 'Students cannot post in the announcements channel' });
     }
 
-    const messageId = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-
     const newMessage = new ChatMessage({
-      id: messageId,
-      chatRoomId: roomId,
-      senderId: req.user.id,
+      chatRoom: room._id,
       senderName: req.user.name,
       senderEmail: userEmail,
       senderRole: req.user.role,
@@ -351,7 +347,7 @@ router.delete('/rooms/:roomId', authenticateToken, async (req, res) => {
     await ChatRoom.updateOne({ id: roomId }, { $addToSet: { deletedBy: userEmail } });
 
     // add user email to message delete list
-    await ChatMessage.updateMany({ chatRoomId: roomId }, { $addToSet: { deletedBy: userEmail } });
+    await ChatMessage.updateMany({ chatRoom: room._id }, { $addToSet: { deletedBy: userEmail } });
 
     // if both deleted then remove from database
     const updatedRoom = await ChatRoom.findOne({ id: roomId });
@@ -360,7 +356,7 @@ router.delete('/rooms/:roomId', authenticateToken, async (req, res) => {
         updatedRoom.deletedBy.includes(p.toLowerCase())
       );
       if (allDeleted) {
-        await ChatMessage.deleteMany({ chatRoomId: roomId });
+        await ChatMessage.deleteMany({ chatRoom: room._id });
         await ChatRoom.deleteOne({ id: roomId });
       }
     }
