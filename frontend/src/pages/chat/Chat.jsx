@@ -449,16 +449,29 @@ export default function Chat() {
               <form onSubmit={handleSendMessage} className="message-form">
                 {/* emoji quick drawer */}
                 <div className="quick-emojis">
-                  {['👍', '❤️', '😂', '🔥', '👏', '🙌', '💡', '✅'].map(emoji => (
-                    <button 
-                      key={emoji}
-                      type="button" 
-                      className="emoji-btn" 
-                      onClick={() => handleQuickEmoji(emoji)}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+                  {['👍', '❤️', '😂', '🔥', '👏', '🙌', '💡', '✅'].map(emoji => {
+                    const emojiIconMap = {
+                      '👍': 'emoji-thumbsup',
+                      '❤️': 'emoji-heart',
+                      '😂': 'emoji-joy',
+                      '🔥': 'emoji-fire',
+                      '👏': 'emoji-clap',
+                      '🙌': 'emoji-hands',
+                      '💡': 'emoji-bulb',
+                      '✅': 'emoji-check'
+                    };
+                    return (
+                      <button 
+                        key={emoji}
+                        type="button" 
+                        className="emoji-btn" 
+                        onClick={() => handleQuickEmoji(emoji)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}
+                      >
+                        <Icon name={emojiIconMap[emoji]} width={20} height={20} />
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="input-controls-row">

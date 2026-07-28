@@ -17,9 +17,25 @@ import sunIcon from '../assets/icons/sun.png'
 import moonIcon from '../assets/icons/moon.png'
 import linkedinIcon from '../assets/icons/linkedin.png'
 import githubIcon from '../assets/icons/github.png'
+import emojiThumbsup from '../assets/icons/emoji-thumbsup.png'
+import emojiHeart from '../assets/icons/emoji-heart.png'
+import emojiJoy from '../assets/icons/emoji-joy.png'
+import emojiFire from '../assets/icons/emoji-fire.png'
+import emojiClap from '../assets/icons/emoji-clap.png'
+import emojiHands from '../assets/icons/emoji-hands.png'
+import emojiBulb from '../assets/icons/emoji-bulb.png'
+import emojiCheck from '../assets/icons/emoji-check.png'
 
 export default function Icon({ name, width = 20, height = 20, className = "", style = {} }) {
   const iconMap = {
+    'emoji-thumbsup': emojiThumbsup,
+    'emoji-heart': emojiHeart,
+    'emoji-joy': emojiJoy,
+    'emoji-fire': emojiFire,
+    'emoji-clap': emojiClap,
+    'emoji-hands': emojiHands,
+    'emoji-bulb': emojiBulb,
+    'emoji-check': emojiCheck,
     room: roomIcon,
     bed: roomIcon,
     fee: feeIcon,
@@ -52,6 +68,28 @@ export default function Icon({ name, width = 20, height = 20, className = "", st
     moon: moonIcon,
     linkedin: linkedinIcon,
     github: githubIcon
+  }
+
+  if (name === 'instagram') {
+    return (
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={width} 
+        height={height} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className} 
+        style={{ display: 'inline-block', verticalAlign: 'middle', ...style }}
+      >
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+      </svg>
+    );
   }
 
   if (name === 'chat' || name === 'message' || name === 'message-square') {

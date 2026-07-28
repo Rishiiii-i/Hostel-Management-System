@@ -127,15 +127,26 @@
   filter: invert(1);
 }
 
+.footer-social-link svg {
+  stroke: currentColor;
+  transition: all 0.3s ease;
+  display: block;
+}
+
 .footer-social-link:hover {
   background: #1e6b51;
   border-color: #34d399;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(52, 211, 153, 0.15);
+  color: #ffffff;
 }
 
 .footer-social-link:hover img {
   filter: invert(1) brightness(1.5);
+  transform: scale(1.05);
+}
+
+.footer-social-link:hover svg {
   transform: scale(1.05);
 }
 

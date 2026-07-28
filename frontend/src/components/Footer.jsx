@@ -25,6 +25,9 @@ export default function Footer() {
               <a href="https://github.com/Dileep-Kumar-D4" target="_blank" rel="noopener noreferrer" className="footer-social-link" aria-label="GitHub">
                 <Icon name="github" width={18} height={18} />
               </a>
+              <a href="https://www.instagram.com/bale.dileepkumar/" target="_blank" rel="noopener noreferrer" className="footer-social-link" aria-label="Instagram">
+                <Icon name="instagram" width={18} height={18} />
+              </a>
             </div>
           </div>
 
