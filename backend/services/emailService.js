@@ -36,7 +36,8 @@ function getTransporter() {
       auth: {
         user: gmailUser,
         pass: gmailPass
-      }
+      },
+      tls: { rejectUnauthorized: false }
     });
   }
 

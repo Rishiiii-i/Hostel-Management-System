@@ -356,9 +356,21 @@ router.post('/notifications/read', authenticateToken, async (req, res) => {
   try {
     if (!isDbConnected()) return res.status(200).json({ message: 'Success' });
     
-    const { category } = req.body;
+    const { category, id } = req.body;
     
-    if (category) {
+    if (id) {
+      const user = await User.findOne({ email: req.user.email.toLowerCase() });
+      if (user && user.notifications) {
+        user.notifications.forEach(n => {
+          const generatedId = n.id || n.messageId || (n._id ? n._id.toString() : '');
+          if (n.id === id || n.messageId === id || generatedId === id) {
+            n.read = true;
+          }
+        });
+        user.markModified('notifications');
+        await user.save();
+      }
+    } else if (category) {
       const keyword = category.toLowerCase();
       const user = await User.findOne({ email: req.user.email.toLowerCase() });
       if (user && user.notifications) {

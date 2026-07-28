@@ -31,7 +31,7 @@ router.get('/rooms', authenticateToken, async (req, res) => {
       roomObj.unreadCount = unreadCount;
 
       // add other user details
-      const otherEmail = room.participants.find(p => p.toLowerCase() !== userEmail);
+      const otherEmail = room.participants.find(p => p && p.toLowerCase() !== userEmail);
       if (otherEmail) {
         const recipient = await User.findOne({ email: otherEmail.toLowerCase() });
         if (recipient) {
@@ -145,6 +145,12 @@ router.post('/rooms/dm', authenticateToken, async (req, res) => {
         updatedAt: new Date()
       });
       await room.save();
+    } else {
+      // if room already exists, make sure to un-delete it for the sender
+      if (room.deletedBy.includes(userEmail)) {
+        room.deletedBy = room.deletedBy.filter(email => email.toLowerCase() !== userEmail);
+        await room.save();
+      }
     }
 
     const roomObj = room.toObject();
@@ -277,30 +283,33 @@ router.post('/rooms/:roomId/messages', authenticateToken, async (req, res) => {
     };
     room.updatedAt = new Date();
 
-    // make room show up for other user
-    const recipientEmail = room.participants.find(p => p.toLowerCase() !== userEmail);
-    if (recipientEmail && room.deletedBy.includes(recipientEmail.toLowerCase())) {
-      room.deletedBy = room.deletedBy.filter(email => email.toLowerCase() !== recipientEmail.toLowerCase());
-    }
+    const recipientEmail = room.participants.find(p => p && p.toLowerCase() !== userEmail);
+    // make room show up for both users if they sent a message
+    room.deletedBy = [];
 
     await room.save();
 
     // add message notification to other user list in database
     if (recipientEmail) {
       try {
-        const recipientUser = await User.findOne({ email: recipientEmail.toLowerCase() });
-        if (recipientUser) {
-          const chatNotification = {
-            id: 'notif-' + Date.now(),
-            title: `New Message from ${req.user.name}`,
-            text: text || 'Shared a file',
-            time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            read: false
-          };
-          recipientUser.notifications.unshift(chatNotification);
-          recipientUser.markModified('notifications');
-          await recipientUser.save();
-        }
+        const chatNotification = {
+          id: 'notif-' + Date.now(),
+          title: `New Message from ${req.user.name}`,
+          text: text || 'Shared a file',
+          time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          read: false
+        };
+        await User.updateOne(
+          { email: recipientEmail.toLowerCase() },
+          { 
+            $push: { 
+              notifications: { 
+                $each: [chatNotification], 
+                $position: 0 
+              } 
+            } 
+          }
+        );
       } catch (dbErr) {
         console.error('Failed to save notification in database:', dbErr);
       }
