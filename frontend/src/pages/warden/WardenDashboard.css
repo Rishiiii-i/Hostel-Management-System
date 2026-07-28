@@ -337,3 +337,27 @@ html.dark .donut-inner {
 .legend-dot.amber { background: #f59e0b; }
 .legend-dot.blue { background: #3b82f6; }
 .legend-dot.green { background: #10b981; }
+
+/* Lock layout height and prevent double scrollbars on warden dashboard */
+body:has(.warden-dashboard-page) {
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+
+body:has(.warden-dashboard-page) .dashboard-container {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}
+
+body:has(.warden-dashboard-page) .dashboard-main {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}
+
+body:has(.warden-dashboard-page) .dashboard-content {
+  height: calc(100vh - 80px) !important;
+  overflow-y: auto !important;
+}

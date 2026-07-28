@@ -39,7 +39,7 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
     setShowNotifications(!showNotifications);
   };
 
-  const handleNotificationClick = (item) => {
+  const handleNotificationClick = async (item) => {
     markAsRead(item.id);
     if (profile && profile.notifications) {
       const updatedNotifications = profile.notifications.map((n, idx) => {
@@ -56,9 +56,23 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
     }
     setShowNotifications(false);
     navigateFromNotification(item, setActiveTab);
+
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('http://localhost:5000/api/student/notifications/read', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id: item.id })
+      });
+    } catch (err) {
+      console.error('Failed to sync notification read status to backend:', err);
+    }
   };
 
-  const handleMarkAllRead = () => {
+  const handleMarkAllRead = async () => {
     markAllAsRead();
     if (profile && profile.notifications) {
       const updatedNotifications = profile.notifications.map(n => ({ ...n, read: true }));
@@ -66,6 +80,20 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
         ...prev,
         notifications: updatedNotifications
       }));
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('http://localhost:5000/api/student/notifications/read', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({})
+      });
+    } catch (err) {
+      console.error('Failed to sync mark all read to backend:', err);
     }
   };
 

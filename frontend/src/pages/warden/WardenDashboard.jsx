@@ -15,7 +15,7 @@ export default function WardenDashboard({ activeTab = 'overview', setActiveTab, 
   const currentTab = validTabs.includes(activeTab) ? activeTab : 'overview'
 
   return (
-    <div className="warden-dashboard-page">
+    <div className={currentTab === 'chat' ? "admin-dashboard-page" : "warden-dashboard-page"}>
       {currentTab === 'overview' && <WardenOverview setActiveTab={setActiveTab} />}
       {currentTab === 'attendance' && <WardenAttendance />}
       {currentTab === 'rooms' && <WardenRooms />}

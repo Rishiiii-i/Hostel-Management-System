@@ -15,6 +15,8 @@ import checkmarkIcon from '../assets/icons/checkmark.png'
 import googleIcon from '../assets/icons/google.png'
 import sunIcon from '../assets/icons/sun.png'
 import moonIcon from '../assets/icons/moon.png'
+import linkedinIcon from '../assets/icons/linkedin.png'
+import githubIcon from '../assets/icons/github.png'
 
 export default function Icon({ name, width = 20, height = 20, className = "", style = {} }) {
   const iconMap = {
@@ -47,7 +49,9 @@ export default function Icon({ name, width = 20, height = 20, className = "", st
     checkmark: checkmarkIcon,
     google: googleIcon,
     sun: sunIcon,
-    moon: moonIcon
+    moon: moonIcon,
+    linkedin: linkedinIcon,
+    github: githubIcon
   }
 
   if (name === 'chat' || name === 'message' || name === 'message-square') {

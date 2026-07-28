@@ -116,11 +116,6 @@ export default function WardenOverview({ setActiveTab }) {
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ padding: '40px 0', textAlign: 'center', fontWeight: 600, color: '#557162' }}>
-          Loading dashboard metrics...
-        </div>
-      ) : (
         <>
           {/* 4 top vibrant cards */}
           <div className="owner-stat-grid">
@@ -334,7 +329,6 @@ export default function WardenOverview({ setActiveTab }) {
             )}
           </div>
         </>
-      )}
     </div>
   )
 }

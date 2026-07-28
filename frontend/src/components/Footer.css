@@ -97,6 +97,65 @@
   background: #34d399;
 }
 
+/* Social links styling */
+.footer-socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #14271c;
+  color: #9cb4a6;
+  border: 1px solid #1f3a2c;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-social-link img {
+  filter: invert(75%) brightness(1.1);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.footer-social-link[aria-label="LinkedIn"] img {
+  filter: invert(1);
+}
+
+.footer-social-link:hover {
+  background: #1e6b51;
+  border-color: #34d399;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.15);
+}
+
+.footer-social-link:hover img {
+  filter: invert(1) brightness(1.5);
+  transform: scale(1.05);
+}
+
+/* Bottom bar policy links styling */
+.footer-bottom-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-bottom-links a {
+  font-size: 13px;
+  color: #728d7e;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-bottom-links a:hover {
+  color: #34d399;
+}
+
 @media (max-width: 850px) {
   .footer-top-grid {
     grid-template-columns: 1fr 1fr;
@@ -122,4 +181,162 @@
   .footer-brand-col {
     grid-column: span 1;
   }
+}
+
+/* Modal backdrop styling */
+.footer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(8, 16, 12, 0.75);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Modal box styling */
+.footer-modal-content {
+  background: #0f1c15;
+  color: #e5eee8;
+  border: 1px solid #1c3327;
+  border-radius: 20px;
+  width: min(650px, calc(100% - 32px));
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(52, 211, 153, 0.05);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Header styling */
+.footer-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid #1c3327;
+}
+
+.footer-modal-header h3 {
+  font: 700 20px 'Manrope', sans-serif;
+  color: #ffffff;
+  margin: 0;
+}
+
+.footer-modal-close {
+  background: none;
+  border: none;
+  color: #9cb4a6;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-modal-close:hover {
+  color: #34d399;
+  transform: scale(1.1);
+}
+
+/* Body (scrollable content) */
+.footer-modal-body {
+  padding: 28px;
+  overflow-y: auto;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #9cb4a6;
+  text-align: left;
+}
+
+.footer-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.footer-modal-body::-webkit-scrollbar-track {
+  background: #0b1510;
+}
+
+.footer-modal-body::-webkit-scrollbar-thumb {
+  background: #1c3327;
+  border-radius: 4px;
+}
+
+.footer-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #34d399;
+}
+
+.modal-lead {
+  font-size: 13.5px;
+  color: #728d7e;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-style: italic;
+}
+
+.footer-modal-body section {
+  margin-bottom: 24px;
+}
+
+.footer-modal-body h4 {
+  font: 700 15.5px 'Manrope', sans-serif;
+  color: #ffffff;
+  margin: 0 0 10px;
+}
+
+.footer-modal-body p {
+  margin: 0 0 12px;
+}
+
+.footer-modal-body ul {
+  margin: 0 0 16px;
+  padding-left: 20px;
+}
+
+.footer-modal-body li {
+  margin-bottom: 8px;
+}
+
+/* Footer of modal */
+.footer-modal-footer {
+  padding: 18px 28px 24px;
+  border-top: 1px solid #1c3327;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.footer-modal-btn {
+  background: #1e6b51;
+  color: #ffffff;
+  border: 1px solid #34d399;
+  padding: 10px 24px;
+  border-radius: 99px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.footer-modal-btn:hover {
+  background: #34d399;
+  color: #0f1c15;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.2);
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

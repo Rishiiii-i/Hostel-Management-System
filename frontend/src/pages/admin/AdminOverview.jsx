@@ -66,15 +66,7 @@ export default function AdminOverview({ setActiveTab }) {
     ? `conic-gradient(#f59e0b 0% ${pendingEnd}%, #3b82f6 ${pendingEnd}% ${inProgressEnd}%, #10b981 ${inProgressEnd}% 100%)`
     : '#e2e8f0'
 
-  if (loading) {
-    return (
-      <div style={{ display: 'grid', placeItems: 'center', minHeight: '300px' }}>
-        <div className="owner-refresh-btn" style={{ padding: '16px 24px', borderRadius: '12px' }}>
-          Loading admin overview data...
-        </div>
-      </div>
-    )
-  }
+
 
   return (
     <div className="tab-pane animate-fade-in-slide-up">
