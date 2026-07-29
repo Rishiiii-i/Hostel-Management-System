@@ -4,6 +4,16 @@ import Icon from '../components/Icon'
 import { useAuth } from '../context/AuthContext'
 import Chat from './chat/Chat'
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 export default function StudentDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
   const { user, updateProfileName, updateUserData } = useAuth()
   const fileInputRef = useRef(null)
@@ -73,6 +83,16 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' })
   const [upiId, setUpiId] = useState('')
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [showRazorpaySimulator, setShowRazorpaySimulator] = useState(false)
+  const [simulatorMethod, setSimulatorMethod] = useState('upi')
+  const [simCardNumber, setSimCardNumber] = useState('')
+  const [simCardExpiry, setSimCardExpiry] = useState('')
+  const [simCardCvv, setSimCardCvv] = useState('')
+  const [simUpiAddress, setSimUpiAddress] = useState('')
+  const [paymentStep, setPaymentStep] = useState('form') // 'form', 'otp', 'success'
+  const [otpCode, setOtpCode] = useState('')
+  const [receiptData, setReceiptData] = useState(null)
+  const [cardFlip, setCardFlip] = useState(false)
 
   // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
@@ -587,79 +607,200 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const handleOpenPayModal = () => {
     setPaymentPeriod('Hostel Fee');
     setPayAmount(feeDetails.dueFee.toString());
+    setPaymentStep('form');
+    setOtpCode('');
+    setReceiptData(null);
+    setCardFlip(false);
     setShowPayModal(true);
+  };
+
+  const handleSimulatorSuccess = async () => {
+    const paymentId = `pay_sim_${Math.floor(100000 + Math.random() * 900000)}`;
+    setIsProcessingPayment(true);
+    setShowRazorpaySimulator(false);
+    try {
+      const res = await fetchWithAuth('http://localhost:5000/api/student/transactions', {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: payAmount,
+          period: paymentPeriod,
+          paymentId: paymentId
+        })
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setTransactions([saved, ...transactions]);
+        setReceiptData(saved);
+        
+        const amountPaid = Number(payAmount) || 0;
+        
+        if (['Hostel Fee', 'Mess Fee', 'Utility Bill', 'Amenity Fee', 'Other Charges'].includes(paymentPeriod)) {
+          setFeeDetails(prev => {
+            const newPaid = prev.paidFee + amountPaid;
+            const newDue = Math.max(0, prev.totalFee - newPaid);
+            const isCleared = newDue <= 0;
+            const nextStatus = isCleared ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Unpaid');
+            
+            setFeePaid(isCleared);
+
+            const updatedProfile = {
+              ...profile,
+              paidFee: newPaid,
+              dueFee: newDue,
+              feeStatus: nextStatus
+            };
+            if (setProfile) setProfile(updatedProfile);
+            localStorage.setItem('shm_user_profile', JSON.stringify(updatedProfile));
+            
+            return {
+              ...prev,
+              paidFee: newPaid,
+              dueFee: newDue,
+              feeStatus: nextStatus
+            };
+          });
+        }
+        setPaymentStep('success');
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Fee Payment Completed',
+              body: `Payment of ₹${payAmount} transacted successfully via Razorpay.`
+            },
+            data: { type: 'fee', targetScreen: 'fee', targetHash: '#dashboard' }
+          }
+        }));
+      } else {
+        const errData = await res.json();
+        alert(errData.message || 'Failed to process payment.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to connect to backend server for verification.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const handlePayFee = async (e) => {
     if (e) e.preventDefault();
+    
     setIsProcessingPayment(true);
     
-    setTimeout(async () => {
-      try {
-        const res = await fetchWithAuth('http://localhost:5000/api/student/transactions', {
-          method: 'POST',
-          body: JSON.stringify({
-            amount: payAmount,
-            period: paymentPeriod
-          })
-        });
-        if (res.ok) {
-          const saved = await res.json();
-          setTransactions([saved, ...transactions]);
-          
-          const amountPaid = Number(payAmount) || 0;
-          
-          if (['Hostel Fee', 'Mess Fee', 'Utility Bill', 'Amenity Fee', 'Other Charges'].includes(paymentPeriod)) {
-            setFeeDetails(prev => {
-              const newPaid = prev.paidFee + amountPaid;
-              const newDue = Math.max(0, prev.totalFee - newPaid);
-              const isCleared = newDue <= 0;
-              const nextStatus = isCleared ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Unpaid');
-              
-              setFeePaid(isCleared);
-
-              // instantly update parent state and localstorage to prevent desync on refresh
-              const updatedProfile = {
-                ...profile,
-                paidFee: newPaid,
-                dueFee: newDue,
-                feeStatus: nextStatus
-              };
-              if (setProfile) setProfile(updatedProfile);
-              localStorage.setItem('shm_user_profile', JSON.stringify(updatedProfile));
-              
-              return {
-                ...prev,
-                paidFee: newPaid,
-                dueFee: newDue,
-                feeStatus: nextStatus
-              };
-            });
-          }
-
-          setShowPayModal(false);
-          setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
-          setUpiId('');
-          window.dispatchEvent(new CustomEvent('shm:new_notification', {
-            detail: {
-              notification: {
-                title: 'Fee Payment Completed',
-                body: `Payment of ₹${payAmount} processed successfully.`
-              },
-              data: { type: 'fee', targetScreen: 'fee', targetHash: '#dashboard' }
-            }
-          }));
-        } else {
-          const errData = await res.json();
-          alert(errData.message || 'Failed to process payment.');
-        }
-      } catch (err) {
-        console.error('Failed to submit fee payment:', err);
-      } finally {
-        setIsProcessingPayment(false);
+    let razorpayKey = 'rzp_test_HILw76iG5K3s2f';
+    try {
+      const keyRes = await fetch('http://localhost:5000/api/payment/key');
+      if (keyRes.ok) {
+        const keyData = await keyRes.json();
+        if (keyData.key) razorpayKey = keyData.key;
       }
-    }, 1500);
-  }
+    } catch (keyErr) {
+      console.warn('Failed to fetch Razorpay key from backend, using default dummy key.', keyErr);
+    }
+
+    if (razorpayKey === 'rzp_test_HILw76iG5K3s2f') {
+      setIsProcessingPayment(false);
+      setShowPayModal(false);
+      setShowRazorpaySimulator(true);
+      return;
+    }
+
+    const loaded = await loadRazorpayScript();
+    if (!loaded) {
+      alert('Razorpay Checkout SDK failed to load. Are you connected to the internet?');
+      setIsProcessingPayment(false);
+      return;
+    }
+
+    const options = {
+      key: razorpayKey,
+      amount: Math.round(Number(payAmount) * 100),
+      currency: 'INR',
+      name: 'Smart Hostel System',
+      description: `${paymentPeriod} Checkout`,
+      image: 'https://cdn-icons-png.flaticon.com/512/1042/1042308.png',
+      handler: async function (response) {
+        const paymentId = response.razorpay_payment_id;
+        try {
+          const res = await fetchWithAuth('http://localhost:5000/api/student/transactions', {
+            method: 'POST',
+            body: JSON.stringify({
+              amount: payAmount,
+              period: paymentPeriod,
+              paymentId: paymentId
+            })
+          });
+          if (res.ok) {
+            const saved = await res.json();
+            setTransactions([saved, ...transactions]);
+            setReceiptData(saved);
+            
+            const amountPaid = Number(payAmount) || 0;
+            
+            if (['Hostel Fee', 'Mess Fee', 'Utility Bill', 'Amenity Fee', 'Other Charges'].includes(paymentPeriod)) {
+              setFeeDetails(prev => {
+                const newPaid = prev.paidFee + amountPaid;
+                const newDue = Math.max(0, prev.totalFee - newPaid);
+                const isCleared = newDue <= 0;
+                const nextStatus = isCleared ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Unpaid');
+                
+                setFeePaid(isCleared);
+
+                const updatedProfile = {
+                  ...profile,
+                  paidFee: newPaid,
+                  dueFee: newDue,
+                  feeStatus: nextStatus
+                };
+                if (setProfile) setProfile(updatedProfile);
+                localStorage.setItem('shm_user_profile', JSON.stringify(updatedProfile));
+                
+                return {
+                  ...prev,
+                  paidFee: newPaid,
+                  dueFee: newDue,
+                  feeStatus: nextStatus
+                };
+              });
+            }
+            setPaymentStep('success');
+            window.dispatchEvent(new CustomEvent('shm:new_notification', {
+              detail: {
+                notification: {
+                  title: 'Fee Payment Completed',
+                  body: `Payment of ₹${payAmount} transacted successfully via Razorpay.`
+                },
+                data: { type: 'fee', targetScreen: 'fee', targetHash: '#dashboard' }
+              }
+            }));
+          } else {
+            const errData = await res.json();
+            alert(errData.message || 'Failed to process payment.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Failed to connect to backend server for verification.');
+        } finally {
+          setIsProcessingPayment(false);
+        }
+      },
+      prefill: {
+        name: profile?.fullName || profile?.name || 'Student',
+        email: profile?.email || ''
+      },
+      theme: {
+        color: '#10b981'
+      },
+      modal: {
+        ondismiss: function () {
+          setIsProcessingPayment(false);
+        }
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
 
   return (
     <div className="student-dashboard-page">
@@ -1440,186 +1581,180 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
 
       {/* modals */}
       {showPayModal && (
-        <div className="modal-backdrop modal-pay-fee animate-fade-in">
-          <div className="modal-box animate-scale-in">
-            <h3>Pay Fee Dues</h3>
-            {isProcessingPayment ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 0', gap: '16px' }}>
-                <div style={{ width: '40px', height: '40px', border: '4px solid rgba(16, 185, 129, 0.2)', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                <p style={{ fontWeight: 600, color: '#557162', margin: 0 }}>Processing secure payment...</p>
+        <div className="modal-backdrop modal-pay-fee animate-fade-in" style={{ zIndex: 10000 }}>
+          <div className="modal-box animate-scale-in" style={{ maxWidth: '520px', borderRadius: '24px', padding: '32px', border: '1px solid #e2e8f0', boxShadow: '0 20px 40px rgba(15,23,42,0.1)' }}>
+            
+            {/* Payment Headers */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>Secure Checkout</h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748b' }}>Powered by SmartPay Gateway</p>
               </div>
-            ) : (
-              <form onSubmit={handlePayFee}>
-                <label className="form-label">
-                  Payment Category
-                  <select
-                    value={paymentPeriod}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setPaymentPeriod(val);
-                      if (val === 'Hostel Fee') {
-                        setPayAmount(feeDetails.dueFee.toString());
-                      } else if (val === 'Mess Fee') {
-                        setPayAmount('3000.00');
-                      } else if (val === 'Utility Bill') {
-                        setPayAmount('800.00');
-                      } else if (val === 'Amenity Fee') {
-                        setPayAmount('1200.00');
-                      } else {
-                        setPayAmount('1000.00');
-                      }
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                      color: '#1e293b',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      marginTop: '6px',
-                      marginBottom: '14px',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <option value="Hostel Fee">Hostel Fee (Dues: ₹{feeDetails.dueFee})</option>
-                    <option value="Mess Fee">Mess Fee</option>
-                    <option value="Utility Bill">Utility Bill (Electricity, Water, Wifi)</option>
-                    <option value="Amenity Fee">Amenity Fee (Gym, Laundry)</option>
-                    <option value="Other Charges">Other Charges</option>
-                  </select>
-                </label>
+              <button 
+                onClick={() => { setShowPayModal(false); setPaymentStep('form'); }}
+                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}
+              >
+                ✕
+              </button>
+            </div>
 
-                <label className="form-label">
-                  Amount (₹)
-                  <input
-                    type="number"
-                    value={payAmount}
-                    onChange={(e) => setPayAmount(e.target.value)}
-                    required
-                  />
-                </label>
-                
-                <div className="payment-options" style={{ display: 'flex', gap: '20px', margin: '16px 0' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      checked={paymentMethod === 'card'} 
-                      onChange={() => setPaymentMethod('card')} 
-                    /> 
-                    Credit / Debit Card
+            {isProcessingPayment ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: '20px' }}>
+                <div className="spinner-loader" style={{ width: '48px', height: '48px', border: '4px solid rgba(16, 185, 129, 0.1)', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin-loader 0.8s linear infinite' }}></div>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontWeight: 700, color: '#1e293b', margin: 0, fontSize: '15px' }}>Verifying Transaction Details...</p>
+                  <p style={{ margin: '6px 0 0 0', fontSize: '13px', color: '#64748b' }}>Please do not close this window or refresh the page.</p>
+                </div>
+                <style>{`
+                  @keyframes spin-loader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                `}</style>
+              </div>
+            ) : paymentStep === 'form' ? (
+              <form onSubmit={handlePayFee}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                  <label className="form-label" style={{ margin: 0 }}>
+                    Payment Category
+                    <select
+                      value={paymentPeriod}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setPaymentPeriod(val);
+                        if (val === 'Hostel Fee') {
+                          setPayAmount(feeDetails.dueFee.toString());
+                        } else if (val === 'Mess Fee') {
+                          setPayAmount('3000.00');
+                        } else if (val === 'Utility Bill') {
+                          setPayAmount('800.00');
+                        } else if (val === 'Amenity Fee') {
+                          setPayAmount('1200.00');
+                        } else {
+                          setPayAmount('1000.00');
+                        }
+                      }}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', fontSize: '14px', marginTop: '6px', outline: 'none' }}
+                    >
+                      <option value="Hostel Fee">Hostel Fee (Dues: ₹{feeDetails.dueFee})</option>
+                      <option value="Mess Fee">Mess Fee</option>
+                      <option value="Utility Bill">Utility Bill (Electricity, Water, Wifi)</option>
+                      <option value="Amenity Fee">Amenity Fee (Gym, Laundry)</option>
+                      <option value="Other Charges">Other Charges</option>
+                    </select>
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      checked={paymentMethod === 'upi'} 
-                      onChange={() => setPaymentMethod('upi')} 
-                    /> 
-                    UPI ID
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', cursor: 'pointer' }}>
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      checked={paymentMethod === 'qr'} 
-                      onChange={() => setPaymentMethod('qr')} 
-                    /> 
-                    QR Code
+
+                  <label className="form-label" style={{ margin: 0 }}>
+                    Amount (₹)
+                    <input
+                      type="number"
+                      value={payAmount}
+                      onChange={(e) => setPayAmount(e.target.value)}
+                      required
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', marginTop: '6px', outline: 'none', boxSizing: 'border-box' }}
+                    />
                   </label>
                 </div>
+                
+                {/* Razorpay Integration Info */}
+                <div style={{ marginTop: '24px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                  <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay Logo" style={{ height: '24px', margin: '0 auto 10px auto', display: 'block' }} />
+                  <p style={{ margin: 0, fontSize: '13px', color: '#475569', fontWeight: 500 }}>
+                    Safe & Secure transaction processed via Razorpay Secure Gateway.
+                  </p>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#94a3b8' }}>
+                    Supports Cards, UPI, Netbanking, and Wallets
+                  </p>
+                </div>
 
-                {paymentMethod === 'card' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-                    <label className="form-label" style={{ margin: 0 }}>
-                      Cardholder Name
-                      <input
-                        type="text"
-                        placeholder="Enter the cardholder name"
-                        value={cardDetails.name}
-                        onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
-                        required
-                      />
-                    </label>
-                    <label className="form-label" style={{ margin: 0 }}>
-                      Card Number
-                      <input
-                        type="text"
-                        maxLength="19"
-                        placeholder="Enter the 16 digit card number"
-                        value={cardDetails.number}
-                        onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-                        required
-                      />
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <label className="form-label" style={{ margin: 0 }}>
-                        Expiry Date
-                        <input
-                          type="text"
-                          maxLength="5"
-                          placeholder="Enter the expiry date (MM/YY)"
-                          value={cardDetails.expiry}
-                          onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                          required
-                        />
-                      </label>
-                      <label className="form-label" style={{ margin: 0 }}>
-                        CVV
-                        <input
-                          type="password"
-                          maxLength="3"
-                          placeholder="Enter the 3 digit CVV"
-                          value={cardDetails.cvv}
-                          onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                          required
-                        />
-                      </label>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === 'upi' && (
-                  <div style={{ marginBottom: '16px' }}>
-                    <label className="form-label">
-                      UPI ID
-                      <input
-                        type="text"
-                        placeholder="Enter the UPI ID (username@upi)"
-                        value={upiId}
-                        onChange={(e) => setUpiId(e.target.value)}
-                        required
-                      />
-                    </label>
-                  </div>
-                )}
-
-                {paymentMethod === 'qr' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '16px', padding: '10px', background: '#f9fbf9', borderRadius: '14px', border: '1px solid #e1e9e2' }}>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#557162', textAlign: 'center' }}>
-                      Scan the QR code with GPay, PhonePe, or any UPI app to pay ₹{payAmount}.
-                    </p>
-                    <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=smarthostel@upi%26pn=SmartHostel%26am=${payAmount}%26cu=INR`}
-                      alt="Payment QR Code" 
-                      style={{ width: '150px', height: '150px', border: '4px solid #ffffff', borderRadius: '8px', boxShadow: '0 4px 12px rgba(18, 55, 38, 0.08)' }} 
-                    />
-                    <p style={{ margin: 0, fontSize: '12px', color: '#8ca295', fontStyle: 'italic' }}>
-                      UPI ID: smarthostel@upi
-                    </p>
-                  </div>
-                )}
-
-                <div className="modal-actions" style={{ marginTop: '24px' }}>
-                  <button type="button" className="btn-secondary" onClick={() => setShowPayModal(false)}>Cancel</button>
-                  <button type="submit" className="btn-pay-fee">Pay Now</button>
+                <div className="modal-actions" style={{ marginTop: '28px', display: 'flex', gap: '12px' }}>
+                  <button type="button" className="btn-secondary" onClick={() => setShowPayModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px' }}>Cancel</button>
+                  <button type="submit" className="btn-pay-fee" style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontWeight: 600, border: 'none', cursor: 'pointer' }}>Proceed to Payment</button>
                 </div>
               </form>
+            ) : (
+              // Styled Success Receipt Block
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '56px', height: '56px', borderRadius: '50%', background: '#d1fae5', color: '#10b981', fontSize: '24px', marginBottom: '14px', animation: 'scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>✓</div>
+                  <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#065f46' }}>Payment Approved!</h4>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Your receipt has been generated successfully.</p>
+                </div>
+
+                {/* Printable Invoice Details */}
+                <div id="payment-invoice-receipt" style={{ background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', fontFamily: 'monospace', fontSize: '12px', color: '#334155', display: 'flex', flexDirection: 'column', gap: '10px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)' }}>
+                  <div style={{ textAlign: 'center', borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px', marginBottom: '6px' }}>
+                    <strong style={{ fontSize: '13px', color: '#0f172a' }}>SMART HOSTEL SYSTEM</strong>
+                    <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>OFFICIAL TRANSACTION INVOICE</div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>RECEIPT ID:</span>
+                    <strong>{receiptData?.id || 'TXN-UNKNOWN'}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>DATE & TIME:</span>
+                    <strong>{receiptData?.date || new Date().toISOString().split('T')[0]}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>STUDENT EMAIL:</span>
+                    <strong>{receiptData?.studentEmail || profile.email}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>PAYMENT CATEGORY:</span>
+                    <strong>{receiptData?.period || paymentPeriod}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>METHOD:</span>
+                    <strong style={{ textTransform: 'uppercase' }}>{paymentMethod} checkout</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>GATEWAY STATUS:</span>
+                    <strong style={{ color: '#10b981' }}>PAID / SETTLED</strong>
+                  </div>
+                  <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '12px', marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#0f172a' }}>
+                    <strong>AMOUNT TRANSACTED:</strong>
+                    <strong>{receiptData?.amount || `₹${payAmount}`}</strong>
+                  </div>
+                </div>
+
+                <div className="modal-actions" style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const printContent = document.getElementById('payment-invoice-receipt').innerHTML;
+                      const originalContent = document.body.innerHTML;
+                      const printWindow = window.open('', '', 'height=500,width=500');
+                      printWindow.document.write('<html><head><title>Receipt Print</title>');
+                      printWindow.document.write('</head><body style="font-family:monospace;padding:30px;">');
+                      printWindow.document.write(printContent);
+                      printWindow.document.write('</body></html>');
+                      printWindow.document.close();
+                      printWindow.print();
+                    }}
+                    style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#f1f5f9', color: '#475569', fontWeight: 600, border: '1px solid #cbd5e1', cursor: 'pointer' }}
+                  >
+                    Print Receipt
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-pay-fee" 
+                    onClick={() => { setShowPayModal(false); setPaymentStep('form'); }} 
+                    style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontWeight: 600, border: 'none', cursor: 'pointer' }}
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
             )}
           </div>
+          <style>{`
+            @keyframes scan-line {
+              0% { top: 0%; }
+              50% { top: 100%; }
+              100% { top: 0%; }
+            }
+            @keyframes scaleUp {
+              from { transform: scale(0.8); opacity: 0; }
+              to { transform: scale(1); opacity: 1; }
+            }
+          `}</style>
         </div>
       )}
 
@@ -1729,6 +1864,161 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 <button type="submit" className="btn-ask-gatepass">Submit Request</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {showRazorpaySimulator && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+          <div style={{ width: '100%', maxWidth: '380px', background: '#ffffff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.2)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
+            
+            {/* Header */}
+            <div style={{ background: '#092444', color: '#ffffff', padding: '20px 24px', position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold' }}>
+                  H
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#ffffff' }}>Smart Hostel System</h3>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#94a3b8' }}>{paymentPeriod} Checkout</p>
+                </div>
+              </div>
+              <div style={{ marginTop: '16px', fontSize: '20px', fontWeight: 700 }}>
+                ₹{parseFloat(payAmount).toLocaleString()}
+              </div>
+            </div>
+
+            {/* Selector */}
+            <div style={{ display: 'flex', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              {['upi', 'card', 'netbanking'].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setSimulatorMethod(m)}
+                  style={{
+                    flex: 1,
+                    padding: '12px 6px',
+                    border: 'none',
+                    background: 'transparent',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: simulatorMethod === m ? '#2563eb' : '#64748b',
+                    borderBottom: simulatorMethod === m ? '2px solid #2563eb' : '2px solid transparent',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  {m === 'upi' ? 'UPI' : m === 'card' ? 'Card' : 'Net Banking'}
+                </button>
+              ))}
+            </div>
+
+            {/* Form Details */}
+            <div style={{ padding: '24px 24px 16px 24px' }}>
+              {simulatorMethod === 'upi' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>UPI ID / VPA</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. success@razorpay"
+                    value={simUpiAddress}
+                    onChange={(e) => setSimUpiAddress(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '13px', outline: 'none' }}
+                  />
+                  <p style={{ margin: '8px 0 0 0', fontSize: '11px', color: '#64748b', fontStyle: 'italic' }}>
+                    Tip: Enter any UPI ID to proceed.
+                  </p>
+                </div>
+              )}
+
+              {simulatorMethod === 'card' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Card Number</label>
+                    <input
+                      type="text"
+                      maxLength="16"
+                      placeholder="4381 2345 6789 1111"
+                      value={simCardNumber}
+                      onChange={(e) => setSimCardNumber(e.target.value.replace(/\D/g, ''))}
+                      style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '13px', outline: 'none' }}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Expiry</label>
+                      <input
+                        type="text"
+                        maxLength="5"
+                        placeholder="MM/YY"
+                        value={simCardExpiry}
+                        onChange={(e) => {
+                          let val = e.target.value;
+                          if (val.length === 2 && !val.includes('/')) val += '/';
+                          setSimCardExpiry(val);
+                        }}
+                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '13px', outline: 'none' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>CVV</label>
+                      <input
+                        type="password"
+                        maxLength="3"
+                        placeholder="123"
+                        value={simCardCvv}
+                        onChange={(e) => setSimCardCvv(e.target.value.replace(/\D/g, ''))}
+                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '13px', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {simulatorMethod === 'netbanking' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Popular Banks</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    {['SBI', 'HDFC', 'ICICI', 'Axis'].map(b => (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => alert(`Selected ${b} Netbanking.`)}
+                        style={{ padding: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '11px', fontWeight: 500, borderRadius: '4px', cursor: 'pointer', textAlign: 'center' }}
+                      >
+                        {b}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Buttons */}
+            <div style={{ padding: '0 24px 24px 24px' }}>
+              <button
+                type="button"
+                onClick={handleSimulatorSuccess}
+                style={{ width: '100%', padding: '12px', background: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '4px', fontWeight: 600, fontSize: '13px', cursor: 'pointer', boxShadow: '0 2px 4px rgba(37,99,235,0.2)' }}
+              >
+                Pay ₹{parseFloat(payAmount).toLocaleString()}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowRazorpaySimulator(false)}
+                style={{ width: '100%', padding: '10px', background: 'transparent', color: '#64748b', border: 'none', fontSize: '11px', fontWeight: 500, cursor: 'pointer', marginTop: '6px' }}
+              >
+                Cancel Payment
+              </button>
+            </div>
+
+            {/* Razorpay Footer */}
+            <div style={{ background: '#f1f5f9', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Secured by</span>
+              <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay logo" style={{ height: '14px' }} />
+              <span style={{ fontSize: '9px', color: '#092444', fontWeight: 'bold' }}>Razorpay</span>
+            </div>
+
           </div>
         </div>
       )}

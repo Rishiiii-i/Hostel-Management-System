@@ -18,6 +18,11 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
       icon: <Icon name="home" width="18" height="18" />
     },
     {
+      id: 'hostels',
+      label: 'Hostels',
+      icon: <Icon name="building" width="18" height="18" />
+    },
+    {
       id: 'students',
       label: 'Students',
       icon: <Icon name="user" width="18" height="18" />
@@ -57,6 +62,11 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
       id: 'overview',
       label: 'Dashboard',
       icon: <Icon name="home" width="18" height="18" />
+    },
+    {
+      id: 'hostels',
+      label: 'Hostels',
+      icon: <Icon name="building" width="18" height="18" />
     },
     {
       id: 'attendance',

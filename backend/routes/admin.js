@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { User, Room, Complaint, Transaction, Notice } from '../db.js';
+import { User, Room, Complaint, Transaction, Notice, Hostel } from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { FCMService } from '../services/fcmService.js';
 import { notificationQueue } from '../services/notificationQueue.js';
@@ -421,6 +421,126 @@ router.delete('/students/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
+// get all hostels
+router.get('/hostels', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    if (!isDbConnected()) return res.status(200).json([]);
+    const hostels = await Hostel.find({}).sort({ name: 1 });
+    res.status(200).json(hostels);
+  } catch (error) {
+    console.error('Error fetching hostels:', error);
+    res.status(500).json({ message: 'Error fetching hostels list' });
+  }
+});
+
+// register a new hostel and automatically generate its rooms
+router.post('/hostels', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
+    const { name, block, totalFloors, roomsPerFloor, roomCapacity, fee, type, description } = req.body;
+
+    if (!name || !block) {
+      return res.status(400).json({ message: 'Hostel name and block are required' });
+    }
+
+    const existingHostel = await Hostel.findOne({ block });
+    if (existingHostel) {
+      return res.status(400).json({ message: `A hostel block named "${block}" already exists` });
+    }
+
+    const hostelId = `HST-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newHostel = new Hostel({
+      id: hostelId,
+      name,
+      block,
+      totalFloors: Number(totalFloors) || 4,
+      roomsPerFloor: Number(roomsPerFloor) || 20,
+      roomCapacity: Number(roomCapacity) || 4,
+      fee: Number(fee) || 45000,
+      type: type || 'Boys',
+      description: description || ''
+    });
+
+    await newHostel.save();
+
+    // Automatically generate rooms
+    const generatedRooms = [];
+    const capacity = Number(roomCapacity) || 4;
+    const floorsCount = Number(totalFloors) || 4;
+    const roomsCount = Number(roomsPerFloor) || 20;
+
+    for (let f = 1; f <= floorsCount; f++) {
+      const suffix = f === 1 ? 'st' : f === 2 ? 'nd' : f === 3 ? 'rd' : 'th';
+      const floorStr = `${f}${suffix} Floor`;
+      for (let r = 1; r <= roomsCount; r++) {
+        // room numbers: 101, 102 ... 120, 201 ... 220, etc.
+        const roomNoVal = `${f}${r < 10 ? '0' : ''}${r}`;
+        const roomId = `RM-${block.replace(/\s+/g, '')}-${roomNoVal}`;
+
+        // Ensure room doesn't exist
+        const existingRoom = await Room.findOne({ id: roomId });
+        if (!existingRoom) {
+          const newRoom = new Room({
+            id: roomId,
+            roomNo: roomNoVal,
+            block: block,
+            capacity: capacity,
+            status: 'Vacant',
+            occupants: [],
+            occupantName: '',
+            occupantEmail: '',
+            floor: floorStr,
+            type: `${capacity}-Sharing`,
+            hostelId: hostelId
+          });
+          await newRoom.save();
+          generatedRooms.push(newRoom);
+        }
+      }
+    }
+
+    res.status(201).json({ hostel: newHostel, roomsCount: generatedRooms.length });
+  } catch (error) {
+    console.error('Error adding hostel:', error);
+    res.status(500).json({ message: 'Error registering hostel' });
+  }
+});
+
+// delete a hostel and clean up its generated rooms
+router.delete('/hostels/:id', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    if (!isDbConnected()) return res.status(200).json({ message: 'Database offline' });
+    const { id } = req.params;
+
+    const hostel = await Hostel.findOne({ id });
+    if (!hostel) {
+      return res.status(404).json({ message: 'Hostel not found' });
+    }
+
+    // delete all associated rooms and deallocate occupant students
+    const rooms = await Room.find({ hostelId: id });
+    for (const room of rooms) {
+      if (room.occupants && room.occupants.length > 0) {
+        for (const occ of room.occupants) {
+          const student = await User.findOne({ email: occ.email.toLowerCase() });
+          if (student) {
+            student.room = '';
+            student.block = '';
+            await student.save();
+          }
+        }
+      }
+      await Room.deleteOne({ id: room.id });
+    }
+
+    await Hostel.deleteOne({ id });
+    res.status(200).json({ message: 'Hostel and associated rooms deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting hostel:', error);
+    res.status(500).json({ message: 'Error deleting hostel' });
+  }
+});
+
 // get all rooms
 router.get('/rooms', authenticateToken, isAdmin, async (req, res) => {
   try {
@@ -517,26 +637,44 @@ router.post('/rooms/allocate', authenticateToken, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Room not found' });
     }
 
-    if (status === 'Vacant' || !occupantEmail) {
+    roomDoc.occupants = roomDoc.occupants || [];
+
+    if (status === 'Vacant') {
       // deallocate
-      const oldEmail = roomDoc.occupantEmail;
-      if (oldEmail) {
-        const student = await User.findOne({ email: oldEmail.toLowerCase() });
+      if (occupantEmail) {
+        const emailToRemove = occupantEmail.toLowerCase();
+        roomDoc.occupants = roomDoc.occupants.filter(o => o.email.toLowerCase() !== emailToRemove);
+        
+        const student = await User.findOne({ email: emailToRemove });
         if (student) {
-          student.room = null;
-          student.block = null;
+          student.room = '';
+          student.block = '';
           await student.save();
         }
+      } else {
+        // clear all
+        for (const occ of roomDoc.occupants) {
+          const student = await User.findOne({ email: occ.email.toLowerCase() });
+          if (student) {
+            student.room = '';
+            student.block = '';
+            await student.save();
+          }
+        }
+        roomDoc.occupants = [];
       }
 
-      roomDoc.status = 'Vacant';
-      roomDoc.occupantName = null;
-      roomDoc.occupantEmail = null;
+      roomDoc.status = roomDoc.occupants.length > 0 ? 'Occupied' : 'Vacant';
+      roomDoc.occupantName = roomDoc.occupants.map(o => o.name).join(', ') || null;
+      roomDoc.occupantEmail = roomDoc.occupants.map(o => o.email).join(', ') || null;
       await roomDoc.save();
 
       return res.status(200).json({ message: 'Room deallocated successfully', room: roomDoc });
     } else {
       // allocate
+      if (!occupantEmail) {
+        return res.status(400).json({ message: 'Occupant email is required for allocation' });
+      }
       const student = await User.findOne({ email: occupantEmail.toLowerCase() });
       if (!student) {
         return res.status(404).json({ message: 'No registered student found with this email' });
@@ -544,22 +682,33 @@ router.post('/rooms/allocate', authenticateToken, isAdmin, async (req, res) => {
 
       // check if student is already in a room
       if (student.room) {
-        const otherRoom = await Room.findOne({ roomNo: student.room });
+        const otherRoom = await Room.findOne({ roomNo: student.room, block: student.block });
         if (otherRoom) {
-          otherRoom.status = 'Vacant';
-          otherRoom.occupantName = null;
-          otherRoom.occupantEmail = null;
+          otherRoom.occupants = (otherRoom.occupants || []).filter(o => o.email.toLowerCase() !== student.email.toLowerCase());
+          otherRoom.status = otherRoom.occupants.length > 0 ? 'Occupied' : 'Vacant';
+          otherRoom.occupantName = otherRoom.occupants.map(o => o.name).join(', ') || null;
+          otherRoom.occupantEmail = otherRoom.occupants.map(o => o.email).join(', ') || null;
           await otherRoom.save();
         }
+      }
+
+      // Check if room is full
+      const capacity = roomDoc.capacity || 4;
+      const isAlreadyOccupant = roomDoc.occupants.some(o => o.email.toLowerCase() === student.email.toLowerCase());
+      if (!isAlreadyOccupant) {
+        if (roomDoc.occupants.length >= capacity) {
+          return res.status(400).json({ message: 'Room is already fully occupied' });
+        }
+        roomDoc.occupants.push({ name: student.name, email: student.email });
       }
 
       student.room = roomDoc.roomNo;
       student.block = roomDoc.block;
       await student.save();
 
-      roomDoc.status = 'Occupied';
-      roomDoc.occupantName = student.name;
-      roomDoc.occupantEmail = student.email;
+      roomDoc.status = roomDoc.occupants.length >= capacity ? 'Occupied' : 'Vacant';
+      roomDoc.occupantName = roomDoc.occupants.map(o => o.name).join(', ');
+      roomDoc.occupantEmail = roomDoc.occupants.map(o => o.email).join(', ');
       await roomDoc.save();
 
       return res.status(200).json({ message: 'Room allocated successfully', room: roomDoc });

@@ -257,7 +257,7 @@ router.get('/transactions', authenticateToken, async (req, res) => {
 // add a payment transaction
 router.post('/transactions', authenticateToken, async (req, res) => {
   try {
-    const { amount, period } = req.body;
+    const { amount, period, paymentId } = req.body;
     const parsedAmount = Number(amount) || 0;
     
     if (!isDbConnected()) {
@@ -270,7 +270,7 @@ router.post('/transactions', authenticateToken, async (req, res) => {
     }
 
     const newTxnData = {
-      id: `TXN-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: paymentId || `TXN-${Math.floor(1000 + Math.random() * 9000)}`,
       studentEmail: student.email.toLowerCase(),
       period: period || 'Hostel Fee',
       amount: `₹${parsedAmount}`,
@@ -287,6 +287,30 @@ router.post('/transactions', authenticateToken, async (req, res) => {
       student.dueFee = Math.max(0, (student.totalFee || 45000) - student.paidFee);
       student.feeStatus = student.dueFee <= 0 ? 'Paid' : (student.paidFee > 0 ? 'Partial' : 'Unpaid');
       await student.save();
+
+      // allocate room to occupants list if payment is completed
+      if (student.feeStatus === 'Paid' && student.room) {
+        const room = await Room.findOne({ roomNo: student.room, block: student.block });
+        if (room) {
+          room.occupants = room.occupants || [];
+          const isAlreadyOccupant = room.occupants.some(o => o.email.toLowerCase() === student.email.toLowerCase());
+          if (!isAlreadyOccupant) {
+            room.occupants.push({ name: student.name, email: student.email });
+            
+            const capacity = room.capacity || 4;
+            if (room.occupants.length >= capacity) {
+              room.status = 'Occupied';
+            } else if (room.occupants.length > 0) {
+              room.status = 'Available';
+            } else {
+              room.status = 'Vacant';
+            }
+            room.occupantName = room.occupants.map(o => o.name).join(', ') || null;
+            room.occupantEmail = room.occupants.map(o => o.email).join(', ') || null;
+            await room.save();
+          }
+        }
+      }
 
       // dispatch notifications to warden and admin
       try {

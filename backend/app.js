@@ -27,6 +27,11 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Smart Hostel backend server is running' });
 });
 
+// get razorpay public key
+app.get('/api/payment/key', (req, res) => {
+  res.status(200).json({ key: process.env.RAZORPAY_KEY_ID || 'rzp_test_HILw76iG5K3s2f' });
+});
+
 // global error handling middleware
 app.use((err, req, res, next) => {
   if (err.type === 'entity.too.large') {

@@ -192,15 +192,39 @@ const roomSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   roomNo: { type: String, required: true },
   block: { type: String, required: true },
-  capacity: { type: Number, default: 2 },
-  status: { type: String, enum: ['Occupied', 'Vacant'], default: 'Vacant' },
+  capacity: { type: Number, default: 4 },
+  status: { type: String, enum: ['Occupied', 'Vacant', 'Available'], default: 'Vacant' },
+  occupants: {
+    type: [{
+      name: String,
+      email: String
+    }],
+    default: []
+  },
   occupantName: { type: String, default: null },
   occupantEmail: { type: String, default: null },
   floor: { type: String, default: '1st Floor' },
-  type: { type: String, default: '2-Sharing' }
+  type: { type: String, default: '4-Sharing' },
+  hostelId: { type: String, default: null }
 });
 
 const Room = mongoose.model('Room', roomSchema);
+
+// hostel schema
+const hostelSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  block: { type: String, required: true },
+  totalFloors: { type: Number, required: true, default: 4 },
+  roomsPerFloor: { type: Number, required: true, default: 20 },
+  roomCapacity: { type: Number, required: true, default: 4 },
+  fee: { type: Number, required: true, default: 45000 },
+  type: { type: String, enum: ['Boys', 'Girls', 'Co-ed'], default: 'Boys' },
+  description: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Hostel = mongoose.model('Hostel', hostelSchema);
 
 // notice schema
 const noticeSchema = new mongoose.Schema({
@@ -518,6 +542,7 @@ export {
   MessMenu,
   ChatRoom,
   ChatMessage,
+  Hostel,
   findUserByEmail,
   createUser
 };
