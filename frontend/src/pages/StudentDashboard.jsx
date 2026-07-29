@@ -969,7 +969,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             <div className="dash-card">
               <div className="card-title-badge">
                 <h3>Assigned Room Info</h3>
-                <span className="status-badge paid">Occupied</span>
+                <span className={`status-badge ${feePaid ? 'paid' : 'pending'}`}>{feePaid ? 'Occupied' : 'Pending'}</span>
               </div>
               <div className="room-info-grid">
                 <div className="info-row">
@@ -998,7 +998,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               <div className="room-info-grid">
                 <div className="info-row">
                   <span className="info-label">Resident Status</span>
-                  <strong className="info-val">{profile?.room ? 'Room Allocated' : 'Not Assigned'}</strong>
+                  <strong className="info-val">{profile?.room ? (feePaid ? 'Room Allocated' : 'Pending Payment') : 'Not Assigned'}</strong>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Warden In-Charge</span>

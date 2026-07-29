@@ -183,112 +183,41 @@ export default function WardenRooms() {
     if (e) e.preventDefault()
     if (!occupantEmail || !selectedRoom) return
 
-    if (allocationStep === 'details') {
-      setAllocationStep('pay')
-      return
-    }
-
     setIsProcessingPayment(true)
-
-    let razorpayKey = 'rzp_test_HILw76iG5K3s2f';
     try {
-      const keyRes = await fetch('http://localhost:5000/api/payment/key')
-      if (keyRes.ok) {
-        const keyData = await keyRes.json()
-        if (keyData.key) razorpayKey = keyData.key
-      }
-    } catch (keyErr) {
-      console.warn('Failed to fetch Razorpay key from backend, using default dummy key.', keyErr)
-    }
-
-    if (razorpayKey === 'rzp_test_HILw76iG5K3s2f') {
-      setIsProcessingPayment(false)
-      setShowAllocateModal(false)
-      setShowRazorpaySimulator(true)
-      return
-    }
-
-    const loaded = await loadRazorpayScript()
-    if (!loaded) {
-      alert('Razorpay Checkout SDK failed to load. Are you connected to the internet?')
-      setIsProcessingPayment(false)
-      return
-    }
-
-    const options = {
-      key: razorpayKey,
-      amount: 4500000, // ₹45,000 in paise
-      currency: 'INR',
-      name: 'Smart Hostel System',
-      description: 'Room Allocation & Admission Fee',
-      image: 'https://cdn-icons-png.flaticon.com/512/1042/1042308.png',
-      handler: async function (response) {
-        const paymentId = response.razorpay_payment_id
-        try {
-          const res = await fetchWithAuth('http://localhost:5000/api/warden/rooms/allocate', {
-            method: 'POST',
-            body: JSON.stringify({
-              roomId: selectedRoom.id,
-              occupantEmail: occupantEmail,
-              status: 'Occupied',
-              paymentId: paymentId
-            })
-          })
-          if (res.ok) {
-            const roomData = await res.json()
-            
-            const receipt = {
-              id: paymentId,
-              date: new Date().toISOString().split('T')[0],
-              studentEmail: occupantEmail,
-              period: 'Room Allocation Fee',
-              amount: '₹45,000'
-            }
-            setReceiptData(receipt)
-
-            window.dispatchEvent(new CustomEvent('shm:new_notification', {
-              detail: {
-                notification: {
-                  title: 'Room Allocated',
-                  body: `Room ${selectedRoom.roomNo} allocated to ${occupantEmail} after payment.`
-                },
-                data: { type: 'room', targetScreen: 'profile', targetHash: '#warden-dashboard' }
-              }
-            }))
-            
-            // Refresh rooms list
-            loadRoomsData()
-            
-            setAllocationStep('success')
-          } else {
-            const errData = await res.json()
-            alert(errData.message || 'Failed to allocate room.')
-            setAllocationStep('details')
+      const res = await fetchWithAuth('http://localhost:5000/api/warden/rooms/allocate', {
+        method: 'POST',
+        body: JSON.stringify({
+          roomId: selectedRoom.id,
+          occupantEmail: occupantEmail,
+          status: 'Occupied'
+        })
+      })
+      if (res.ok) {
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Room Assigned',
+              body: `Room ${selectedRoom.roomNo} assigned to ${occupantEmail}.`
+            },
+            data: { type: 'room', targetScreen: 'profile', targetHash: '#warden-dashboard' }
           }
-        } catch (err) {
-          console.error('Failed to allocate room:', err)
-          alert('Allocation verification request failed.')
-          setAllocationStep('details')
-        } finally {
-          setIsProcessingPayment(false)
-        }
-      },
-      prefill: {
-        email: occupantEmail,
-        name: 'Student'
-      },
-      theme: {
-        color: '#10b981'
-      },
-      modal: {
-        ondismiss: function () {
-          setIsProcessingPayment(false)
-        }
+        }))
+        
+        loadRoomsData()
+        setShowAllocateModal(false)
+        setOccupantEmail('')
+        alert('Room assigned successfully! The student can now pay the allocation fee from their student dashboard to confirm.')
+      } else {
+        const errData = await res.json()
+        alert(errData.message || 'Failed to allocate room.')
       }
+    } catch (err) {
+      console.error('Failed to allocate room:', err)
+      alert('Failed to allocate room.')
+    } finally {
+      setIsProcessingPayment(false)
     }
-
-    const rzp = new window.Razorpay(options)
-    rzp.open()
   }
 
   const handleDeallocate = async (room) => {
@@ -637,7 +566,7 @@ export default function WardenRooms() {
                   type="submit"
                   className="btn-purple-primary"
                 >
-                  Configure Room
+                  Save Changes
                 </button>
               </div>
             </form>
@@ -660,7 +589,7 @@ export default function WardenRooms() {
         }}>
           <div className="owner-card-box" style={{ maxWidth: '520px', width: '100%', padding: '32px', borderRadius: '24px', background: '#ffffff', boxShadow: '0 20px 40px rgba(15,23,42,0.1)' }}>
             
-            {/* Modal Header */}
+            {/* modal header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
@@ -677,20 +606,18 @@ export default function WardenRooms() {
               >
                 ✕
               </button>
-            </div>
-
-            {isProcessingPayment ? (
+            </div>            {isProcessingPayment ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: '20px' }}>
-                <div style={{ width: '48px', height: '48px', border: '4px solid rgba(16, 185, 129, 0.1)', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin-loader 0.8s linear infinite' }}></div>
+                <div style={{ width: '48px', height: '48px', border: '4px solid rgba(16, 185, 129, 0.1)', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin-loader 0.8s linear infinite' }}></div>
                 <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontWeight: 700, color: '#1e293b', margin: 0, fontSize: '15px' }}>Verifying Transaction & Allocating Room...</p>
+                  <p style={{ fontWeight: 700, color: '#1e293b', margin: 0, fontSize: '15px' }}>Assigning Room to Student...</p>
                   <p style={{ margin: '6px 0 0 0', fontSize: '13px', color: '#64748b' }}>Please wait, securing database records.</p>
                 </div>
                 <style>{`
                   @keyframes spin-loader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
                 `}</style>
               </div>
-            ) : allocationStep === 'details' ? (
+            ) : (
               <form onSubmit={handleAllocateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>Select Student for Allocation</label>
@@ -719,8 +646,8 @@ export default function WardenRooms() {
                     <strong style={{ color: '#0f172a' }}>{(selectedRoom?.occupants || []).length} / {selectedRoom?.capacity || 4} occupied</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', borderTop: '1px solid #cbd5e1', paddingTop: '8px', marginTop: '8px' }}>
-                    <span style={{ color: '#0f172a', fontWeight: 700 }}>Required Allocation Fee:</span>
-                    <strong style={{ color: '#10b981', fontSize: '15px' }}>₹45,000</strong>
+                    <span style={{ color: '#0f172a', fontWeight: 700 }}>Hostel Admission Fee:</span>
+                    <strong style={{ color: '#10b981', fontSize: '15px' }}>₹45,000 (To be paid by Student)</strong>
                   </div>
                 </div>
 
@@ -736,108 +663,12 @@ export default function WardenRooms() {
                   <button
                     type="submit"
                     className="btn-purple-primary"
-                    style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                    style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#3b82f6', color: '#ffffff', border: 'none', cursor: 'pointer', fontWeight: 600 }}
                   >
-                    Proceed to Payment
+                    Assign Room
                   </button>
                 </div>
               </form>
-            ) : allocationStep === 'pay' ? (
-              <form onSubmit={handleAllocateSubmit}>
-                {/* Razorpay Integration Info */}
-                <div style={{ marginTop: '24px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                  <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay Logo" style={{ height: '24px', margin: '0 auto 10px auto', display: 'block' }} />
-                  <p style={{ margin: 0, fontSize: '13px', color: '#475569', fontWeight: 500 }}>
-                    Safe & Secure transaction processed via Razorpay Secure Gateway.
-                  </p>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#94a3b8' }}>
-                    Supports Cards, UPI, Netbanking, and Wallets
-                  </p>
-                </div>
-
-                <div className="modal-actions" style={{ marginTop: '28px', display: 'flex', gap: '12px' }}>
-                  <button type="button" className="btn-secondary" onClick={() => setAllocationStep('details')} style={{ flex: 1, padding: '12px', borderRadius: '10px' }}>Back</button>
-                  <button type="submit" className="btn-pay-fee" style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontWeight: 600, border: 'none', cursor: 'pointer' }}>Proceed to Payment (₹45,000)</button>
-                </div>
-              </form>
-            ) : (
-              // Receipt view
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ textAlign: 'center', padding: '10px 0' }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '56px', height: '56px', borderRadius: '50%', background: '#d1fae5', color: '#10b981', fontSize: '24px', marginBottom: '14px' }}>✓</div>
-                  <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#065f46' }}>Allocation Confirmed!</h4>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Room allocated and transaction recorded.</p>
-                </div>
-
-                <div id="allocation-invoice-receipt" style={{ background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', fontFamily: 'monospace', fontSize: '12px', color: '#334155', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ textAlign: 'center', borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px', marginBottom: '6px' }}>
-                    <strong style={{ fontSize: '13px', color: '#0f172a' }}>SMART HOSTEL SYSTEM</strong>
-                    <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>OFFICIAL ALLOCATION RECEIPT</div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>TRANSACTION ID:</span>
-                    <strong>{receiptData?.id}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>ALLOCATED DATE:</span>
-                    <strong>{receiptData?.date}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>STUDENT ALLOCATED:</span>
-                    <strong>{receiptData?.studentEmail}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>ROOM NUMBER:</span>
-                    <strong>{selectedRoom?.roomNo}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>BLOCK NAME:</span>
-                    <strong>{selectedRoom?.block}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>FEE CATEGORY:</span>
-                    <strong>Room Allocation Fee</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>METHOD:</span>
-                    <strong style={{ textTransform: 'uppercase' }}>{paymentMethod} checkout</strong>
-                  </div>
-                  <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '12px', marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#0f172a' }}>
-                    <strong>TOTAL PAID:</strong>
-                    <strong>{receiptData?.amount}</strong>
-                  </div>
-                </div>
-
-                <div className="modal-actions" style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      const printContent = document.getElementById('allocation-invoice-receipt').innerHTML;
-                      const printWindow = window.open('', '', 'height=500,width=500');
-                      printWindow.document.write('<html><head><title>Receipt Print</title></head><body style="font-family:monospace;padding:30px;">');
-                      printWindow.document.write(printContent);
-                      printWindow.document.write('</body></html>');
-                      printWindow.document.close();
-                      printWindow.print();
-                    }}
-                    style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#f1f5f9', color: '#475569', fontWeight: 600, border: '1px solid #cbd5e1', cursor: 'pointer' }}
-                  >
-                    Print Receipt
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      setShowAllocateModal(false)
-                      setSelectedRoom(null)
-                      setOccupantEmail('')
-                      loadRoomsData()
-                    }} 
-                    style={{ flex: 1, padding: '12px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontWeight: 600, border: 'none', cursor: 'pointer' }}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
             )}
           </div>
           <style>{`

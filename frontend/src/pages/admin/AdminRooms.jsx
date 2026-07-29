@@ -399,7 +399,7 @@ export default function AdminRooms() {
                   type="submit"
                   className="btn-purple-primary"
                 >
-                  Configure Room
+                  Save Changes
                 </button>
               </div>
             </form>
