@@ -1472,7 +1472,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 </div>
                 <div className="profile-card-details">
                   <h3>{profile?.fullName || 'Student'}</h3>
-                  <span className="profile-roll">{profile?.rollNo || 'Resident'} &bull; Computer Science</span>
+                  <span className="profile-roll">{profile?.rollNo || 'Resident'}</span>
                   <span className="profile-badge-active">Active Student Resident</span>
                 </div>
               </div>
