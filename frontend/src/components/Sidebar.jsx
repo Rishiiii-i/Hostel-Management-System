@@ -4,7 +4,7 @@ import Icon from './Icon'
 import { useAuth } from '../context/AuthContext'
 import { notificationStore } from '../notifications/notificationStore'
 
-export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProfile }) {
+export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProfile, isOpen, onClose }) {
   const { user, logOut } = useAuth()
   const lastCheckedRoomsRef = useRef({})
 
@@ -17,11 +17,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
       label: 'Dashboard',
       icon: <Icon name="home" width="18" height="18" />
     },
-    {
-      id: 'hostels',
-      label: 'Hostels',
-      icon: <Icon name="building" width="18" height="18" />
-    },
+
     {
       id: 'students',
       label: 'Students',
@@ -63,11 +59,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
       label: 'Dashboard',
       icon: <Icon name="home" width="18" height="18" />
     },
-    {
-      id: 'hostels',
-      label: 'Hostels',
-      icon: <Icon name="building" width="18" height="18" />
-    },
+
     {
       id: 'attendance',
       label: 'Attendance',
@@ -333,6 +325,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
 
   const handleLogout = async () => {
     try {
+      if (onClose) onClose();
       await logOut()
     } catch (err) {
       console.error('Logout failed:', err)
@@ -341,6 +334,7 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
 
   const handleTabClick = async (tabId) => {
     setActiveTab(tabId);
+    if (onClose) onClose();
     if (isWarden || isAdmin) return;
 
     let category = null;
@@ -385,12 +379,15 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
     : isAdmin ? 'SA' : isWarden ? 'MR' : 'ST'
 
   return (
-    <aside className="dashboard-sidebar">
-      <div className="sidebar-brand">
+    <aside className={`dashboard-sidebar ${isOpen ? 'is-open' : ''}`}>
+      <div className="sidebar-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
         <button 
           type="button" 
           className="brand" 
-          onClick={() => setActiveTab('overview')}
+          onClick={() => {
+            setActiveTab('overview');
+            if (onClose) onClose();
+          }}
           style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
         >
           <span className="brand-logo-icon">
@@ -398,6 +395,16 @@ export default function Sidebar({ activeTab, setActiveTab, profile = {}, setProf
           </span>
           Smart Hostel
         </button>
+        {onClose && (
+          <button 
+            type="button" 
+            className="sidebar-close-btn" 
+            onClick={onClose}
+            aria-label="Close Sidebar"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav">

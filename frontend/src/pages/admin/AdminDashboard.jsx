@@ -1,6 +1,5 @@
 import './AdminDashboard.css'
 import AdminOverview from './AdminOverview'
-import AdminHostels from './AdminHostels'
 import AdminStudents from './AdminStudents'
 import AdminRooms from './AdminRooms'
 import AdminFees from './AdminFees'
@@ -10,13 +9,12 @@ import AdminNotices from './AdminNotices'
 import Chat from '../chat/Chat'
 
 export default function AdminDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
-  const validTabs = ['overview', 'hostels', 'students', 'rooms', 'fees', 'complaints', 'notices', 'chat', 'profile']
+  const validTabs = ['overview', 'students', 'rooms', 'fees', 'complaints', 'notices', 'chat', 'profile']
   const currentTab = validTabs.includes(activeTab) ? activeTab : 'overview'
 
   return (
     <div className="admin-dashboard-page">
       {currentTab === 'overview' && <AdminOverview setActiveTab={setActiveTab} />}
-      {currentTab === 'hostels' && <AdminHostels />}
       {currentTab === 'students' && <AdminStudents />}
       {currentTab === 'rooms' && <AdminRooms />}
       {currentTab === 'fees' && <AdminFees />}

@@ -25,6 +25,7 @@ export default function MainLayout({ children, activeTab, setActiveTab, profile,
 
 function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProfile }) {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useAuth();
   const { history, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
@@ -117,11 +118,33 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
   return (
     <div className="dashboard-container">
       <NotificationPopup />
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} profile={profile} setProfile={setProfile} />
+      {isSidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setIsSidebarOpen(false)} />
+      )}
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        profile={profile} 
+        setProfile={setProfile} 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
       
       <div className="dashboard-main">
         <header className="dashboard-header">
           <div className="header-left">
+            <button 
+              type="button" 
+              className="sidebar-toggle-btn"
+              onClick={() => setIsSidebarOpen(true)}
+              aria-label="Open Sidebar"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
             <div 
               className="header-title-flex" 
               onClick={() => setActiveTab('overview')}

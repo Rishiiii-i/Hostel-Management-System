@@ -92,6 +92,8 @@ html.dark .tab-subtitle {
   padding: 28px;
   box-shadow: 0 6px 20px rgba(18, 55, 38, 0.03);
   box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
 }
 
 html.dark .dash-card {
@@ -642,28 +644,52 @@ html.dark .fee-amount-display b {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
 }
 
 .fee-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 14px;
   color: #3a5446;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e1ebe2;
+  width: 100%;
+}
+
+.fee-item:last-child {
+  border-bottom: none;
+}
+
+.fee-item strong {
+  color: #1e6b51;
+  font-weight: 700;
+  font-size: 14.5px;
 }
 
 html.dark .fee-item {
   color: #b0c9bb;
+  border-bottom-color: #233e30;
+}
+
+html.dark .fee-item strong {
+  color: #38b387;
 }
 
 /* tables */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  min-width: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .payment-history-scroll-box {
   max-height: 290px;
   overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
   padding-right: 4px;
 }
 
@@ -1147,16 +1173,24 @@ html.dark .modal-actions .btn-secondary {
 
 @media (max-width: 768px) {
   .student-dashboard {
-    padding: 20px;
+    padding: 16px;
   }
   .dashboard-grid-2col,
   .form-grid-2col,
   .attendance-summary-box {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   .tab-title-row {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
+  }
+  .custom-table {
+    min-width: 650px; /* Force scrollbar on mobile instead of squishing and cutting off columns */
+  }
+  .fee-summary-box {
+    padding: 16px;
   }
 }
 

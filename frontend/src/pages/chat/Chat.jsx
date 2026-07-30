@@ -222,7 +222,7 @@ export default function Chat() {
   // dm only mode
 
   return (
-    <div className="chat-workspace-container animate-fade-in-slide-up">
+    <div className={`chat-workspace-container animate-fade-in-slide-up ${activeRoom ? 'has-active-room' : ''}`}>
       {/* left sidebar chats */}
       <div className="chat-sidebar-panel">
         <div className="chat-sidebar-header">
@@ -311,6 +311,13 @@ export default function Chat() {
           <>
             {/* active room header */}
             <div className="chat-header-bar">
+              <button 
+                type="button" 
+                className="chat-back-btn" 
+                onClick={() => setActiveRoom(null)}
+              >
+                &larr; Back
+              </button>
               <div className="active-room-details">
                 <div className="active-avatar-wrapper">
                   {activeRoom.recipient?.photo ? (

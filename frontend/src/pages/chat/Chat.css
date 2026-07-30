@@ -1234,3 +1234,61 @@ html.dark .btn-delete-chat:hover {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
 }
+
+/* Responsive mobile chat screen */
+.chat-back-btn {
+  display: none; /* hidden on desktop */
+  background: none;
+  border: none;
+  color: #1e6b51;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+  transition: all 0.2s ease;
+}
+
+.chat-back-btn:hover {
+  background-color: #f0f7f2;
+}
+
+html.dark .chat-back-btn {
+  color: #38b387;
+}
+
+html.dark .chat-back-btn:hover {
+  background-color: #1c3327;
+}
+
+@media (max-width: 960px) {
+  .chat-back-btn {
+    display: inline-flex;
+  }
+  
+  .chat-workspace-container {
+    flex-direction: column;
+    height: calc(100vh - 102px) !important;
+  }
+
+  /* When no room is active, hide feed and show sidebar */
+  .chat-workspace-container:not(.has-active-room) .chat-sidebar-panel {
+    display: flex !important;
+    width: 100% !important;
+  }
+  .chat-workspace-container:not(.has-active-room) .chat-workspace-feed {
+    display: none !important;
+  }
+
+  /* When a room is active, show feed and hide sidebar */
+  .chat-workspace-container.has-active-room .chat-sidebar-panel {
+    display: none !important;
+  }
+  .chat-workspace-container.has-active-room .chat-workspace-feed {
+    display: flex !important;
+    width: 100% !important;
+  }
+}

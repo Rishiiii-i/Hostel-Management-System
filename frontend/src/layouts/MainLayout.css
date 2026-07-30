@@ -391,3 +391,118 @@ html.dark .notification-item p {
   align-self: flex-end;
   margin-top: 2px;
 }
+
+/* Sidebar mobile backdrop */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  transition: opacity 0.3s ease;
+}
+
+/* Sidebar toggle button (hidden on desktop) */
+.sidebar-toggle-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #1e6b51;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #f0f7f2;
+}
+
+html.dark .sidebar-toggle-btn {
+  color: #38b387;
+}
+
+html.dark .sidebar-toggle-btn:hover {
+  background-color: #1c3327;
+}
+
+/* Sidebar close button inside sidebar header (hidden on desktop) */
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.sidebar-close-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+html.dark .sidebar-close-btn:hover {
+  background-color: #1e2d24;
+  color: #f8fafc;
+}
+
+/* Responsive queries */
+@media (max-width: 960px) {
+  .sidebar-toggle-btn {
+    display: flex;
+  }
+  
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  .dashboard-header {
+    padding: 0 16px;
+    height: 70px;
+  }
+
+  .dashboard-content {
+    padding: 16px;
+    height: calc(100vh - 70px);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-date {
+    display: none; /* Hide date on small screens */
+  }
+
+  .header-search {
+    display: none; /* Hide search bar on mobile headers */
+  }
+
+  .dashboard-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh !important;
+    z-index: 1000 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15) !important;
+  }
+
+  .dashboard-sidebar.is-open {
+    transform: translateX(0) !important;
+  }
+}
