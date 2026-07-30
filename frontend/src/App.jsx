@@ -60,7 +60,8 @@ function App() {
       room: '',
       block: '',
       rollNo: '',
-      photo: ''
+      photo: '',
+      is2FAEnabled: false
     }
   })
 
@@ -85,7 +86,8 @@ function App() {
           emergencyContact: user.emergencyContact !== undefined ? user.emergencyContact : (isDifferentUser ? '' : prev.emergencyContact),
           room: user.room !== undefined ? user.room : (isDifferentUser ? '' : prev.room),
           block: user.block !== undefined ? user.block : (isDifferentUser ? '' : prev.block),
-          rollNo: user.rollNo !== undefined ? user.rollNo : (isDifferentUser ? '' : prev.rollNo)
+          rollNo: user.rollNo !== undefined ? user.rollNo : (isDifferentUser ? '' : prev.rollNo),
+          is2FAEnabled: user.is2FAEnabled !== undefined ? user.is2FAEnabled : (isDifferentUser ? false : prev.is2FAEnabled)
         }
         try {
           localStorage.setItem('shm_user_profile', JSON.stringify(updated))
@@ -102,7 +104,8 @@ function App() {
         room: '',
         block: '',
         rollNo: '',
-        photo: ''
+        photo: '',
+        is2FAEnabled: false
       });
     }
   }, [user])

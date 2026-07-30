@@ -219,7 +219,8 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
             totalFee: totalF,
             paidFee: paidF,
             dueFee: dueF,
-            notifications: profileData.notifications || []
+            notifications: profileData.notifications || [],
+            is2FAEnabled: profileData.is2FAEnabled || false
           };
           if (setProfile) setProfile(mappedProfile);
           localStorage.setItem('shm_user_profile', JSON.stringify(mappedProfile));
