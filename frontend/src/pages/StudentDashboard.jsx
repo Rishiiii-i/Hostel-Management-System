@@ -15,7 +15,7 @@ const loadRazorpayScript = () => {
 };
 
 export default function StudentDashboard({ activeTab = 'overview', setActiveTab, profile, setProfile }) {
-  const { user, updateProfileName, updateUserData } = useAuth()
+  const { user, updateProfileName, updateUserData, logOut } = useAuth()
   const fileInputRef = useRef(null)
   const [complaints, setComplaints] = useState([])
   const [gatePasses, setGatePasses] = useState([])
@@ -93,6 +93,54 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
   const [otpCode, setOtpCode] = useState('')
   const [receiptData, setReceiptData] = useState(null)
   const [cardFlip, setCardFlip] = useState(false)
+  const [isToggling2FA, setIsToggling2FA] = useState(false)
+  const [twoFactorMessage, setTwoFactorMessage] = useState('')
+
+  const handleToggle2FA = async () => {
+    setIsToggling2FA(true);
+    setTwoFactorMessage('');
+    const targetState = !profile?.is2FAEnabled;
+    try {
+      const response = await fetchWithAuth('http://localhost:5000/api/student/toggle-2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is2FAEnabled: targetState })
+      });
+      
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to toggle 2FA status');
+      }
+
+      // Update the user profile locally
+      const updatedProfile = { ...profile, is2FAEnabled: targetState };
+      setProfile(updatedProfile);
+      updateUserData({ is2FAEnabled: targetState });
+
+      if (targetState) {
+        // Turning ON 2FA: start 3s logout countdown
+        let seconds = 3;
+        setTwoFactorMessage(`2FA successfully enabled! Logging out in ${seconds} seconds...`);
+        const interval = setInterval(() => {
+          seconds -= 1;
+          if (seconds > 0) {
+            setTwoFactorMessage(`2FA successfully enabled! Logging out in ${seconds} seconds...`);
+          } else {
+            clearInterval(interval);
+            logOut(true, '#login'); // logout without confirmation popup and redirect to login page
+          }
+        }, 1000);
+      } else {
+        // Turning OFF 2FA: just show success message
+        setTwoFactorMessage('2FA has been successfully disabled.');
+        setTimeout(() => setTwoFactorMessage(''), 4000);
+      }
+    } catch (err) {
+      alert(err.message || 'An error occurred while changing 2FA settings.');
+    } finally {
+      setIsToggling2FA(false);
+    }
+  };
 
   // helper for requests with auth token
   const fetchWithAuth = async (url, options = {}) => {
@@ -1485,6 +1533,49 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
               </div>
             </div>
 
+            <div className="dash-card" style={{ display: 'flex', flexDirection: 'column', padding: '12px 20px', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ padding: '6px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.1)', display: 'grid', placeItems: 'center' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary, #1e293b)' }}>2-Factor Authentication (2FA):</span>
+                  <span className={profile?.is2FAEnabled ? "profile-badge-active" : ""} style={{ backgroundColor: profile?.is2FAEnabled ? '#d1fae5' : '#f1f5f9', color: profile?.is2FAEnabled ? '#065f46' : '#64748b', padding: '2px 8px', borderRadius: '99px', fontSize: '10.5px', fontWeight: 800 }}>
+                    {profile?.is2FAEnabled ? 'ENABLED' : 'DISABLED'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  disabled={isToggling2FA}
+                  onClick={handleToggle2FA}
+                  style={{
+                    background: profile?.is2FAEnabled ? '#fee2e2' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: profile?.is2FAEnabled ? '#dc2626' : '#ffffff',
+                    border: profile?.is2FAEnabled ? '1px solid #fecaca' : 'none',
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '12.5px',
+                    cursor: 'pointer',
+                    boxShadow: profile?.is2FAEnabled ? 'none' : '0 3px 8px rgba(16, 185, 129, 0.15)',
+                    transition: 'all 0.2s ease',
+                    opacity: isToggling2FA ? 0.7 : 1
+                  }}
+                >
+                  {profile?.is2FAEnabled ? 'Disable' : 'Enable'}
+                </button>
+              </div>
+              {twoFactorMessage && (
+                <div className="alert-success-box animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', backgroundColor: '#ecfdf5', border: '1px solid #10b981', borderRadius: '8px', color: '#065f46', fontSize: '12.5px', margin: '4px 0 0 0' }}>
+                  <Icon name="checkmark" width="14" height="14" />
+                  <span>{twoFactorMessage}</span>
+                </div>
+              )}
+            </div>
+
             <div className="dash-card settings-form-card">
               <h3>Personal &amp; Contact Details</h3>
               <form onSubmit={handleSaveProfile} className="settings-form">
@@ -1575,6 +1666,7 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
                 </div>
               </form>
             </div>
+
           </div>
         </div>
       )}

@@ -482,4 +482,43 @@ router.get('/mess/menu', authenticateToken, async (req, res) => {
   }
 });
 
+// Toggle 2FA status for student
+router.post('/toggle-2fa', authenticateToken, async (req, res) => {
+  try {
+    const { is2FAEnabled } = req.body;
+
+    if (typeof is2FAEnabled !== 'boolean') {
+      return res.status(400).json({ message: 'is2FAEnabled must be a boolean value' });
+    }
+
+    if (!isDbConnected()) {
+      return res.status(200).json({ 
+        message: `2FA (decoupled) is now turned ${is2FAEnabled ? 'ON' : 'OFF'}`,
+        is2FAEnabled 
+      });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email: req.user.email.toLowerCase() },
+      { is2FAEnabled },
+      { returnDocument: 'after' }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.status(200).json({
+      message: `2FA is now turned ${is2FAEnabled ? 'ON' : 'OFF'}`,
+      user: userObj
+    });
+  } catch (error) {
+    console.error('Failed to toggle 2FA:', error);
+    res.status(500).json({ message: 'Failed to toggle 2FA status' });
+  }
+});
+
 export default router;

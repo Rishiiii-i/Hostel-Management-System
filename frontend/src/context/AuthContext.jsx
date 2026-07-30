@@ -167,12 +167,18 @@ export const AuthProvider = ({ children }) => {
         setFirebaseUser(fbUser);
         try {
           const syncedUser = await syncUserWithBackend(fbUser);
-          // Only automatically log in without OTP if user is non-student OR has already verified 2FA token
+          // Only automatically log in without OTP if user is non-student OR doesn't have 2FA enabled OR has already verified 2FA token
           const cachedUser = localStorage.getItem('user');
           const cachedToken = localStorage.getItem('token');
 
           if (syncedUser.role === 'student') {
-            if (cachedUser && cachedToken) {
+            if (syncedUser.is2FAEnabled === false) {
+              // 2FA is disabled, direct login
+              const fbToken = await fbUser.getIdToken().catch(() => 'token');
+              localStorage.setItem('token', cachedToken || fbToken);
+              localStorage.setItem('user', JSON.stringify(syncedUser));
+              setUser(syncedUser);
+            } else if (cachedUser && cachedToken) {
               setUser(JSON.parse(cachedUser));
             } else {
               // Student needs 2FA verification
@@ -201,6 +207,7 @@ export const AuthProvider = ({ children }) => {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           localStorage.removeItem('shm_user_profile');
+          localStorage.removeItem('pending_otp_email');
           setUser(null);
         }
         setLoading(false);
@@ -212,13 +219,14 @@ export const AuthProvider = ({ children }) => {
 
   const handlePostAuthentication = async (syncedUser, email) => {
     const isStudent = !syncedUser.role || syncedUser.role === 'student';
+    const needs2FA = isStudent && syncedUser.is2FAEnabled === true;
 
-    if (isStudent) {
+    if (needs2FA) {
       // Require 2FA OTP for Student Dashboard
       await sendOtp(email);
       return { requires2FA: true, email, user: syncedUser };
     } else {
-      // Warden / Admin proceed without 2FA
+      // Warden / Admin / Student with 2FA disabled proceed without 2FA
       localStorage.setItem('user', JSON.stringify(syncedUser));
       setUser(syncedUser);
       setLoading(false);
@@ -333,9 +341,11 @@ export const AuthProvider = ({ children }) => {
     await updateUserData({ name: newName });
   };
 
-  const logOut = async () => {
-    const confirmed = window.confirm('Are you sure you want to logout?');
-    if (!confirmed) return;
+  const logOut = async (bypassConfirm = false, redirectHash = '#home') => {
+    if (!bypassConfirm) {
+      const confirmed = window.confirm('Are you sure you want to logout?');
+      if (!confirmed) return;
+    }
 
     const oldToken = localStorage.getItem('token');
     try {
@@ -354,7 +364,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setFirebaseUser(null);
       setLoading(false);
-      window.location.hash = '#home';
+      window.location.hash = redirectHash;
     }
   };
 
