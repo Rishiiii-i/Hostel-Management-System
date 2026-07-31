@@ -1,5 +1,5 @@
 import './MainLayout.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Sidebar from '../components/Sidebar'
 import Icon from '../components/Icon'
 import { useAuth } from '../context/AuthContext'
@@ -7,6 +7,8 @@ import { NotificationProvider, useNotifications } from '../notifications/Notific
 import NotificationPopup from '../notifications/NotificationPopup'
 import { notificationService } from '../notifications/notificationService'
 import { navigateFromNotification } from '../utils/deepLinking'
+import Chatbot from '../components/Chatbot'
+import { notificationStore } from '../notifications/notificationStore'
 
 export default function MainLayout({ children, activeTab, setActiveTab, profile, setProfile }) {
   return (
@@ -28,11 +30,80 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user } = useAuth();
   const { history, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const profileRef = useRef(profile);
+
+  // keep profileRef updated
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (user && token) {
       notificationService.initialize(token);
+
+      // Start background polling for notifications
+      const fetchNotifications = async () => {
+        try {
+          const res = await fetch('http://127.0.0.1:5000/api/notifications', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (res.ok) {
+            const data = await res.json(); // Array of notifications from user document
+            if (Array.isArray(data)) {
+              // Compare with existing notification IDs to find new ones
+              const currentHistoryIds = new Set((notificationStore.history || []).map(n => n.id));
+              const currentDbIds = new Set((profileRef.current?.notifications || []).map(n => n.id));
+
+              let hasNew = false;
+              // Iterate in reverse (oldest to newest) to show them in chronological order
+              const reversedData = [...data].reverse();
+              for (const notif of reversedData) {
+                const notifId = notif.id;
+                if (notifId && !currentHistoryIds.has(notifId) && !currentDbIds.has(notifId)) {
+                  // This is a new notification that we haven't seen in the UI store
+                  notificationStore.addNotification({
+                    id: notifId,
+                    notification: {
+                      title: notif.title,
+                      body: notif.text || notif.body
+                    },
+                    data: {
+                      title: notif.title,
+                      body: notif.text || notif.body,
+                      type: 'general',
+                      id: notifId
+                    }
+                  });
+                  hasNew = true;
+                }
+              }
+
+              if (hasNew || data.length !== (profileRef.current?.notifications || []).length) {
+                // Update profile notifications to keep bell list in sync
+                setProfile(prev => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    notifications: data
+                  };
+                });
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error polling notifications:', err);
+        }
+      };
+
+      // Poll immediately and then every 10 seconds
+      fetchNotifications();
+      const intervalId = setInterval(fetchNotifications, 10000);
+      return () => {
+        clearInterval(intervalId);
+      };
     }
   }, [user]);
 
@@ -60,7 +131,7 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
 
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:5000/api/student/notifications/read', {
+      await fetch('http://127.0.0.1:5000/api/notifications/read', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +156,7 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
 
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:5000/api/student/notifications/read', {
+      await fetch('http://127.0.0.1:5000/api/notifications/read', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,6 +189,7 @@ function MainLayoutContent({ children, activeTab, setActiveTab, profile, setProf
   return (
     <div className="dashboard-container">
       <NotificationPopup />
+      {user?.role === 'student' && <Chatbot />}
       {isSidebarOpen && (
         <div className="sidebar-backdrop" onClick={() => setIsSidebarOpen(false)} />
       )}

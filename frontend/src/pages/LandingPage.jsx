@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Icon from '../components/Icon'
 import ScrollReveal from '../components/ScrollReveal'
+import Chatbot from '../components/Chatbot'
 
 const features = [
   {
@@ -500,6 +501,7 @@ export default function LandingPage() {
       </section>
 
       <Footer />
+      <Chatbot />
     </main>
   )
 }

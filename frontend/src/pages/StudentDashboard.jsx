@@ -397,6 +397,15 @@ export default function StudentDashboard({ activeTab = 'overview', setActiveTab,
           await updateProfileName(updated.name);
         }
         setSavedSuccessMsg('Profile details updated successfully!')
+        window.dispatchEvent(new CustomEvent('shm:new_notification', {
+          detail: {
+            notification: {
+              title: 'Profile Updated',
+              body: 'Your profile details have been successfully updated.'
+            },
+            data: { type: 'profile', targetScreen: 'settings' }
+          }
+        }));
       } else {
         alert('Failed to save profile changes to server.');
       }
