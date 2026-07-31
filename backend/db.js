@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import dns from 'dns';
 
-// use google/cloudflare dns to fix srv lookup errors on windows
+// use googl dns to fix srv lookup errors on windows
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 dotenv.config();
@@ -31,7 +31,6 @@ function buildConnectionString() {
 }
 
 const connectionString = buildConnectionString();
-const sanitizedUri = connectionString.replace(/(mongodb(?:\+srv)?:\/\/[^:]+:)[^@]+@/, '$1***@');
 const hasPlaceholders = connectionString.includes('<db_username>') || connectionString.includes('<db_password>');
 
 if (!connectionString) {
@@ -53,7 +52,6 @@ if (!connectionString) {
     })
     .catch((error) => {
       console.error('MongoDB connection error:', error.message);
-      console.error('Sanitized connection string:', sanitizedUri);
       console.error('Please verify your connection string and credentials in backend/.env.');
     });
 }
@@ -544,6 +542,16 @@ const aiLogSchema = new mongoose.Schema({
 
 const AiLog = mongoose.model('AiLog', aiLogSchema, 'aichatbot');
 
+// user contact messages schema
+const contactSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, lowercase: true, trim: true },
+  message: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const ContactMessage = mongoose.model('ContactMessage', contactSchema);
+
 export {
   User,
   Otp,
@@ -559,6 +567,7 @@ export {
   ChatMessage,
   Hostel,
   AiLog,
+  ContactMessage,
   findUserByEmail,
   createUser
 };

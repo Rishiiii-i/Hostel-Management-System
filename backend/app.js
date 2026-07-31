@@ -7,6 +7,7 @@ import studentRoutes from './routes/student.js';
 import notificationRoutes from './routes/notifications.js';
 import chatRoutes from './routes/chat.js';
 import chatbotRoutes from './routes/chatbot.js';
+import contactRoutes from './routes/contact.js';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/student', studentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/contact', contactRoutes);
 
 // check if the backend is running
 app.get('/health', (req, res) => {
