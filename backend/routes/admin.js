@@ -944,7 +944,29 @@ router.put('/profile', authenticateToken, isAdmin, async (req, res) => {
     admin.block = office || admin.block; // storing office location in block attribute
     if (photo !== undefined) admin.photo = photo;
 
+    const newNotification = {
+      id: 'notif-' + Date.now(),
+      title: 'Profile Updated',
+      text: 'Administrator profile details updated successfully.',
+      time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      read: false
+    };
+    admin.notifications.unshift(newNotification);
+    admin.markModified('notifications');
     await admin.save();
+
+    notificationQueue.enqueue({
+      type: 'USERS',
+      target: [admin.email],
+      payload: {
+        title: newNotification.title,
+        body: newNotification.text,
+        notificationType: 'PROFILE_UPDATE',
+        targetHash: '#admin-dashboard',
+        targetTab: 'profile',
+        data: { type: 'profile' }
+      }
+    });
 
     res.status(200).json({
       message: 'Admin profile updated successfully',

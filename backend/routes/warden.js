@@ -61,6 +61,41 @@ router.post('/attendance/mark', async (req, res) => {
 
     await Attendance.bulkWrite(bulkOps);
     console.log('POST /attendance/mark successfully wrote ops');
+
+    // Notify students whose attendance was marked
+    try {
+      for (const r of records) {
+        const student = await User.findOne({ id: r.studentId });
+        if (student) {
+          const attNotification = {
+            id: `NT-${Math.floor(1000 + Math.random() * 9000)}`,
+            title: 'Attendance Marked',
+            text: `You were marked ${r.status} on ${date}.`,
+            time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            read: false
+          };
+          student.notifications.unshift(attNotification);
+          student.markModified('notifications');
+          await student.save();
+
+          notificationQueue.enqueue({
+            type: 'USERS',
+            target: [student.email],
+            payload: {
+              title: attNotification.title,
+              body: attNotification.text,
+              notificationType: 'ATTENDANCE_MARK',
+              targetHash: '#dashboard',
+              targetTab: 'gatepass', // In student dashboard, attendance is on the gatepass tab
+              data: { type: 'attendance' }
+            }
+          });
+        }
+      }
+    } catch (notifErr) {
+      console.error('Failed to notify students of attendance marking:', notifErr);
+    }
+
     res.status(200).json({ message: 'Attendance records updated successfully' });
   } catch (error) {
     console.error('Error updating attendance:', error);
@@ -817,14 +852,36 @@ router.put('/profile', async (req, res) => {
 
     // synchronize photo name and phone updates with the warden's user document
     if (updates.email) {
-      await User.findOneAndUpdate(
-        { email: updates.email.toLowerCase() },
-        {
-          photo: updates.photo,
-          name: updates.fullName,
-          phone: updates.phone
-        }
-      );
+      const user = await User.findOne({ email: updates.email.toLowerCase() });
+      if (user) {
+        user.photo = updates.photo;
+        user.name = updates.fullName;
+        user.phone = updates.phone;
+
+        const newNotification = {
+          id: 'notif-' + Date.now(),
+          title: 'Profile Updated',
+          text: 'Warden profile details updated successfully.',
+          time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          read: false
+        };
+        user.notifications.unshift(newNotification);
+        user.markModified('notifications');
+        await user.save();
+
+        notificationQueue.enqueue({
+          type: 'USERS',
+          target: [user.email],
+          payload: {
+            title: newNotification.title,
+            body: newNotification.text,
+            notificationType: 'PROFILE_UPDATE',
+            targetHash: '#warden-dashboard',
+            targetTab: 'profile',
+            data: { type: 'profile' }
+          }
+        });
+      }
     }
 
     res.status(200).json(profile);

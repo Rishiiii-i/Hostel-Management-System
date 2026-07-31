@@ -193,4 +193,76 @@ router.post('/test-push', authenticateToken, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/notifications
+ * Retrieve notification history for the authenticated user (any role)
+ */
+router.get('/', authenticateToken, async (req, res) => {
+  try {
+    const email = req.user?.email;
+    if (!email) {
+      return res.status(401).json({ message: 'User email not found in token' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(user.notifications || []);
+  } catch (error) {
+    console.error('[NotificationRoute] Error fetching notifications:', error);
+    res.status(500).json({ message: 'Failed to fetch notifications', error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/read
+ * Mark notification(s) as read for the authenticated user
+ */
+router.post('/read', authenticateToken, async (req, res) => {
+  try {
+    const email = req.user?.email;
+    const { id } = req.body;
+
+    if (!email) {
+      return res.status(401).json({ message: 'User email not found in token' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (id) {
+      // Mark specific notification as read
+      if (user.notifications) {
+        user.notifications = user.notifications.map(n => {
+          if (n.id === id) {
+            n.read = true;
+          }
+          return n;
+        });
+        user.markModified('notifications');
+        await user.save();
+      }
+    } else {
+      // Mark all as read
+      if (user.notifications) {
+        user.notifications = user.notifications.map(n => {
+          n.read = true;
+          return n;
+        });
+        user.markModified('notifications');
+        await user.save();
+      }
+    }
+
+    res.status(200).json({ message: 'Notifications marked as read', notifications: user.notifications || [] });
+  } catch (error) {
+    console.error('[NotificationRoute] Error marking notifications as read:', error);
+    res.status(500).json({ message: 'Failed to mark notifications as read', error: error.message });
+  }
+});
+
 export default router;

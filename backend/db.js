@@ -533,6 +533,17 @@ async function initDefaultChatChannels() {
   }
 }
 
+// ai assistant chatbot logs schema
+const aiLogSchema = new mongoose.Schema({
+  userId: { type: String, default: 'Guest' },
+  role: { type: String, default: 'Guest' },
+  message: { type: String, required: true },
+  reply: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now }
+});
+
+const AiLog = mongoose.model('AiLog', aiLogSchema, 'aichatbot');
+
 export {
   User,
   Otp,
@@ -547,6 +558,7 @@ export {
   ChatRoom,
   ChatMessage,
   Hostel,
+  AiLog,
   findUserByEmail,
   createUser
 };

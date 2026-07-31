@@ -74,19 +74,43 @@ router.put('/profile', authenticateToken, async (req, res) => {
     if (!isDbConnected()) {
       return res.status(200).json({ name, rollNo, phone, emergencyContact, room, block, photo });
     }
-    const user = await User.findOneAndUpdate(
-      { email: req.user.email.toLowerCase() },
-      { 
-        name, 
-        rollNo, 
-        phone, 
-        emergencyContact, 
-        room, 
-        block, 
-        photo 
-      },
-      { returnDocument: 'after' }
-    );
+    const user = await User.findOne({ email: req.user.email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    user.name = name;
+    user.rollNo = rollNo;
+    user.phone = phone;
+    user.emergencyContact = emergencyContact;
+    user.room = room;
+    user.block = block;
+    user.photo = photo;
+
+    const newNotification = {
+      id: 'notif-' + Date.now(),
+      title: 'Profile Updated',
+      text: 'Your profile details have been successfully updated.',
+      time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      read: false
+    };
+    user.notifications.unshift(newNotification);
+    user.markModified('notifications');
+    await user.save();
+
+    notificationQueue.enqueue({
+      type: 'USERS',
+      target: [user.email],
+      payload: {
+        title: newNotification.title,
+        body: newNotification.text,
+        notificationType: 'PROFILE_UPDATE',
+        targetHash: '#dashboard',
+        targetTab: 'settings',
+        data: { type: 'profile' }
+      }
+    });
+
     res.status(200).json(user);
   } catch (error) {
     console.error('Failed to update student profile:', error);
@@ -135,6 +159,31 @@ router.post('/complaints', authenticateToken, async (req, res) => {
 
     const complaint = new Complaint(newComplaintData);
     await complaint.save();
+
+    // Push notification to student DB
+    const studentNotif = {
+      id: 'notif-' + Date.now(),
+      title: 'Complaint Registered',
+      text: `Your complaint "${title}" has been registered successfully.`,
+      time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      read: false
+    };
+    student.notifications.unshift(studentNotif);
+    student.markModified('notifications');
+    await student.save();
+
+    // Push notification to all wardens DB
+    const wardenNotif = {
+      id: 'notif-' + Date.now(),
+      title: 'New Student Complaint',
+      text: `${student.name} (${student.room || 'N/A'}) submitted: "${title}"`,
+      time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      read: false
+    };
+    await User.updateMany(
+      { role: 'warden' },
+      { $push: { notifications: { $each: [wardenNotif], $position: 0 } } }
+    );
 
     notificationQueue.enqueue({
       type: 'ROLE',
@@ -197,6 +246,31 @@ router.post('/gatepasses', authenticateToken, async (req, res) => {
 
     const gatePass = new GatePass(newPassData);
     await gatePass.save();
+
+    // Push notification to student DB
+    const studentNotif = {
+      id: 'notif-' + Date.now(),
+      title: 'Gate Pass Requested',
+      text: `Your gate pass request for "${reason}" has been submitted.`,
+      time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      read: false
+    };
+    student.notifications.unshift(studentNotif);
+    student.markModified('notifications');
+    await student.save();
+
+    // Push notification to all wardens DB
+    const wardenNotif = {
+      id: 'notif-' + Date.now(),
+      title: 'New Gate Pass Request',
+      text: `${student.name} requested leave for "${reason}"`,
+      time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      read: false
+    };
+    await User.updateMany(
+      { role: 'warden' },
+      { $push: { notifications: { $each: [wardenNotif], $position: 0 } } }
+    );
 
     notificationQueue.enqueue({
       type: 'ROLE',
@@ -322,6 +396,18 @@ router.post('/transactions', authenticateToken, async (req, res) => {
           read: false
         };
 
+        // notify student
+        const studentNotification = {
+          id: `NT-${Math.floor(1000 + Math.random() * 9000)}`,
+          title: 'Fee Payment Successful',
+          text: `Successfully paid ₹${parsedAmount} for ${period || 'Hostel Fee'}.`,
+          time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          read: false
+        };
+        student.notifications.unshift(studentNotification);
+        student.markModified('notifications');
+        await student.save();
+
         // notify warden
         const warden = await User.findOne({ email: 'warden@smarthostel.com' });
         if (warden) {
@@ -337,6 +423,19 @@ router.post('/transactions', authenticateToken, async (req, res) => {
           admin.markModified('notifications');
           await admin.save();
         }
+
+        notificationQueue.enqueue({
+          type: 'USERS',
+          target: [student.email],
+          payload: {
+            title: studentNotification.title,
+            body: studentNotification.text,
+            notificationType: 'PAYMENT_SUCCESS',
+            targetHash: '#dashboard',
+            targetTab: 'fee',
+            data: { type: 'fee_payment' }
+          }
+        });
 
         notificationQueue.enqueue({
           type: 'ROLE',
